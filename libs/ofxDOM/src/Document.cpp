@@ -118,7 +118,7 @@ bool Document::onPointerEvent(PointerEventArgs& e)
         return false;
     }
 
-    auto capturedPointerIter = _capturedPointers.find(e.getPointerID());
+    auto capturedPointerIter = _capturedPointers.find(e.getID());
 
     if (capturedPointerIter != _capturedPointers.end())
     {
