@@ -49,9 +49,6 @@ public:
     bool onKeyEvent(ofKeyEventArgs& e);
     bool onPointerEvent(PointerEventArgs& e);
 
-    void addPointerDeviceFilter(const std::string& type);
-    void removePointerDeviceFilter(const std::string& type);
-
     bool setPointerCapture(Element* element, std::size_t id);
     bool releasePointerCapture(std::size_t id);
 
@@ -71,8 +68,6 @@ protected:
     PointerMap _capturedPointers;
 
 //    PointerMap _pointerMap;
-
-    std::set<std::string> _pointerDeviceFilter;
 
 };
 

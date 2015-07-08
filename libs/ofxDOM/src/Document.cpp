@@ -113,11 +113,6 @@ bool Document::onKeyEvent(ofKeyEventArgs& e)
 
 bool Document::onPointerEvent(PointerEventArgs& e)
 {
-    if (_pointerDeviceFilter.find(e.eventType()) != _pointerDeviceFilter.end())
-    {
-        return false;
-    }
-
     auto capturedPointerIter = _capturedPointers.find(e.id());
 
     if (capturedPointerIter != _capturedPointers.end())
@@ -163,18 +158,6 @@ bool Document::onPointerEvent(PointerEventArgs& e)
     }
 
     return false;
-}
-
-
-void Document::addPointerDeviceFilter(const std::string& type)
-{
-    _pointerDeviceFilter.insert(type);
-}
-
-
-void Document::removePointerDeviceFilter(const std::string& type)
-{
-    _pointerDeviceFilter.erase(type);
 }
 
 
