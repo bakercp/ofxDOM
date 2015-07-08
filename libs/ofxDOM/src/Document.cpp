@@ -161,6 +161,8 @@ bool Document::onPointerEvent(PointerEventArgs& e)
             return false;
         }
     }
+
+    return false;
 }
 
 
