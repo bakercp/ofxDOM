@@ -145,12 +145,12 @@ void Event::setCurrentTarget(Element* target)
 PointerEvent::PointerEvent(const PointerEventArgs& pointer,
                            Element* target,
                            Element* source):
-    UIEvent(pointer.getEventType(),
+    UIEvent(pointer.eventType(),
             source,
             target,
-            eventBubbles(pointer.getEventType()),
-            eventCancelable(pointer.getEventType()),
-            _pointer.getTimestamp()),
+            eventBubbles(pointer.eventType()),
+            eventCancelable(pointer.eventType()),
+            _pointer.timestamp()),
     _pointer(pointer)
 {
 }

@@ -45,8 +45,6 @@ class AbstractLayout;
 class Element: public EventListener
 {
 public:
-    typedef std::unique_ptr<Element> Ptr;
-
     Element(float x, float y, float width, float height);
 
     Element(const std::string& id, float x, float y, float width, float height);
@@ -61,10 +59,10 @@ public:
     /// \param nodePtr the rvalue reference to the child node.
     ///
     /// \returns a pointer to the child that was attached.
-    Element* attachChild(Ptr element);
+    Element* attachChild(std::unique_ptr<Element> element);
 
     /// \brief Release ownership
-    Ptr releaseChild(Element* element);
+    std::unique_ptr<Element> releaseChild(Element* element);
 
     void moveToFront();
     void moveForward();
@@ -124,13 +122,10 @@ public:
     void setAttribute(const std::string& name, const std::string& value);
     void clearAttribute(const std::string& name);
 
-    void setPointerCapture(PointerEventArgs::PointerID id);
-    void releasePointerCapture(PointerEventArgs::PointerID id);
+    void setPointerCapture(std::size_t id);
+    void releasePointerCapture(std::size_t id);
 
 protected:
-    typedef std::vector<Ptr> ChildList;
-    typedef std::vector<Ptr>::iterator ChildListIter;
-
     void setup();
     void update();
     void draw();
@@ -144,13 +139,13 @@ protected:
     /// \brief Find a child by a raw Element pointer.
     /// \param The pointer to the child.
     /// \returns An iterator pointing to the matching Element or the end.
-    ChildListIter findChild(Element* element);
+    std::vector<std::unique_ptr<Element>>::iterator findChild(Element* element);
 
     /// \brief An optional pointer to a parent Node.
     Element* _parent = nullptr;
 
     /// \brief A vector to Elements.
-    ChildList _children;
+    std::vector<std::unique_ptr<Element>> _children;
 
     std::string _id;
 

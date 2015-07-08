@@ -113,12 +113,12 @@ bool Document::onKeyEvent(ofKeyEventArgs& e)
 
 bool Document::onPointerEvent(PointerEventArgs& e)
 {
-    if (_pointerDeviceFilter.find(e.getDeviceType()) != _pointerDeviceFilter.end())
+    if (_pointerDeviceFilter.find(e.eventType()) != _pointerDeviceFilter.end())
     {
         return false;
     }
 
-    auto capturedPointerIter = _capturedPointers.find(e.getID());
+    auto capturedPointerIter = _capturedPointers.find(e.id());
 
     if (capturedPointerIter != _capturedPointers.end())
     {
@@ -140,9 +140,9 @@ bool Document::onPointerEvent(PointerEventArgs& e)
     {
         std::vector<Element*> path;
 
-        recursiveHitTest(e.getEventType(),
-                         e.getPoint(),
-                         screenToLocal(e.getPoint()),
+        recursiveHitTest(e.eventType(),
+                         e.point(),
+                         screenToLocal(e.point()),
                          path);
 
         if (!path.empty())
@@ -178,7 +178,7 @@ void Document::removePointerDeviceFilter(const std::string& type)
 }
 
 
-bool Document::setPointerCapture(Element* element, PointerEventArgs::PointerID id)
+bool Document::setPointerCapture(Element* element, std::size_t id)
 {
     cout << "================================== Calling Document::setPointerCapture " << endl;
 
@@ -191,7 +191,7 @@ bool Document::setPointerCapture(Element* element, PointerEventArgs::PointerID i
         }
         else
         {
-            ofLogWarning("Document:setPointerCapture") << "Pointer id << " << std::get<0>(id) << std::get<1>(id) << std::get<2>(id) << " is already captured.";
+            ofLogWarning("Document:setPointerCapture") << "Pointer id " << id << " is already captured.";
             return false;
         }
     }
@@ -203,7 +203,7 @@ bool Document::setPointerCapture(Element* element, PointerEventArgs::PointerID i
 }
 
 
-bool Document::releasePointerCapture(PointerEventArgs::PointerID id)
+bool Document::releasePointerCapture(std::size_t id)
 {
     auto iter = _capturedPointers.find(id);
 

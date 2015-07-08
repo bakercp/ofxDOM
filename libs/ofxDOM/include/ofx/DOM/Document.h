@@ -52,8 +52,8 @@ public:
     void addPointerDeviceFilter(const std::string& type);
     void removePointerDeviceFilter(const std::string& type);
 
-    bool setPointerCapture(Element* element, PointerEventArgs::PointerID id);
-    bool releasePointerCapture(PointerEventArgs::PointerID id);
+    bool setPointerCapture(Element* element, std::size_t id);
+    bool releasePointerCapture(std::size_t id);
 
     /// \brief Dispatch an event.
     ///
@@ -66,7 +66,7 @@ public:
     bool dispatchEvent(EventType& event, std::vector<EventTarget*> targets);
 
 protected:
-    typedef std::map<PointerEventArgs::PointerID, Element*> PointerMap;
+    typedef std::map<std::size_t, Element*> PointerMap;
 
     PointerMap _capturedPointers;
 

@@ -54,7 +54,7 @@ Element::~Element()
 }
 
 
-Element* Element::attachChild(Ptr element)
+Element* Element::attachChild(std::unique_ptr<Element> element)
 {
     if (nullptr != element)
     {
@@ -90,14 +90,14 @@ Element* Element::attachChild(Ptr element)
 }
 
 
-Element::Ptr Element::releaseChild(Element* element)
+std::unique_ptr<Element> Element::releaseChild(Element* element)
 {
     auto iter = findChild(element);
 
     if (iter != _children.end())
     {
         // Move the child out of the children array.
-        Ptr detachedChild = std::move(*iter);
+        std::unique_ptr<Element> detachedChild = std::move(*iter);
 
         // Disown the detached child
         _children.erase(iter);
@@ -250,7 +250,7 @@ Element* Element::findFirstChildById(const std::string& id)
 {
     auto iter = std::find_if(_children.begin(),
                              _children.end(),
-                             [&](const Ptr& child) {
+                             [&](const std::unique_ptr<Element>& child) {
                                  return child->getId() == id;
                              });
     
@@ -274,11 +274,11 @@ std::vector<Element*> Element::findChildrenById(const std::string& id)
 }
 
 
-Element::ChildListIter Element::findChild(Element* element)
+std::vector<std::unique_ptr<Element>>::iterator Element::findChild(Element* element)
 {
     return std::find_if(_children.begin(),
                         _children.end(),
-                        [&](const Ptr& child) {
+                        [&](const std::unique_ptr<Element>& child) {
                             return element == child.get();
                         });
 }
@@ -568,7 +568,7 @@ bool Element::recursiveHitTest(const std::string& event,
 }
 
 
-void Element::setPointerCapture(PointerEventArgs::PointerID id)
+void Element::setPointerCapture(std::size_t id)
 {
     Document* d = document();
 
@@ -579,7 +579,7 @@ void Element::setPointerCapture(PointerEventArgs::PointerID id)
 }
 
 
-void Element::releasePointerCapture(PointerEventArgs::PointerID id)
+void Element::releasePointerCapture(std::size_t id)
 {
     Document* d = document();
 
