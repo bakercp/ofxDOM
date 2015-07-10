@@ -31,11 +31,20 @@
 #include "ofx/PointerEvents.h"
 #include "ofx/DOM/Events.h"
 #include "ofx/DOM/EventListener.h"
+#include "ofx/DOM/Exceptions.h"
 #include "ofx/DOM/Types.h"
 
 
 namespace ofx {
 namespace DOM {
+
+
+
+class Exception: public std::exception
+{
+
+};
+
 
 
 class Document;
@@ -94,11 +103,35 @@ public:
 
     virtual bool hitTest(const Position& localPosition) const;
 
+    /// \brief Get the Position of this Element in screen coordinates.
+    /// \returns the Position of this Element in screen coordinates.
     Position screenPosition() const;
+
+    /// \brief Convert the local coordinates to screen coordinates.
+    ///
+    /// Local coordinates are defined with reference to the position of the box.
+    /// The Position of this element will be in its parent's local coordinates.
+    ///
+    /// \returns the position converted from local to screen coordinates.
     Position localToScreen(const Position& localPosition) const;
+
+    /// \brief Convert the screen coordinates to local coordinates.
+    ///
+    /// Local coordinates are defined with reference to the position of the box.
+    /// The Position of this element will be in its parent's local coordinates.
+    ///
+    /// \returns the position converted from screen to local coordinates.
     Position screenToLocal(const Position& screenPosition) const;
 
     void setPosition(float x, float y);
+    void setPosition(const Position& position);
+
+    /// \brief Get the position of the Element in its parent coordinates.
+    ///
+    /// Local coordinates are defined with reference to the position of the box.
+    /// The Position of this element will be in its parent's local coordinates.
+    ///
+    /// \returns The position in parent coordinates.
     Position getPosition() const;
 
     void setSize(float width, float height);
@@ -107,12 +140,17 @@ public:
     Geometry getGeometry() const;
     void setGeometry(const Geometry& geometry);
 
+    /// \returns true iff the Element is enabled.
     bool isEnabled() const;
     void setEnabled(bool enabled);
+
+    /// \returns true iff the Element is hidden.
     bool isHidden() const;
     void setHidden(bool hidden);
+
+    /// \returns true iff the Element is locked.
     bool isLocked() const;
-    bool setLocked(bool locked);
+    void setLocked(bool locked);
 
     std::string getId() const;
     void setId(const std::string& id);

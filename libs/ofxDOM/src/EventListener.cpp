@@ -62,6 +62,23 @@ a.erase(std::remove(a.begin(), a.end(), event), a.end());
 }
 
 
+void EventListener::handleEvent(PointerCaptureEvent& e)
+{
+    if (e.type() == PointerEventArgs::GOT_POINTER_CAPTURE)
+    {
+        onGotPointerCapture(e);
+    }
+    else if (e.type() == PointerEventArgs::LOST_POINTER_CAPTURE)
+    {
+        onLostPointerCapture(e);
+    }
+    else
+    {
+        ofLogWarning("Element::handleEvent") << "Unhandled PointerCaptureEvent type: " << e.type();
+    }
+}
+
+
 void EventListener::handleEvent(PointerEvent& e)
 {
     if (e.type() == PointerEventArgs::POINTER_OVER)
@@ -102,7 +119,7 @@ void EventListener::handleEvent(PointerEvent& e)
     }
     else
     {
-        ofLogWarning("Element::Element::handleEvent") << "Unhandled PointerEvent type: " << e.type();
+        ofLogWarning("Element::handleEvent") << "Unhandled PointerEvent type: " << e.type();
     }
 }
 
@@ -119,7 +136,7 @@ void EventListener::handleEvent(KeyboardEvent& e)
     }
     else
     {
-        ofLogWarning("Element::Element::handleEvent") << "Unhandled KeyboardEvent type: " << e.type();
+        ofLogWarning("Element::handleEvent") << "Unhandled KeyboardEvent type: " << e.type();
     }
 }
 
@@ -189,12 +206,12 @@ void EventListener::onPointerScroll(PointerEvent& e)
 }
 
 
-void EventListener::onGotPointerCapture(PointerEvent& e)
+void EventListener::onGotPointerCapture(PointerCaptureEvent& e)
 {
 }
 
 
-void EventListener::onLostPointerCapture(PointerEvent& e)
+void EventListener::onLostPointerCapture(PointerCaptureEvent& e)
 {
 }
 

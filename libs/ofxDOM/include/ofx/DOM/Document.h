@@ -49,8 +49,8 @@ public:
     bool onKeyEvent(ofKeyEventArgs& e);
     bool onPointerEvent(PointerEventArgs& e);
 
-    bool setPointerCapture(Element* element, std::size_t id);
-    bool releasePointerCapture(std::size_t id);
+    void setPointerCapture(Element* element, std::size_t id);
+    void releasePointerCapture(Element* element, std::size_t id);
 
     /// \brief Dispatch an event.
     ///
@@ -63,11 +63,9 @@ public:
     bool dispatchEvent(EventType& event, std::vector<EventTarget*> targets);
 
 protected:
-    typedef std::map<std::size_t, Element*> PointerMap;
+    std::unordered_map<std::size_t, Element*> _capturedPointers;
 
-    PointerMap _capturedPointers;
-
-//    PointerMap _pointerMap;
+    std::unordered_map<std::size_t, PointerEventArgs> _activePointers;
 
 };
 

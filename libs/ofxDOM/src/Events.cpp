@@ -35,7 +35,7 @@ Event::Event(const std::string& type,
              Element* target,
              bool bubbles,
              bool cancelable,
-             unsigned long long timestamp):
+             uint64_t timestamp):
     _type(type),
     _source(source),
     _target(target),
@@ -139,6 +139,57 @@ Element* Event::getCurrentTarget() const
 void Event::setCurrentTarget(Element* target)
 {
     _currentTaget = target;
+}
+
+
+PointerCaptureEvent::PointerCaptureEvent(std::size_t id,
+                                         bool captured,
+                                         Element* source,
+                                         Element* target):
+    UIEvent((captured ? PointerEventArgs::GOT_POINTER_CAPTURE : PointerEventArgs::LOST_POINTER_CAPTURE),
+            source,
+            target,
+            true,
+            false,
+            ofGetElapsedTimeMillis()),
+    _id(id)
+{
+}
+
+
+
+PointerCaptureEvent::~PointerCaptureEvent()
+{
+}
+
+
+std::size_t PointerCaptureEvent::id() const
+{
+    return _id;
+}
+
+
+GotPointerEvent::GotPointerEvent(std::size_t id, Element* source, Element* target):
+    PointerCaptureEvent(id, true, source, target)
+{
+}
+
+
+GotPointerEvent::~GotPointerEvent()
+{
+}
+
+
+
+
+LostPointerEvent::LostPointerEvent(std::size_t id, Element* source, Element* target):
+    PointerCaptureEvent(id, false, source, target)
+{
+}
+
+
+LostPointerEvent::~LostPointerEvent()
+{
 }
 
 

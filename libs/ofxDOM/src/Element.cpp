@@ -300,7 +300,6 @@ Document* Element::document()
 {
     if (nullptr == _parent)
     {
-        // If no parent, check to see if this is the document.
         return dynamic_cast<Document*>(this);
     }
     else
@@ -336,7 +335,6 @@ Position Element::localToScreen(const Position& position) const
 }
 
 
-
 Position Element::screenToLocal(const Position& position) const
 {
     return position - screenPosition();
@@ -347,10 +345,26 @@ void Element::setPosition(float x, float y)
 {
     if (_x != x || _y != y)
     {
-        _x = x;
-        _y = y;
+        if (!isRoot())
+        {
+            Geometry g = parent()->getGeometry();
+            _x = ofClamp(x, 0, g.width - _width);
+            _y = ofClamp(y, 0, g.height - _height);
+        }
+        else
+        {
+            _x = x;
+            _y = y;
+        }
+
         onMoved(_x, _y);
     }
+}
+
+
+void Element::setPosition(const Position& position)
+{
+    setPosition(position.x, position.y);
 }
 
 
@@ -433,7 +447,7 @@ bool Element::isLocked() const
 }
 
 
-bool Element::setLocked(bool locked)
+void Element::setLocked(bool locked)
 {
     if(_locked != locked)
     {
@@ -572,9 +586,13 @@ void Element::setPointerCapture(std::size_t id)
 {
     Document* d = document();
 
-    if (nullptr == d)
+    if (nullptr != d)
     {
         d->setPointerCapture(this, id);
+    }
+    else
+    {
+        throw DOMException(DOMException::INVALID_STATE_ERROR);
     }
 }
 
@@ -583,9 +601,13 @@ void Element::releasePointerCapture(std::size_t id)
 {
     Document* d = document();
 
-    if (nullptr == d)
+    if (nullptr != d)
     {
-        d->releasePointerCapture(id);
+        d->releasePointerCapture(this, id);
+    }
+    else
+    {
+        throw DOMException(DOMException::INVALID_STATE_ERROR);
     }
 }
 

@@ -113,23 +113,30 @@ bool Document::onKeyEvent(ofKeyEventArgs& e)
 
 bool Document::onPointerEvent(PointerEventArgs& e)
 {
+    bool wasEventHandled = false;
+
+    // If there's an event for it, it's active.
+    _activePointers[e.id()] = e;
+
     auto capturedPointerIter = _capturedPointers.find(e.id());
+
+    PointerEvent event(e, this, nullptr);
 
     if (capturedPointerIter != _capturedPointers.end())
     {
-        PointerEvent event(e, this, capturedPointerIter->second);
+        Element* targetElement = capturedPointerIter->second;
+        event._target = targetElement;
         event.setPhase(Event::Phase::AT_TARGET);
-        capturedPointerIter->second->handleEvent(event);
+        targetElement->handleEvent(event);
 
-        // Release capture if appropriate.
+        // Release capture if it wasn't explicitly released by the target.
         if (event.type() == PointerEventArgs::POINTER_UP ||
             event.type() == PointerEventArgs::POINTER_CANCEL)
         {
-            // TODO Fire document-wide lost pointer capture event.
-            _capturedPointers.erase(capturedPointerIter);
+            releasePointerCapture(targetElement, e.id());
         }
 
-        return true;
+        wasEventHandled = true;
     }
     else
     {
@@ -142,62 +149,92 @@ bool Document::onPointerEvent(PointerEventArgs& e)
 
         if (!path.empty())
         {
-            PointerEvent event(e, this, nullptr);
+            event._target = path.back();
 
             if (dispatchEvent(event, path))
             {
                 // TODO call default action.
             }
 
-            return true;
+            wasEventHandled = true;
         }
         else
         {
-            return false;
+            wasEventHandled = false;
         }
     }
 
-    return false;
+    // Mouse events are always active.
+    // Touch and pen events are no longer active if up or cancelled.
+    if (e.deviceType() != PointerEventArgs::TYPE_MOUSE &&
+        (event.type() == PointerEventArgs::POINTER_UP ||
+         event.type() == PointerEventArgs::POINTER_CANCEL))
+    {
+        _activePointers.erase(e.id());
+    }
+
+    return wasEventHandled;
 }
 
 
-bool Document::setPointerCapture(Element* element, std::size_t id)
+void Document::setPointerCapture(Element* element, std::size_t id)
 {
-    cout << "================================== Calling Document::setPointerCapture " << endl;
-
-    if (nullptr != element)
+    if (nullptr == element || this != element->document())
     {
-        if (_capturedPointers.find(id) == _capturedPointers.end())
+        throw DOMException(DOMException::INVALID_STATE_ERROR);
+    }
+    else
+    {
+        auto activePointersIter = _activePointers.find(id);
+
+        if (activePointersIter == _activePointers.end())
         {
+            throw DOMException(DOMException::INVALID_POINTER_ID);
+        }
+        else if (activePointersIter->second.buttons() > 0)
+        {
+            cout << "POINTER CAPTURE .... " << endl;
             _capturedPointers[id] = element;
-            return true;
+            GotPointerEvent evt(id, this, element);
+            std::vector<Element*> path = { element };
+            dispatchEvent(evt, path);
         }
         else
         {
-            ofLogWarning("Document:setPointerCapture") << "Pointer id " << id << " is already captured.";
-            return false;
+            cout << "POINTER CAPTURE FAILED.... " << endl;
         }
-    }
-    else
-    {
-        ofLogError("Document:setPointerCapture") << "Target element is nullptr.";
-        return false;
     }
 }
 
 
-bool Document::releasePointerCapture(std::size_t id)
+void Document::releasePointerCapture(Element* element, std::size_t id)
 {
-    auto iter = _capturedPointers.find(id);
+    // TODO: release if the target element is removed from the document.
 
-    if (iter != _capturedPointers.end())
+    if (nullptr == element)
     {
-        _capturedPointers.erase(iter);
-        return true;
+        throw DOMException(DOMException::INVALID_STATE_ERROR);
     }
     else
     {
-        return false;
+        auto activePointersIter = _activePointers.find(id);
+
+        if (activePointersIter == _activePointers.end())
+        {
+            throw DOMException(DOMException::INVALID_POINTER_ID);
+        }
+        else
+        {
+            auto iter = _capturedPointers.find(id);
+
+            if (iter != _capturedPointers.end())
+            {
+                _capturedPointers.erase(iter);
+                LostPointerEvent evt(id, this, element);
+                std::vector<Element*> path = { element };
+                dispatchEvent(evt, path);
+            }
+        }
     }
 }
 

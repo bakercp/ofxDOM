@@ -52,6 +52,7 @@ public:
 //    }
 
     void handleEvent(PointerEvent& e);
+    void handleEvent(PointerCaptureEvent& e);
     void handleEvent(KeyboardEvent& e);
     void handleEvent(FocusEvent& e);
 
@@ -71,8 +72,8 @@ public:
 
     virtual void onPointerScroll(PointerEvent& e);
 
-    virtual void onGotPointerCapture(PointerEvent& e);
-    virtual void onLostPointerCapture(PointerEvent& e);
+    virtual void onGotPointerCapture(PointerCaptureEvent& e);
+    virtual void onLostPointerCapture(PointerCaptureEvent& e);
 
     virtual void onKeyDown(KeyboardEvent& e);
     virtual void onKeyUp(KeyboardEvent& e);

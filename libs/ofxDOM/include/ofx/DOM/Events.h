@@ -60,7 +60,7 @@ public:
           Element* target,
           bool bubbles,
           bool cancelable,
-          unsigned long long timestamp);
+          uint64_t timestamp);
 
     /// \brief Destroy the event type.
     virtual ~Event();
@@ -164,8 +164,20 @@ protected:
     /// value of timeStamp may be not available for all events. When not
     /// available, a value of 0 will be returned. Examples of epoch time are
     /// the time of the system start or 0:0:0 UTC 1st January 1970.
-    unsigned long long _timestamp = 0;
+    uint64_t _timestamp = 0;
 
+    friend class Document;
+};
+
+
+class MutationEvent: public Event
+{
+public:
+    using Event::Event;
+
+    virtual ~MutationEvent()
+    {
+    }
 };
 
 
@@ -179,6 +191,38 @@ public:
     {
     }
 
+};
+
+
+class PointerCaptureEvent: public UIEvent
+{
+public:
+    PointerCaptureEvent(std::size_t id, bool captured, Element* source, Element* target);
+    virtual ~PointerCaptureEvent();
+
+    std::size_t id() const;
+
+private:
+    std::size_t _id;
+
+};
+
+
+class GotPointerEvent: public PointerCaptureEvent
+{
+public:
+    GotPointerEvent(std::size_t id, Element* source, Element* target);
+    virtual ~GotPointerEvent();
+
+};
+
+
+class LostPointerEvent: public PointerCaptureEvent
+{
+public:
+    LostPointerEvent(std::size_t id, Element* source, Element* target);
+    virtual ~LostPointerEvent();
+    
 };
 
 
@@ -232,6 +276,14 @@ public:
     static const std::string FOCUS_OUT;
     static const std::string BLUR;
 
+};
+
+
+
+class DragDropEvent: public Event
+{
+public:
+    
 };
 
 
