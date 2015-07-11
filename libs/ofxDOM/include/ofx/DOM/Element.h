@@ -199,6 +199,8 @@ protected:
     /// \brief A collection of named attributes.
     std::unordered_map<std::string, std::string> _attributes;
 
+    std::unordered_set<uint64_t> _capturedPointers;
+
 private:
     /// \brief Not construction-copyable.
     Element(const Element& other) = delete; // non-construction-copyable
