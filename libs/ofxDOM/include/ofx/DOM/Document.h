@@ -73,18 +73,14 @@ protected:
 template<typename EventType, typename EventTarget>
 bool Document::dispatchEvent(EventType& event, std::vector<EventTarget*> targets)
 {
-    // Capture phase.
-    event.setPhase(Event::Phase::CAPTURING_PHASE);
-
+    // Capture and Target phase.
     auto iter = targets.begin();
 
     while (iter != targets.end())
     {
-        if ((*iter)->isEventListener(event.type(), true))
-        {
-            event.setCurrentTarget(*iter);
-            (*iter)->handleEvent(event);
-        }
+        event.setPhase(event.target() == *iter ? Event::Phase::AT_TARGET : Event::Phase::CAPTURING_PHASE);
+        event.setCurrentTarget(*iter);
+        (*iter)->handleEvent(event);
 
         if (event.isCancelled())
         {
@@ -94,19 +90,7 @@ bool Document::dispatchEvent(EventType& event, std::vector<EventTarget*> targets
         ++iter;
     }
 
-    // Target phase.
-    event.setPhase(Event::Phase::AT_TARGET);
-    event.setCurrentTarget(targets.back());
-    targets.back()->handleEvent(event);
-
-    if (event.isCancelled())
-    {
-        return !event.isDefaultPrevented();
-    }
-
     // Bubble phase.
-    event.setPhase(Event::Phase::BUBBLING_PHASE);
-
     if (targets.size() > 1 && event.bubbles())
     {
         // Begin with the parent of the target element.
@@ -114,11 +98,10 @@ bool Document::dispatchEvent(EventType& event, std::vector<EventTarget*> targets
 
         while (riter != targets.rend())
         {
-            if ((*riter)->isEventListener(event.type(), false))
-            {
-                event.setCurrentTarget(*iter);
-                (*riter)->handleEvent(event);
-            }
+            event.setPhase(Event::Phase::BUBBLING_PHASE);
+
+            event.setCurrentTarget(*iter);
+            (*riter)->handleEvent(event);
 
             if (event.isCancelled())
             {

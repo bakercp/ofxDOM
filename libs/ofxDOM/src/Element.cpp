@@ -345,17 +345,8 @@ void Element::setPosition(float x, float y)
 {
     if (_x != x || _y != y)
     {
-        if (!isRoot())
-        {
-            Geometry g = parent()->getGeometry();
-            _x = ofClamp(x, 0, g.width - _width);
-            _y = ofClamp(y, 0, g.height - _height);
-        }
-        else
-        {
-            _x = x;
-            _y = y;
-        }
+        _x = x;
+        _y = y;
 
         onMoved(_x, _y);
     }

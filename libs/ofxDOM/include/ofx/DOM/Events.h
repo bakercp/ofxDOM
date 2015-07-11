@@ -32,7 +32,7 @@
 #include <ctime>
 #include "ofEvents.h"
 #include "ofx/PointerEvents.h"
-
+#include "ofx/DOM/Exceptions.h"
 
 
 namespace ofx {
@@ -91,6 +91,12 @@ public:
     /// event flow stops. This method may be used during any stage of event
     /// flow.
     void stopPropagation();
+
+    // \brief Stop the propagation of the event, including all other events at the target.
+    //
+    // If successful this event throws ofEventAttendedException();
+    // \throws ofEventAttendedException if the event is cancelable. 
+    void stopImmediatePropagation();
 
     /// \brief Prevent any default actions associated with the event.
     ///
@@ -197,7 +203,7 @@ public:
 class PointerCaptureEvent: public UIEvent
 {
 public:
-    PointerCaptureEvent(std::size_t id, bool captured, Element* source, Element* target);
+    PointerCaptureEvent(std::size_t id, bool wasCaptured, Element* source, Element* target);
     virtual ~PointerCaptureEvent();
 
     std::size_t id() const;
@@ -205,24 +211,6 @@ public:
 private:
     std::size_t _id;
 
-};
-
-
-class GotPointerEvent: public PointerCaptureEvent
-{
-public:
-    GotPointerEvent(std::size_t id, Element* source, Element* target);
-    virtual ~GotPointerEvent();
-
-};
-
-
-class LostPointerEvent: public PointerCaptureEvent
-{
-public:
-    LostPointerEvent(std::size_t id, Element* source, Element* target);
-    virtual ~LostPointerEvent();
-    
 };
 
 
@@ -279,12 +267,76 @@ public:
 };
 
 
-
 class DragDropEvent: public Event
 {
 public:
     
 };
+
+
+class AbstractDOMEvent {
+public:
+    virtual ~AbstractDOMEvent()
+    {
+    }
+};
+
+
+class BaseDOMEvent: public AbstractDOMEvent
+{
+public:
+    virtual ~BaseDOMEvent()
+    {
+    }
+
+    virtual bool hasListeners() const = 0;
+
+};
+
+
+template<typename EventArgs>
+class DOMEvent: public BaseDOMEvent
+{
+public:
+    virtual ~DOMEvent()
+    {
+    }
+
+    ofEvent<EventArgs>& event(bool useCapture = false)
+    {
+        return useCapture ? capture : bubble;
+    }
+
+    bool hasListeners() const
+    {
+        return bubble.size() > 0 || capture.size() > 0;
+    }
+
+    void notify(EventArgs& e)
+    {
+        switch (e.getPhase())
+        {
+            case Event::Phase::NONE:
+                throw DOMException(DOMException::INVALID_STATE_ERROR);
+            case Event::Phase::CAPTURING_PHASE:
+                capture.notify(e.source(), e);
+                return;
+            case Event::Phase::AT_TARGET:
+                capture.notify(e.source(), e);
+                bubble.notify(e.source(), e);
+                return;
+            case Event::Phase::BUBBLING_PHASE:
+                capture.notify(e.source(), e);
+                return;
+        }
+    }
+
+private:
+    ofEvent<EventArgs> bubble;
+    ofEvent<EventArgs> capture;
+
+};
+
 
 
 } } // namespace ofx::DOM

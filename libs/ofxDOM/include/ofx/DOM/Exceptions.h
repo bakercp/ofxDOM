@@ -25,7 +25,8 @@
 #pragma once
 
 
-#include "ofx/DOM/Element.h"
+#include <stdexcept>
+#include <string>
 
 
 namespace ofx {

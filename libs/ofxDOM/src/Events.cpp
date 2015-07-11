@@ -63,9 +63,15 @@ void Event::stopPropagation()
     {
         _canceled = true;
     }
-    else
+}
+
+
+void Event::stopImmediatePropagation()
+{
+    if (_cancelable)
     {
-        cout << "cant cancel that event ..." << endl;
+        _canceled = true;
+        throw ofEventAttendedException();
     }
 }
 
@@ -143,10 +149,10 @@ void Event::setCurrentTarget(Element* target)
 
 
 PointerCaptureEvent::PointerCaptureEvent(std::size_t id,
-                                         bool captured,
+                                         bool wasCaptured,
                                          Element* source,
                                          Element* target):
-    UIEvent((captured ? PointerEventArgs::GOT_POINTER_CAPTURE : PointerEventArgs::LOST_POINTER_CAPTURE),
+    UIEvent((wasCaptured ? PointerEventArgs::GOT_POINTER_CAPTURE : PointerEventArgs::LOST_POINTER_CAPTURE),
             source,
             target,
             true,
@@ -166,30 +172,6 @@ PointerCaptureEvent::~PointerCaptureEvent()
 std::size_t PointerCaptureEvent::id() const
 {
     return _id;
-}
-
-
-GotPointerEvent::GotPointerEvent(std::size_t id, Element* source, Element* target):
-    PointerCaptureEvent(id, true, source, target)
-{
-}
-
-
-GotPointerEvent::~GotPointerEvent()
-{
-}
-
-
-
-
-LostPointerEvent::LostPointerEvent(std::size_t id, Element* source, Element* target):
-    PointerCaptureEvent(id, false, source, target)
-{
-}
-
-
-LostPointerEvent::~LostPointerEvent()
-{
 }
 
 

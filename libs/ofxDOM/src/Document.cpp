@@ -191,17 +191,12 @@ void Document::setPointerCapture(Element* element, std::size_t id)
         {
             throw DOMException(DOMException::INVALID_POINTER_ID);
         }
-        else if (activePointersIter->second.buttons() > 0)
+        else if (activePointersIter->second.buttons() > 0 && _capturedPointers.find(id) == _capturedPointers.end())
         {
-            cout << "POINTER CAPTURE .... " << endl;
             _capturedPointers[id] = element;
-            GotPointerEvent evt(id, this, element);
+            PointerCaptureEvent evt(id, true, this, element);
             std::vector<Element*> path = { element };
             dispatchEvent(evt, path);
-        }
-        else
-        {
-            cout << "POINTER CAPTURE FAILED.... " << endl;
         }
     }
 }
@@ -230,7 +225,7 @@ void Document::releasePointerCapture(Element* element, std::size_t id)
             if (iter != _capturedPointers.end())
             {
                 _capturedPointers.erase(iter);
-                LostPointerEvent evt(id, this, element);
+                PointerCaptureEvent evt(id, false, this, element);
                 std::vector<Element*> path = { element };
                 dispatchEvent(evt, path);
             }

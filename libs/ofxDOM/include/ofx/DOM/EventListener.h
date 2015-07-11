@@ -41,47 +41,111 @@ public:
 
     virtual ~EventListener();
 
-    bool isEventListener(const std::string& event, bool useCapture = false) const;
-    void addEventListener(const std::string& event, bool useCapture = false);
-    void removeEventListener(const std::string& event, bool useCapture = false);
+    template <class EventType, typename ArgumentsType, class ListenerClass>
+    void addEventListener(EventType& event,
+                          void (ListenerClass::*listenerMethod)(const void*, ArgumentsType&),
+                          bool useCapture = false,
+                          int priority = OF_EVENT_ORDER_AFTER_APP)
+    {
+        ofAddListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
+    }
 
-//    template<typename EventType>
-//    bool dispatchEvent(EventType& event)
-//    {
-//        return false;
-//    }
+    template <class EventType, typename ArgumentsType, class ListenerClass>
+    void addEventListener(EventType& event,
+                          void (ListenerClass::*listenerMethod)(ArgumentsType&),
+                          bool useCapture = false,
+                          int priority = OF_EVENT_ORDER_AFTER_APP)
+    {
+        ofAddListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
+    }
 
-    void handleEvent(PointerEvent& e);
-    void handleEvent(PointerCaptureEvent& e);
-    void handleEvent(KeyboardEvent& e);
-    void handleEvent(FocusEvent& e);
+    template <class EventType, typename ArgumentsType, class ListenerClass>
+    void addEventListener(EventType& event,
+                          bool (ListenerClass::*listenerMethod)(const void*, ArgumentsType&),
+                          bool useCapture = false,
+                          int priority = OF_EVENT_ORDER_AFTER_APP)
+    {
+        ofAddListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
+    }
+
+    template <class EventType, typename ArgumentsType, class ListenerClass>
+    void addEventListener(EventType& event,
+                          bool (ListenerClass::*listenerMethod)(ArgumentsType&),
+                          bool useCapture = false,
+                          int priority = OF_EVENT_ORDER_AFTER_APP)
+    {
+        ofAddListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
+    }
+
+    template <class EventType, typename ArgumentsType, class ListenerClass>
+    void removeEventListener(EventType& event,
+                             void (ListenerClass::*listenerMethod)(const void*, ArgumentsType&),
+                             bool useCapture = false,
+                             int priority = OF_EVENT_ORDER_AFTER_APP)
+    {
+        ofRemoveListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
+    }
+
+    template <class EventType, typename ArgumentsType, class ListenerClass>
+    void removeEventListener(EventType& event,
+                             void (ListenerClass::*listenerMethod)(ArgumentsType&),
+                             bool useCapture = false,
+                             int priority = OF_EVENT_ORDER_AFTER_APP)
+    {
+        ofRemoveListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
+    }
+
+
+    template <class EventType, typename ArgumentsType, class ListenerClass>
+    void removeEventListener(EventType& event,
+                             bool (ListenerClass::*listenerMethod)(const void*, ArgumentsType&),
+                             bool useCapture = false,
+                             int priority = OF_EVENT_ORDER_AFTER_APP)
+    {
+        ofRemoveListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
+    }
+
+
+    template <class EventType, typename ArgumentsType, class ListenerClass>
+    void removeEventListener(EventType& event,
+                             bool (ListenerClass::*listenerMethod)(ArgumentsType&),
+                             bool useCapture = false,
+                             int priority = OF_EVENT_ORDER_AFTER_APP)
+    {
+        ofRemoveListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
+    }
+
+
+    template <typename EventType>
+    void handleEvent(EventType& e)
+    {
+        auto iter = _eventRegistry.find(e.type());
+
+        if (iter != _eventRegistry.end())
+        {
+            DOMEvent<EventType>* event = dynamic_cast<DOMEvent<EventType>*>(iter->second);
+
+            if (nullptr != event)
+            {
+                event->notify(e);
+            }
+            else
+            {
+                throw DOMException(DOMException::INVALID_STATE_ERROR);
+            }
+        }
+        else
+        {
+            ofLogWarning("Element::handleEvent") << "Unhandled event type: " << e.type();
+        }
+    }
+
+    bool isEventListener(const std::string& event, bool useCapture) const;
 
     virtual void onSetup();
     virtual void onUpdate();
     virtual void onDraw();
     virtual void onExit();
-
-    virtual void onPointerOver(PointerEvent& e);
-    virtual void onPointerEnter(PointerEvent& e);
-    virtual void onPointerDown(PointerEvent& e);
-    virtual void onPointerMove(PointerEvent& e);
-    virtual void onPointerUp(PointerEvent& e);
-    virtual void onPointerCancel(PointerEvent& e);
-    virtual void onPointerOut(PointerEvent& e);
-    virtual void onPointerLeave(PointerEvent& e);
-
-    virtual void onPointerScroll(PointerEvent& e);
-
-    virtual void onGotPointerCapture(PointerCaptureEvent& e);
-    virtual void onLostPointerCapture(PointerCaptureEvent& e);
-
-    virtual void onKeyDown(KeyboardEvent& e);
-    virtual void onKeyUp(KeyboardEvent& e);
-
-    virtual void onBlur(FocusEvent& e);
-    virtual void onFocusIn(FocusEvent& e);
-    virtual void onFocus(FocusEvent& e);
-    virtual void onFocusOut(FocusEvent& e);
 
     virtual void onParentSet(Element* element);
     virtual void onChildAdded(Element* element);
@@ -114,9 +178,30 @@ public:
     virtual void onHidden();
     virtual void onUnhidden();
 
+    DOMEvent<PointerEvent> pointerOver;
+    DOMEvent<PointerEvent> pointerEnter;
+    DOMEvent<PointerEvent> pointerDown;
+    DOMEvent<PointerEvent> pointerMove;
+    DOMEvent<PointerEvent> pointerUp;
+    DOMEvent<PointerEvent> pointerCancel;
+    DOMEvent<PointerEvent> pointerOut;
+    DOMEvent<PointerEvent> pointerLeave;
+    DOMEvent<PointerEvent> pointerScroll;
+
+    DOMEvent<PointerCaptureEvent> gotPointerCapture;
+    DOMEvent<PointerCaptureEvent> lostPointerCapture;
+
+    DOMEvent<KeyboardEvent> keyDown;
+    DOMEvent<KeyboardEvent> keyUp;
+
+    DOMEvent<FocusEvent> blur;
+    DOMEvent<FocusEvent> focusIn;
+    DOMEvent<FocusEvent> focus;
+    DOMEvent<FocusEvent> focusOut;
+
+
 protected:
-    std::vector<std::string> _bubbleListeners;
-    std::vector<std::string> _captureListeners;
+    std::unordered_map<std::string, BaseDOMEvent*> _eventRegistry;
 
 };
 

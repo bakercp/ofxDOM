@@ -25,6 +25,7 @@
 
 #include "ofx/DOM/EventListener.h"
 #include "ofx/DOM/Events.h"
+#include "ofx/DOM/Exceptions.h"
 
 
 namespace ofx {
@@ -33,6 +34,23 @@ namespace DOM {
 
 EventListener::EventListener()
 {
+    _eventRegistry = {
+        { PointerEventArgs::POINTER_OVER, &pointerOver },
+        { PointerEventArgs::POINTER_ENTER, &pointerEnter },
+        { PointerEventArgs::POINTER_DOWN, &pointerDown },
+        { PointerEventArgs::POINTER_MOVE, &pointerMove },
+        { PointerEventArgs::POINTER_UP, &pointerUp },
+        { PointerEventArgs::POINTER_CANCEL, &pointerCancel },
+        { PointerEventArgs::POINTER_OUT, &pointerOut },
+        { PointerEventArgs::POINTER_LEAVE, &pointerLeave },
+        { PointerEventArgs::POINTER_SCROLL, &pointerScroll },
+
+        { PointerEventArgs::GOT_POINTER_CAPTURE, &gotPointerCapture },
+        { PointerEventArgs::LOST_POINTER_CAPTURE, &lostPointerCapture },
+
+        { KeyboardEvent::KEY_DOWN, &keyDown },
+        { KeyboardEvent::KEY_UP, &keyUp }
+    };
 }
 
 
@@ -43,104 +61,19 @@ EventListener::~EventListener()
 
 bool EventListener::isEventListener(const std::string& event, bool useCapture) const
 {
-    const auto& a = (useCapture ? _captureListeners : _bubbleListeners);
-    return std::find(a.begin(), a.end(), event) != a.end();
-}
+    auto iter = _eventRegistry.find(event);
 
-
-void EventListener::addEventListener(const std::string& event, bool useCapture)
-{
-    removeEventListener(event, useCapture);
-    (useCapture ? _captureListeners : _bubbleListeners).push_back(event);
-}
-
-
-void EventListener::removeEventListener(const std::string& event, bool useCapture)
-{
-auto& a = useCapture ? _captureListeners : _bubbleListeners;
-a.erase(std::remove(a.begin(), a.end(), event), a.end());
-}
-
-
-void EventListener::handleEvent(PointerCaptureEvent& e)
-{
-    if (e.type() == PointerEventArgs::GOT_POINTER_CAPTURE)
+    if (iter != _eventRegistry.end())
     {
-        onGotPointerCapture(e);
-    }
-    else if (e.type() == PointerEventArgs::LOST_POINTER_CAPTURE)
-    {
-        onLostPointerCapture(e);
+        return iter->second->hasListeners();
     }
     else
     {
-        ofLogWarning("Element::handleEvent") << "Unhandled PointerCaptureEvent type: " << e.type();
+        return false;
     }
 }
 
-
-void EventListener::handleEvent(PointerEvent& e)
-{
-    if (e.type() == PointerEventArgs::POINTER_OVER)
-    {
-        onPointerOver(e);
-    }
-    else if (e.type() == PointerEventArgs::POINTER_ENTER)
-    {
-        onPointerEnter(e);
-    }
-    else if (e.type() == PointerEventArgs::POINTER_DOWN)
-    {
-        onPointerDown(e);
-    }
-    else if (e.type() == PointerEventArgs::POINTER_MOVE)
-    {
-        onPointerMove(e);
-    }
-    else if (e.type() == PointerEventArgs::POINTER_UP)
-    {
-        onPointerUp(e);
-    }
-    else if (e.type() == PointerEventArgs::POINTER_CANCEL)
-    {
-        onPointerCancel(e);
-    }
-    else if (e.type() == PointerEventArgs::POINTER_OUT)
-    {
-        onPointerOut(e);
-    }
-    else if (e.type() == PointerEventArgs::POINTER_LEAVE)
-    {
-        onPointerLeave(e);
-    }
-    else if (e.type() == PointerEventArgs::POINTER_SCROLL)
-    {
-        onPointerScroll(e);
-    }
-    else
-    {
-        ofLogWarning("Element::handleEvent") << "Unhandled PointerEvent type: " << e.type();
-    }
-}
-
-
-void EventListener::handleEvent(KeyboardEvent& e)
-{
-    if (e.type() == KeyboardEvent::KEY_DOWN)
-    {
-        onKeyDown(e);
-    }
-    else if (e.type() == KeyboardEvent::KEY_UP)
-    {
-        onKeyUp(e);
-    }
-    else
-    {
-        ofLogWarning("Element::handleEvent") << "Unhandled KeyboardEvent type: " << e.type();
-    }
-}
-
-
+    
 void EventListener::onSetup()
 {
 }
@@ -157,91 +90,6 @@ void EventListener::onDraw()
 
 
 void EventListener::onExit()
-{
-}
-
-
-void EventListener::onPointerOver(PointerEvent& e)
-{
-}
-
-
-void EventListener::onPointerEnter(PointerEvent& e)
-{
-}
-
-
-void EventListener::onPointerDown(PointerEvent& e)
-{
-}
-
-
-void EventListener::onPointerMove(PointerEvent& e)
-{
-}
-
-
-void EventListener::onPointerUp(PointerEvent& e)
-{
-}
-
-
-void EventListener::onPointerCancel(PointerEvent& e)
-{
-}
-
-
-void EventListener::onPointerOut(PointerEvent& e)
-{
-}
-
-
-void EventListener::onPointerLeave(PointerEvent& e)
-{
-}
-
-
-void EventListener::onPointerScroll(PointerEvent& e)
-{
-}
-
-
-void EventListener::onGotPointerCapture(PointerCaptureEvent& e)
-{
-}
-
-
-void EventListener::onLostPointerCapture(PointerCaptureEvent& e)
-{
-}
-
-
-void EventListener::onKeyDown(KeyboardEvent& e)
-{
-}
-
-
-void EventListener::onKeyUp(KeyboardEvent& e)
-{
-}
-
-
-void EventListener::onBlur(FocusEvent& e)
-{
-}
-
-
-void EventListener::onFocusIn(FocusEvent& e)
-{
-}
-
-
-void EventListener::onFocus(FocusEvent& e)
-{
-}
-
-
-void EventListener::onFocusOut(FocusEvent& e)
 {
 }
 
