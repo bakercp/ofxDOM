@@ -40,6 +40,7 @@ public:
 
     static const std::string INVALID_POINTER_ID;
     static const std::string INVALID_STATE_ERROR;
+    static const std::string UNREGISTERED_EVENT;
 
 };
 

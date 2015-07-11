@@ -136,7 +136,7 @@ public:
         }
         else
         {
-            ofLogWarning("Element::handleEvent") << "Unhandled event type: " << e.type();
+            throw DOMException(DOMException::UNREGISTERED_EVENT);
         }
     }
 

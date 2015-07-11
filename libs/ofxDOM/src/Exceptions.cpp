@@ -32,6 +32,7 @@ namespace DOM {
 
 const std::string DOMException::INVALID_POINTER_ID = "InvalidPointerId";
 const std::string DOMException::INVALID_STATE_ERROR = "InvalidStateError";
+const std::string DOMException::UNREGISTERED_EVENT = "UnregisteredEvent";
 
 
 } } // namespace ofx::DOM
