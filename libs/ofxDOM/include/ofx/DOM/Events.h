@@ -1,6 +1,6 @@
 // =============================================================================
 //
-// Copyright (c) 2009-2013 Christopher Baker <http://christopherbaker.net>
+// Copyright (c) 2009-2015 Christopher Baker <http://christopherbaker.net>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -94,8 +94,13 @@ public:
 
     // \brief Stop the propagation of the event, including all other events at the target.
     //
-    // If successful this event throws ofEventAttendedException();
-    // \throws ofEventAttendedException if the event is cancelable. 
+    // If successful this event throws ofEventAttendedException(). This exception
+    // should be handled gracefully by the ofEvent dispatching this event.
+    //
+    // The same effect can be achieved by returning "true" from any event
+    // callback with a boolean return type.
+    //
+    // \throws ofEventAttendedException if the event is cancelable.
     void stopImmediatePropagation();
 
     /// \brief Prevent any default actions associated with the event.
