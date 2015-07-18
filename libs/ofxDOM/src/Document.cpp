@@ -140,6 +140,12 @@ bool Document::onPointerEvent(PointerEventArgs& e)
     }
     else
     {
+        // 1. Is there an active 
+
+
+
+
+
         std::vector<Element*> path;
 
         recursiveHitTest(e.eventType(),

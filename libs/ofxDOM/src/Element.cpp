@@ -41,10 +41,7 @@ Element::Element(float x, float y, float width, float height):
 
 Element::Element(const std::string& id, float x, float y, float width, float height):
     _id(id),
-    _x(x),
-    _y(y),
-    _width(width),
-    _height(height)
+    _geometry(x, y, width, height)
 {
 }
 
@@ -54,43 +51,7 @@ Element::~Element()
 }
 
 
-Element* Element::attachChild(std::unique_ptr<Element> element)
-{
-    if (nullptr != element)
-    {
-        // Get a raw pointer to the node for later.
-        Element* pNode = element.get();
-
-        // Assign the parent to the node via the raw pointer.
-        pNode->_parent = this;
-
-        // Take ownership of the node.
-        _children.push_back(std::move(element));
-
-
-        // Alert the node that its parent was set.
-        pNode->onParentSet(this);
-
-        /// Alert the node's siblings that they have a new sibling.
-        for (auto& child : _children)
-        {
-            // Don't alert itself.
-            if (child.get() != pNode)
-            {
-                child->onSiblingAdded(pNode);
-            }
-        }
-
-        return pNode;
-    }
-    else
-    {
-        return nullptr;
-    }
-}
-
-
-std::unique_ptr<Element> Element::releaseChild(Element* element)
+std::unique_ptr<Element> Element::removeChild(Element* element)
 {
     auto iter = findChild(element);
 
@@ -106,16 +67,25 @@ std::unique_ptr<Element> Element::releaseChild(Element* element)
         detachedChild->_parent = nullptr;
 
         // Alert the node that its parent was set.
-        detachedChild->onParentSet(nullptr);
+        ElementEvent removedFromEvent(this);
+        ofNotifyEvent(detachedChild->removedFrom, removedFromEvent, this);
+
+        ElementEvent childRemovedEvent(detachedChild.get());
+        ofNotifyEvent(childRemoved, childRemovedEvent, this);
 
         /// Alert the node's siblings that it no longer has a sibling.
         for (auto& child : _children)
         {
             if (detachedChild.get() != child.get())
             {
-                child->onSiblingRemoved(detachedChild.get());
+                ElementEvent evt(detachedChild.get());
+                ofNotifyEvent(child->siblingRemoved, evt, this);
             }
         }
+
+        // Detatch child listeners.
+        ofRemoveListener(detachedChild.get()->move, this, &Element::_onChildMoved);
+        ofRemoveListener(detachedChild.get()->resize, this, &Element::_onChildResized);
 
         // Return the detached child.
         // If the return value is ignored, it will be deleted.
@@ -134,7 +104,8 @@ void Element::moveToFront()
     if (!isRoot())
     {
         _parent->moveChildToFront(this);
-        onMovedToFront();
+        ElementOrderEvent evt(this, ElementOrderEvent::TO_FRONT);
+        ofNotifyEvent(reordered, evt, this);
     }
 }
 
@@ -144,7 +115,8 @@ void Element::moveForward()
     if (!isRoot())
     {
         _parent->moveChildForward(this);
-        onMovedForward();
+        ElementOrderEvent evt(this, ElementOrderEvent::FORWARD);
+        ofNotifyEvent(reordered, evt, this);
     }
 }
 
@@ -154,7 +126,8 @@ void Element::moveToBack()
     if (!isRoot())
     {
         _parent->moveChildToBack(this);
-        onMovedToBack();
+        ElementOrderEvent evt(this, ElementOrderEvent::TO_BACK);
+        ofNotifyEvent(reordered, evt, this);
     }
 }
 
@@ -164,7 +137,8 @@ void Element::moveBackward()
     if (!isRoot())
     {
         _parent->moveChildBackward(this);
-        onMovedBackward();
+        ElementOrderEvent evt(this, ElementOrderEvent::BACKWARD);
+        ofNotifyEvent(reordered, evt, this);
     }
 }
 
@@ -178,7 +152,9 @@ void Element::moveChildToFront(Element* element)
         auto detachedChild = std::move(*iter);
         _children.erase(iter);
         _children.insert(_children.begin(), std::move(detachedChild));
-        onChildMovedToFront(element);
+
+        ElementOrderEvent evt(element, ElementOrderEvent::TO_FRONT);
+        ofNotifyEvent(childReordered, evt, this);
     }
 }
 
@@ -191,7 +167,8 @@ void Element::moveChildForward(Element* element)
         iter != _children.begin())
     {
         std::iter_swap(iter, iter - 1);
-        onChildMovedForward(element);
+        ElementOrderEvent evt(element, ElementOrderEvent::FORWARD);
+        ofNotifyEvent(childReordered, evt, this);
     }
 }
 
@@ -206,7 +183,8 @@ void Element::moveChildToBack(Element* element)
         auto detachedChild = std::move(*iter);
         _children.erase(iter);
         _children.push_back(std::move(detachedChild));
-        onChildMovedToBack(element);
+        ElementOrderEvent evt(element, ElementOrderEvent::TO_BACK);
+        ofNotifyEvent(childReordered, evt, this);
     }
 }
 
@@ -219,7 +197,8 @@ void Element::moveChildBackward(Element* element)
         iter != _children.end() - 1)
     {
         std::iter_swap(iter, iter + 1);
-        onChildMovedBackward(element);
+        ElementOrderEvent evt(element, ElementOrderEvent::BACKWARD);
+        ofNotifyEvent(childReordered, evt, this);
     }
 }
 
@@ -316,6 +295,12 @@ bool Element::hitTest(const Position& localPosition) const
 }
 
 
+bool Element::childHitTest(const Position& localPosition) const
+{
+    return getChildGeometry().inside(localPosition);
+}
+
+
 Position Element::screenPosition() const
 {
     return localToScreen(getPosition());
@@ -343,12 +328,12 @@ Position Element::screenToLocal(const Position& position) const
     
 void Element::setPosition(float x, float y)
 {
-    if (_x != x || _y != y)
+    if (_geometry.x != x || _geometry.y != y)
     {
-        _x = x;
-        _y = y;
+        _geometry.setPosition(x, y);
 
-        onMoved(_x, _y);
+        MoveEvent evt(getPosition());
+        ofNotifyEvent(move, evt, this);
     }
 }
 
@@ -361,30 +346,32 @@ void Element::setPosition(const Position& position)
 
 Position Element::getPosition() const
 {
-    return Position(_x, _y);
+    return _geometry.getPosition();
 }
 
 
 void Element::setSize(float width, float height)
 {
-    if (_width != width || _height != height)
+    if (_geometry.width != width || _geometry.height != height)
     {
-        _width = width;
-        _height = height;
-        onResized(_width, _height);
+        _geometry.setWidth(width);
+        _geometry.setHeight(height);
+
+        ResizeEvent evt(_geometry);
+        ofNotifyEvent(resize, evt, this);
     }
 }
 
 
 Size Element::getSize() const
 {
-    return Size(_width, _height);
+    return Size(_geometry.width, _geometry.height);
 }
 
 
 Geometry Element::getGeometry() const
 {
-    return Geometry(_x, _y, _width, _height);
+    return _geometry;
 }
 
 
@@ -395,60 +382,9 @@ void Element::setGeometry(const Geometry& geometry)
 }
 
 
-bool Element::isEnabled() const
+Geometry Element::getChildGeometry() const
 {
-    return _enabled;
-}
-
-void Element::setEnabled(bool enabled)
-{
-    if (_enabled != enabled)
-    {
-        _enabled = enabled;
-        if (_enabled)
-            onEnabled();
-        else
-            onDisabled();
-    }
-}
-
-
-bool Element::isHidden() const
-{
-    return _hidden;
-}
-
-
-void Element::setHidden(bool hidden)
-{
-    if (_hidden != hidden)
-    {
-        _hidden = hidden;
-        if (_hidden)
-            onHidden();
-        else
-            onUnhidden();
-    }
-}
-
-
-bool Element::isLocked() const
-{
-    return _locked;
-}
-
-
-void Element::setLocked(bool locked)
-{
-    if(_locked != locked)
-    {
-        _locked = locked;
-
-        if (_locked)
-            onLocked();
-        else
-            onUnlocked();
-    }
+    return _childGeometry;
 }
 
 
@@ -464,15 +400,15 @@ void Element::setId(const std::string& id)
 }
 
 
-bool Element::hasAttribute(const std::string& name) const
+bool Element::hasAttribute(const std::string& key) const
 {
-    return _attributes.find(name) != _attributes.end();
+    return _attributes.find(key) != _attributes.end();
 }
 
 
-const std::string Element::getAttribute(const std::string& name) const
+const std::string Element::getAttribute(const std::string& key) const
 {
-    auto iter = _attributes.find(name);
+    auto iter = _attributes.find(key);
 
     if (iter != _attributes.end())
     {
@@ -480,23 +416,25 @@ const std::string Element::getAttribute(const std::string& name) const
     }
     else
     {
-        ofLogWarning("Element::hasAttribute") << "Attribute " << name << " not found.";
-        return "";
+        throw DOMException(DOMException::INVALID_ATTRIBUTE_KEY);
     }
 }
 
 
-void Element::setAttribute(const std::string& name, const std::string& value)
+void Element::setAttribute(const std::string& key, const std::string& value)
 {
-    _attributes[name] = value;
-    onAttributeSet(name, value);
+    _attributes[key] = value;
+
+    AttributeEvent evt(key, value);
+    ofNotifyEvent(attributeSet, evt, this);
 }
 
 
-void Element::clearAttribute(const std::string& name)
+void Element::clearAttribute(const std::string& key)
 {
-    _attributes.erase(name);
-    onAttributeCleared(name);
+    _attributes.erase(key);
+    AttributeEvent evt(key, "");
+    ofNotifyEvent(attributeCleared, evt, this);
 }
 
 
@@ -510,7 +448,7 @@ void Element::setup()
 
 void Element::update()
 {
-    if (isEnabled() && !isHidden())
+    if (_enabled && !_hidden)
     {
         for (auto& child : _children) child->update();
         onUpdate();
@@ -520,11 +458,11 @@ void Element::update()
 
 void Element::draw()
 {
-    if (isEnabled() && !isHidden())
+    if (_enabled && !_hidden)
     {
         ofPushStyle();
         ofPushMatrix();
-        ofTranslate(_x, _y);
+        ofTranslate(_geometry.getPosition());
         for (auto& child : _children) child->draw();
         onDraw();
         ofPopMatrix();
@@ -545,7 +483,7 @@ bool Element::recursiveHitTest(const std::string& event,
                                const Position& localPosition,
                                std::vector<Element*>& path)
 {
-    if (isEnabled() && !isHidden() && hitTest(localPosition))
+    if (_enabled && !_hidden && hitTest(localPosition))
     {
         if (isEventListener(event, false) || isEventListener(event, true))
         {
@@ -600,6 +538,73 @@ void Element::releasePointerCapture(std::size_t id)
     {
         throw DOMException(DOMException::INVALID_STATE_ERROR);
     }
+}
+
+
+bool Element::isEnabled() const
+{
+    return _enabled;
+}
+
+
+void Element::setEnabled(bool __enabled)
+{
+    if (_enabled != __enabled)
+    {
+        _enabled = __enabled;
+
+        EnablerEvent evt(_enabled);
+        ofNotifyEvent(enabled, evt, this);
+    }
+}
+
+
+bool Element::isHidden() const
+{
+    return _hidden;
+}
+
+
+void Element::setHidden(bool __hidden)
+{
+    if (_hidden != __hidden)
+    {
+        _hidden = __hidden;
+
+        EnablerEvent evt(_hidden);
+        ofNotifyEvent(hidden, evt, this);
+    }
+}
+
+
+bool Element::isLocked() const
+{
+    return _locked;
+}
+
+
+void Element::setLocked(bool __locked)
+{
+    if(_locked != __locked)
+    {
+        _locked = __locked;
+
+        EnablerEvent evt(_locked);
+        ofNotifyEvent(locked, evt, this);
+    }
+}
+
+
+
+void Element::_onChildMoved(MoveEvent& evt)
+{
+    _childGeometryDirty = true;
+}
+
+
+void Element::_onChildResized(ResizeEvent& evt)
+{
+    _childGeometryDirty = true;
 }
 
 

@@ -26,8 +26,6 @@
 
 
 #include <unordered_set>
-#include "ofEvents.h"
-#include "ofRectangle.h"
 #include "ofx/PointerEvents.h"
 #include "ofx/DOM/Events.h"
 #include "ofx/DOM/EventListener.h"
@@ -37,14 +35,6 @@
 
 namespace ofx {
 namespace DOM {
-
-
-
-class Exception: public std::exception
-{
-
-};
-
 
 
 class Document;
@@ -68,10 +58,52 @@ public:
     /// \param nodePtr the rvalue reference to the child node.
     ///
     /// \returns a pointer to the child that was attached.
-    Element* attachChild(std::unique_ptr<Element> element);
+    template<typename ElementType>
+    ElementType* addChild(std::unique_ptr<ElementType> element)
+    {
+        if (nullptr != element)
+        {
+            // Get a raw pointer to the node for later.
+            ElementType* pNode = element.get();
 
+            // Assign the parent to the node via the raw pointer.
+            pNode->_parent = this;
+
+            // Take ownership of the node.
+            _children.push_back(std::move(element));
+
+            // Alert the node that its parent was set.
+            ElementEvent addedEvent(this);
+            ofNotifyEvent(pNode->addedTo, addedEvent, this);
+
+            ElementEvent childAddedEvent(pNode);
+            ofNotifyEvent(childAdded, childAddedEvent, this);
+
+            // Attach child listeners.
+            ofAddListener(pNode->move, this, &Element::_onChildMoved);
+            ofAddListener(pNode->resize, this, &Element::_onChildResized);
+
+            /// Alert the node's siblings that they have a new sibling.
+            for (auto& child : _children)
+            {
+                // Don't alert itself.
+                if (child.get() != pNode)
+                {
+                    ElementEvent evt(pNode);
+                    ofNotifyEvent(child->siblingAdded, evt, this);
+                }
+            }
+            
+            return pNode;
+        }
+        else
+        {
+            return nullptr;
+        }
+    }
+    
     /// \brief Release ownership
-    std::unique_ptr<Element> releaseChild(Element* element);
+    std::unique_ptr<Element> removeChild(Element* element);
 
     void moveToFront();
     void moveForward();
@@ -102,6 +134,8 @@ public:
     bool isRoot() const;
 
     virtual bool hitTest(const Position& localPosition) const;
+
+    virtual bool childHitTest(const Position& localPosition) const;
 
     /// \brief Get the Position of this Element in screen coordinates.
     /// \returns the Position of this Element in screen coordinates.
@@ -140,6 +174,38 @@ public:
     Geometry getGeometry() const;
     void setGeometry(const Geometry& geometry);
 
+    /// \brief Get the bounding box representing all child elements.
+    /// \returns the bounding box representing all child elements, or
+    /// a rectangle of zero width and height at the origin if no children.
+    Geometry getChildGeometry() const;
+
+    std::string getId() const;
+    void setId(const std::string& id);
+
+    bool hasAttribute(const std::string& name) const;
+
+    /// \brief Get a named attribute via its key.
+    ///
+    /// Users should check to see if the attribute exists using hasAttribute or
+    /// catch the DOMException.
+    ///
+    /// \throws DOMException if no such key.
+    /// \param key The name of the attribute.
+    /// \returns The value corresponding to the key, or throws an exception if
+    /// non found.
+    const std::string getAttribute(const std::string& key) const;
+    void setAttribute(const std::string& key, const std::string& value);
+    void clearAttribute(const std::string& key);
+
+    /// \brief Request that the parent Document capture the given pointer id.
+    ///
+    /// Captured pointers send all of thei revents to the capturing Element.
+    ///
+    /// \param id The pointer id to capture.
+    void setPointerCapture(std::size_t id);
+    
+    void releasePointerCapture(std::size_t id);
+
     /// \returns true iff the Element is enabled.
     bool isEnabled() const;
     void setEnabled(bool enabled);
@@ -151,17 +217,6 @@ public:
     /// \returns true iff the Element is locked.
     bool isLocked() const;
     void setLocked(bool locked);
-
-    std::string getId() const;
-    void setId(const std::string& id);
-
-    bool hasAttribute(const std::string& name) const;
-    const std::string getAttribute(const std::string& name) const;
-    void setAttribute(const std::string& name, const std::string& value);
-    void clearAttribute(const std::string& name);
-
-    void setPointerCapture(std::size_t id);
-    void releasePointerCapture(std::size_t id);
 
 protected:
     void setup();
@@ -185,19 +240,8 @@ protected:
     /// \brief A vector to Elements.
     std::vector<std::unique_ptr<Element>> _children;
 
+    /// \brief An id for this element.
     std::string _id;
-
-    float _x = 0;
-    float _y = 0;
-    float _width = 0;
-    float _height = 0;
-
-    bool _enabled = true;
-    bool _locked = false;
-    bool _hidden = false;
-
-    /// \brief A collection of named attributes.
-    std::unordered_map<std::string, std::string> _attributes;
 
     std::unordered_set<uint64_t> _capturedPointers;
 
@@ -207,6 +251,24 @@ private:
 
     /// \brief Non copyable.
     Element& operator = (const Element&) = delete;
+
+    /// \brief The basic geometry of this element.
+    Geometry _geometry;
+
+    /// \brief The basic union of all child geometries.
+    Geometry _childGeometry;
+
+    bool _childGeometryDirty = true;
+
+    bool _enabled = true;
+    bool _hidden = false;
+    bool _locked = false;
+
+    /// \brief A collection of named attributes.
+    std::unordered_map<std::string, std::string> _attributes;
+
+    void _onChildMoved(MoveEvent& evt);
+    void _onChildResized(ResizeEvent& evt);
 
 };
 

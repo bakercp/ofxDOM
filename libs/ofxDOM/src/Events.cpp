@@ -272,5 +272,115 @@ FocusEvent::~FocusEvent()
 }
 
 
+MoveEvent::MoveEvent(const Position& position):
+    _position(position)
+{
+}
+
+
+MoveEvent::~MoveEvent()
+{
+}
+
+
+const Position& MoveEvent::position() const
+{
+    return _position;
+}
+
+
+ResizeEvent::ResizeEvent(const Geometry& geometry):
+    _geometry(geometry)
+{
+}
+
+
+ResizeEvent::~ResizeEvent()
+{
+}
+
+
+const Geometry& ResizeEvent::geometry() const
+{
+    return _geometry;
+}
+
+
+
+AttributeEvent::AttributeEvent(const std::string& key, const std::string& value):
+    _key(key),
+    _value(value)
+{
+}
+
+
+AttributeEvent::~AttributeEvent()
+{
+}
+
+
+const std::string& AttributeEvent::key() const
+{
+    return _key;
+}
+
+
+const std::string& AttributeEvent::value() const
+{
+    return _value;
+}
+
+
+EnablerEvent::EnablerEvent(bool value):
+    _value(value)
+{
+}
+
+
+EnablerEvent::~EnablerEvent()
+{
+}
+
+
+bool EnablerEvent::value() const
+{
+    return _value;
+}
+
+
+ElementEvent::ElementEvent(Element* element):
+    _element(element)
+{
+}
+
+
+ElementEvent::~ElementEvent()
+{
+}
+
+
+Element* ElementEvent::element()
+{
+    return _element;
+}
+
+
+ElementOrderEvent::ElementOrderEvent(Element* element, Type type):
+    ElementEvent(element),
+    _type(type)
+{
+}
+
+
+ElementOrderEvent::~ElementOrderEvent()
+{
+}
+
+
+ElementOrderEvent::Type ElementOrderEvent::type() const
+{
+    return _type;
+}
+
 
 } } // namespace ofx::DOM

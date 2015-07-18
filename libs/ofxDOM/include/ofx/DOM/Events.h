@@ -33,6 +33,7 @@
 #include "ofEvents.h"
 #include "ofx/PointerEvents.h"
 #include "ofx/DOM/Exceptions.h"
+#include "ofx/DOM/Types.h"
 
 
 namespace ofx {
@@ -178,17 +179,6 @@ protected:
     uint64_t _timestamp = 0;
 
     friend class Document;
-};
-
-
-class MutationEvent: public Event
-{
-public:
-    using Event::Event;
-
-    virtual ~MutationEvent()
-    {
-    }
 };
 
 
@@ -342,6 +332,99 @@ private:
 
 };
 
+
+class MoveEvent: public ofEventArgs
+{
+public:
+    MoveEvent(const Position& position);
+    virtual ~MoveEvent();
+
+    const Position& position() const;
+
+protected:
+    Position _position;
+
+};
+
+
+class ResizeEvent: public ofEventArgs
+{
+public:
+    ResizeEvent(const Geometry& geometry);
+    virtual ~ResizeEvent();
+
+    const Geometry& geometry() const;
+
+protected:
+    Geometry _geometry;
+
+};
+
+
+class AttributeEvent: public ofEventArgs
+{
+public:
+    AttributeEvent(const std::string& key, const std::string& value);
+    virtual ~AttributeEvent();
+
+    const std::string& key() const;
+    const std::string& value() const;
+
+protected:
+    std::string _key;
+    std::string _value;
+    
+};
+
+
+class EnablerEvent: public ofEventArgs
+{
+public:
+    EnablerEvent(bool value);
+    virtual ~EnablerEvent();
+    
+    bool value() const;
+    
+protected:
+    bool _value;
+    
+};
+
+
+class ElementEvent: public ofEventArgs
+{
+public:
+    ElementEvent(Element* element);
+    virtual ~ElementEvent();
+
+    Element* element();
+
+protected:
+    Element* _element;
+
+};
+
+
+class ElementOrderEvent: public ElementEvent
+{
+public:
+    enum Type
+    {
+        FORWARD,
+        BACKWARD,
+        TO_FRONT,
+        TO_BACK
+    };
+
+    ElementOrderEvent(Element* element, Type type);
+    virtual ~ElementOrderEvent();
+
+    Type type() const;
+
+protected:
+    Type _type;
+
+};
 
 
 } } // namespace ofx::DOM

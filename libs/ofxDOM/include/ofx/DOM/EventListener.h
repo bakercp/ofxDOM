@@ -34,6 +34,17 @@ namespace ofx {
 namespace DOM {
 
 
+struct CapturedPointer
+{
+    std::size_t id;
+    Point start;
+    Point offset;
+    Point position;
+    Point velocity;
+    uint64_t lastUpdate;
+};
+
+
 class EventListener
 {
 public:
@@ -147,37 +158,6 @@ public:
     virtual void onDraw();
     virtual void onExit();
 
-    virtual void onParentSet(Element* element);
-    virtual void onChildAdded(Element* element);
-    virtual void onChildRemoved(Element* element);
-    virtual void onSiblingAdded(Element* element);
-    virtual void onSiblingRemoved(Element* element);
-
-    virtual void onChildMovedForward(Element* element);
-    virtual void onChildMovedToFront(Element* element);
-    virtual void onChildMovedBackward(Element* element);
-    virtual void onChildMovedToBack(Element* element);
-
-    virtual void onMovedForward();
-    virtual void onMovedToFront();
-    virtual void onMovedBackward();
-    virtual void onMovedToBack();
-
-    virtual void onAttributeSet(const std::string& name, const std::string& value);
-    virtual void onAttributeCleared(const std::string& name);
-
-    virtual void onMoved(float x, float y);
-    virtual void onResized(float width, float height);
-
-    virtual void onEnabled();
-    virtual void onDisabled();
-
-    virtual void onLocked();
-    virtual void onUnlocked();
-
-    virtual void onHidden();
-    virtual void onUnhidden();
-
     DOMEvent<PointerEvent> pointerOver;
     DOMEvent<PointerEvent> pointerEnter;
     DOMEvent<PointerEvent> pointerDown;
@@ -199,9 +179,32 @@ public:
     DOMEvent<FocusEvent> focus;
     DOMEvent<FocusEvent> focusOut;
 
+    ofEvent<ElementEvent> addedTo;
+    ofEvent<ElementEvent> removedFrom;
+    ofEvent<ElementOrderEvent> reordered;
+
+    ofEvent<ElementEvent> siblingAdded;
+    ofEvent<ElementEvent> siblingRemoved;
+    ofEvent<ElementOrderEvent> siblingReordered;
+
+    ofEvent<ElementEvent> childAdded;
+    ofEvent<ElementEvent> childRemoved;
+    ofEvent<ElementOrderEvent> childReordered;
+
+    ofEvent<MoveEvent> move;
+    ofEvent<ResizeEvent> resize;
+
+    ofEvent<AttributeEvent> attributeSet;
+    ofEvent<AttributeEvent> attributeCleared;
+
+    ofEvent<EnablerEvent> enabled;
+    ofEvent<EnablerEvent> locked;
+    ofEvent<EnablerEvent> hidden;
 
 protected:
     std::unordered_map<std::string, BaseDOMEvent*> _eventRegistry;
+
+//    std::string
 
 };
 

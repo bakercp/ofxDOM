@@ -63,9 +63,13 @@ public:
     bool dispatchEvent(EventType& event, std::vector<EventTarget*> targets);
 
 protected:
+    /// \brief Captured pointer and their capture target.
     std::unordered_map<std::size_t, Element*> _capturedPointers;
 
+    /// \brief Currently active pointers and their last associated event.
     std::unordered_map<std::size_t, PointerEventArgs> _activePointers;
+
+    std::unordered_map<std::size_t, std::vector<Element*>> _activePath;
 
 };
 
