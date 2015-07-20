@@ -115,8 +115,19 @@ public:
     void moveChildToBack(Element* element);
     void moveChildBackward(Element* element);
 
+    /// \brief Determine if the given Element is a child of this Element.
+    /// \param element A pointer the the Element to test.
+    /// \returns true iff the given element is a child of this Element.
     bool isChild(Element* element) const;
+
+    /// \brief Determine if the given Element is a sibling of this Element.
+    /// \param element A pointer the the Element to test.
+    /// \returns true iff the given element is a sibling of this Element.
     bool isSibling(Element* element) const;
+
+    /// \brief Determine if the given Element is the parent of this Element.
+    /// \param element A pointer the the Element to test.
+    /// \returns true iff the given element is the parent of this Element.
     bool isParent(Element* element) const;
 
     /// \brief Determine if this Element has any children.
