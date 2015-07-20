@@ -119,7 +119,15 @@ public:
     bool isSibling(Element* element) const;
     bool isParent(Element* element) const;
 
+
+    /// \brief Find this Element's first child by its id.
+    /// \param id The id of the child Element to find.
+    /// \returns a pointer to the first child or nullptr if no such child exists.
     Element* findFirstChildById(const std::string& id);
+
+    /// \brief Find all of this Element's matching the given id.
+    /// \param id The id of the child Elements to find.
+    /// \returns a vector of pointers to child elements or an empty vector if none exist.
     std::vector<Element*> findChildrenById(const std::string& id);
 
     /// \brief Get a pointer to the parent.
@@ -157,7 +165,13 @@ public:
     /// \returns the position converted from screen to local coordinates.
     Position screenToLocal(const Position& screenPosition) const;
 
+    /// \brief Set the position of the Element in its parent coordinates.
+    /// \param x The new x position.
+    /// \param y The new y position.
     void setPosition(float x, float y);
+
+    /// \brief Set the position of the Element in its parent coordinates.
+    /// \param position The new position.
     void setPosition(const Position& position);
 
     /// \brief Get the position of the Element in its parent coordinates.
@@ -168,10 +182,21 @@ public:
     /// \returns The position in parent coordinates.
     Position getPosition() const;
 
+    /// \brief Set the size of the Element.
+    /// \param width The new width of the Element.
+    /// \param height The new height of the Element.
     void setSize(float width, float height);
+
+    /// \brief Get the Size of the Element.
+    /// \returns the Size of the Element.
     Size getSize() const;
 
+    /// \brief Get the geometry of the Element in its parent coordinates.
+    /// \returns the Geometry of the Element in its parent coordinates.
     Geometry getGeometry() const;
+
+    /// \brief Set the geometry of the Element in its parent coordinates.
+    /// \param geometry The new geometry of the Element in its parent coordinates.
     void setGeometry(const Geometry& geometry);
 
     /// \brief Get the bounding box representing all child elements.
@@ -179,9 +204,23 @@ public:
     /// a rectangle of zero width and height at the origin if no children.
     Geometry getChildGeometry() const;
 
+    /// \brief Get the bounding box representing the union of the child geometry and the element geometry;
+    Geometry getTotalGeometry() const;
+
+    /// \brief Get the id of this Element.
+    ///
+    /// The id is optional and an empty std::string by default.
+    ///
+    /// \returns the id of the Element.
     std::string getId() const;
+
+    /// \brief Set the id of the Element.
+    /// \param id The new id of the Element.
     void setId(const std::string& id);
 
+    /// \brief Determine of the Element has an attribute with the given name.
+    /// \param name The name of the Attribute to query.
+    /// \returns true iff the Element has an attribute with the given name.
     bool hasAttribute(const std::string& name) const;
 
     /// \brief Get a named attribute via its key.
@@ -194,8 +233,19 @@ public:
     /// \returns The value corresponding to the key, or throws an exception if
     /// non found.
     const std::string getAttribute(const std::string& key) const;
-    void setAttribute(const std::string& key, const std::string& value);
-    void clearAttribute(const std::string& key);
+
+    /// \brief Set a value for a named attribute.
+    ///
+    /// If the given attribute exists, it will be overwritten with the given
+    /// value.
+    ///
+    /// \param name The name of the attribute.
+    /// \param value The new value of the attribute called name.
+    void setAttribute(const std::string& name, const std::string& value);
+
+    /// \brief Clear a named attribute.
+    /// \param The name of the attribute to clear.
+    void clearAttribute(const std::string& name);
 
     /// \brief Request that the parent Document capture the given pointer id.
     ///
@@ -203,19 +253,36 @@ public:
     ///
     /// \param id The pointer id to capture.
     void setPointerCapture(std::size_t id);
-    
+
+    /// \brief Release a captured pointer with the given id.
+    ///
+    /// Usually this call is not required as the parent Document's pointer
+    /// dispatching system will automatically release a pointer on the next
+    /// POINTER_UP event.  In some cases, the user may want to explicity release
+    /// the event to fire the associated lostPointerCapture events.
+    ///
+    /// \param id The pointer id to release.
     void releasePointerCapture(std::size_t id);
 
     /// \returns true iff the Element is enabled.
     bool isEnabled() const;
+
+    /// \brief Enable or disable this Element.
+    /// \param enabled The enabled state to set. True to enable, false to disable.
     void setEnabled(bool enabled);
 
     /// \returns true iff the Element is hidden.
     bool isHidden() const;
+
+    /// \brief Hide or show this Element.
+    /// \param hidden The visible state to set. True to hide, false to show.
     void setHidden(bool hidden);
 
     /// \returns true iff the Element is locked.
     bool isLocked() const;
+
+    /// \brief Lock or unlock a this Element.
+    /// \param locked The locked state to set. True to lock, false to unlock.
     void setLocked(bool locked);
 
 protected:
@@ -256,9 +323,9 @@ private:
     Geometry _geometry;
 
     /// \brief The basic union of all child geometries.
-    Geometry _childGeometry;
+    mutable Geometry _childGeometry;
 
-    bool _childGeometryDirty = true;
+    mutable bool _childGeometryDirty = true;
 
     bool _enabled = true;
     bool _hidden = false;
