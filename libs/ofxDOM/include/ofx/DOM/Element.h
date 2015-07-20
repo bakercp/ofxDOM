@@ -119,6 +119,9 @@ public:
     bool isSibling(Element* element) const;
     bool isParent(Element* element) const;
 
+    /// \brief Determine if this Element has any children.
+    /// \returns true iff this Element has any children.
+    bool hasChildren() const;
 
     /// \brief Find this Element's first child by its id.
     /// \param id The id of the child Element to find.

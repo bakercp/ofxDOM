@@ -225,6 +225,12 @@ bool Element::isParent(Element* element) const
 }
 
 
+bool Element::hasChildren() const
+{
+    return !_children.empty();
+}
+
+
 Element* Element::findFirstChildById(const std::string& id)
 {
     auto iter = std::find_if(_children.begin(),
