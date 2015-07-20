@@ -324,7 +324,8 @@ protected:
     /// \brief An id for this element.
     std::string _id;
 
-    std::unordered_set<uint64_t> _capturedPointers;
+    /// \brief A list of the pointer ids currently captured by this Element.
+    std::unordered_set<std::size_t> _capturedPointers;
 
 private:
     /// \brief Not construction-copyable.
@@ -336,19 +337,30 @@ private:
     /// \brief The basic geometry of this element.
     Geometry _geometry;
 
-    /// \brief The basic union of all child geometries.
+    /// \brief The union of all child geometries.
     mutable Geometry _childGeometry;
 
+    /// \brief True if the child geometry is dirty.
+    ///
+    /// This variable usually set by callbacks from the child elements.
     mutable bool _childGeometryDirty = true;
 
+    /// \brief The enabled state of this Element.
     bool _enabled = true;
+
+    /// \brief The visibility of this Element.
     bool _hidden = false;
+
+    /// \brief The locked state of this Element.
     bool _locked = false;
 
     /// \brief A collection of named attributes.
     std::unordered_map<std::string, std::string> _attributes;
 
+    /// \brief A callback for child Elements to notify their parent of movement.
     void _onChildMoved(MoveEvent& evt);
+
+    /// \brief A callback for child Elements to notify their parent size changes.
     void _onChildResized(ResizeEvent& evt);
 
 };
