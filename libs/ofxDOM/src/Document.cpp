@@ -141,21 +141,17 @@ bool Document::onPointerEvent(PointerEventArgs& e)
     else
     {
         // 1. Is there an active 
-
-
-
-
-
         std::vector<Element*> path;
 
         recursiveHitTest(e.eventType(),
-                         e.point(),
                          screenToLocal(e.point()),
                          path);
 
+//        std::reverse(path.begin(), path.end());
+
         if (!path.empty())
         {
-            event._target = path.back();
+            event._target = path.front();
 
             if (dispatchEvent(event, path))
             {

@@ -306,10 +306,9 @@ protected:
     void draw();
     void exit();
 
-    bool recursiveHitTest(const std::string& event,
-                          const Position& screenPosition,
-                          const Position& localPosition,
-                          std::vector<Element*>& path);
+    Element* recursiveHitTest(const std::string& event,
+                              const Position& localPosition,
+                              std::vector<Element*>& path);
 
     /// \brief Find a child by a raw Element pointer.
     /// \param The pointer to the child.

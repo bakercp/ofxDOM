@@ -522,35 +522,49 @@ void Element::exit()
 }
 
 
-bool Element::recursiveHitTest(const std::string& event,
-                               const Position& screenPosition,
+Element* Element::recursiveHitTest(const std::string& event,
                                const Position& localPosition,
                                std::vector<Element*>& path)
 {
-    if (_enabled && !_hidden && hitTest(localPosition))
+    if (_enabled && !_hidden)
     {
-        if (isEventListener(event, false) || isEventListener(event, true))
-        {
-            path.push_back(this);
-        }
+        Element* target = nullptr;
 
-        for (auto& child : _children)
+        Position childLocal = localPosition - this->getPosition();
+
+        if (hasChildren() && childHitTest(childLocal))
         {
-            // If a child hit is found, return immediately.
-            if (child->recursiveHitTest(event,
-                                        screenPosition,
-                                        (localPosition - this->getPosition()),
-                                        path))
+            for (auto& child : _children)
             {
-                return true;
+                target = child->recursiveHitTest(event, childLocal, path);
+
+                if (nullptr != target)
+                {
+                    break;
+                }
             }
         }
-        
-        return false;
+
+        // If there is no child target, is this a viable target?
+        if (nullptr == target && hitTest(localPosition))
+        {
+            target = this;
+        }
+
+        if (nullptr != target && (isEventListener(event, false) || isEventListener(event, true)))
+        {
+            path.push_back(this);
+            return target;
+        }
+        else
+        {
+            // Either this wasn't a listener, or we didn't pass the hit test.
+            return nullptr;
+        }
     }
     else
     {
-        return false;
+        return nullptr;
     }
 }
 
