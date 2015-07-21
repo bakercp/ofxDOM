@@ -390,7 +390,45 @@ void Element::setGeometry(const Geometry& geometry)
 
 Geometry Element::getChildGeometry() const
 {
+    if (_childGeometryInvalid)
+    {
+        _childGeometry = Geometry(); // Clear.
+
+        auto iter = _children.begin();
+
+        while (iter != _children.end())
+        {
+            const Element& child = *(iter->get());
+
+            if (iter == _children.begin())
+            {
+                _childGeometry = child.getTotalGeometry();
+            }
+            else
+            {
+                _childGeometry.growToInclude(child.getTotalGeometry());
+            }
+
+            ++iter;
+        }
+
+        _childGeometryInvalid = false;
+    }
+
     return _childGeometry;
+}
+
+
+Geometry Element::getTotalGeometry() const
+{
+    Geometry totalGeometry(_geometry);
+
+    if (hasChildren())
+    {
+        totalGeometry.growToInclude(getChildGeometry() + getPosition());
+    }
+
+    return totalGeometry;
 }
 
 
@@ -601,16 +639,26 @@ void Element::setLocked(bool __locked)
 }
 
 
+void Element::invalidateChildGeometry() const
+{
+    _childGeometryInvalid = true;
+
+    if (!isRoot())
+    {
+        _parent->invalidateChildGeometry();
+    }
+}
+
 
 void Element::_onChildMoved(MoveEvent& evt)
 {
-    _childGeometryDirty = true;
+    invalidateChildGeometry();
 }
 
 
 void Element::_onChildResized(ResizeEvent& evt)
 {
-    _childGeometryDirty = true;
+    invalidateChildGeometry();
 }
 
 

@@ -218,7 +218,8 @@ public:
     /// a rectangle of zero width and height at the origin if no children.
     Geometry getChildGeometry() const;
 
-    /// \brief Get the bounding box representing the union of the child geometry and the element geometry;
+    /// \brief Get the bounding box representing the union of the child geometry and the element geometry.
+    
     Geometry getTotalGeometry() const;
 
     /// \brief Get the id of this Element.
@@ -321,11 +322,13 @@ protected:
     /// \brief A vector to Elements.
     std::vector<std::unique_ptr<Element>> _children;
 
-    /// \brief An id for this element.
+    /// \brief The id for this element.
     std::string _id;
 
     /// \brief A list of the pointer ids currently captured by this Element.
     std::unordered_set<std::size_t> _capturedPointers;
+
+    void invalidateChildGeometry() const;
 
 private:
     /// \brief Not construction-copyable.
@@ -340,10 +343,10 @@ private:
     /// \brief The union of all child geometries.
     mutable Geometry _childGeometry;
 
-    /// \brief True if the child geometry is dirty.
+    /// \brief True if the child geometry is invalid.
     ///
     /// This variable usually set by callbacks from the child elements.
-    mutable bool _childGeometryDirty = true;
+    mutable bool _childGeometryInvalid = true;
 
     /// \brief The enabled state of this Element.
     bool _enabled = true;
