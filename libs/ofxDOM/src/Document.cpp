@@ -76,6 +76,7 @@ void Document::setup(ofEventArgs& e)
 {
 }
 
+
 void Document::update(ofEventArgs& e)
 {
 }
@@ -140,15 +141,116 @@ bool Document::onPointerEvent(PointerEventArgs& e)
     }
     else
     {
-        // 1. Is there an active 
-        Element* target = recursiveHitTest(e.eventType(),
-                                           screenToLocal(e.point()));
+        // Do a hit test to figure out what element is the target.
+        Element* target = recursiveHitTest(screenToLocal(e.point()));
+
+        if (e.eventType() == PointerEventArgs::POINTER_MOVE)
+        {
+            Element* lastTarget = nullptr;
+
+            auto i = _activeTargets.find(e.id());
+
+            if (i != _activeTargets.end())
+            {
+                Element* oldTarget = i->second;
+
+                if (oldTarget != target)
+                {
+                    {
+                        PointerEventArgs pointerOut(PointerEventArgs::POINTER_OUT,
+                                                    e.point(),
+                                                    e.deviceId(),
+                                                    e.index(),
+                                                    e.deviceType(),
+                                                    e.isPrimary(),
+                                                    e.button(),
+                                                    e.buttons(),
+                                                    e.modifiers(),
+                                                    e.pressCount(),
+                                                    e.timestamp());
+                        
+                        // Call pointerout ONLY on old target
+                        PointerEvent pointerOutEvent(pointerOut, this, oldTarget);
+                        pointerOutEvent.setPhase(Event::Phase::AT_TARGET);
+                        oldTarget->handleEvent(event);
+
+                        PointerEventArgs pointerLeave(PointerEventArgs::POINTER_LEAVE,
+                                                      e.point(),
+                                                      e.deviceId(),
+                                                      e.index(),
+                                                      e.deviceType(),
+                                                      e.isPrimary(),
+                                                      e.button(),
+                                                      e.buttons(),
+                                                      e.modifiers(),
+                                                      e.pressCount(),
+                                                      e.timestamp());
+
+                        // Call pointerleave on old target and ancestors
+                        PointerEvent pointerLeaveEvent(pointerLeave, this, oldTarget);
+                        oldTarget->dispatchEvent(pointerLeaveEvent);
+                    }
+
+                    if (nullptr != target)
+                    {
+                        PointerEventArgs pointerOver(PointerEventArgs::POINTER_OVER,
+                                                     e.point(),
+                                                     e.deviceId(),
+                                                     e.index(),
+                                                     e.deviceType(),
+                                                     e.isPrimary(),
+                                                     e.button(),
+                                                     e.buttons(),
+                                                     e.modifiers(),
+                                                     e.pressCount(),
+                                                     e.timestamp());
+
+                        // Call pointerout ONLY on old target
+                        PointerEvent pointerOverEvent(pointerOver, this, target);
+                        pointerOverEvent.setPhase(Event::Phase::AT_TARGET);
+                        target->handleEvent(event);
+
+                        PointerEventArgs pointerEnter(PointerEventArgs::POINTER_ENTER,
+                                                      e.point(),
+                                                      e.deviceId(),
+                                                      e.index(),
+                                                      e.deviceType(),
+                                                      e.isPrimary(),
+                                                      e.button(),
+                                                      e.buttons(),
+                                                      e.modifiers(),
+                                                      e.pressCount(),
+                                                      e.timestamp());
+
+                        // Call pointerover ONLY on the target.
+                        // Call pointerenter on target and ancestors.
+                        // Call pointerleave on old target and ancestors
+                        PointerEvent pointerEnterEvent(pointerEnter, this, target);
+                        target->dispatchEvent(pointerEnterEvent);
+
+                        _activeTargets[e.id()] = target;
+                    }
+                    else
+                    {
+
+                        // No longer an active target for this id.
+                        _activeTargets.erase(e.id());
+                    }
+                }
+                else
+                {
+                    // Still over the same element.
+                }
+            }
+        }
+
+        // Dispatch the original event if there is a target.
 
         if (nullptr != target)
         {
             event._target = target;
 
-            if (event._target->dispatchEvent(event))
+            if (target->dispatchEvent(event))
             {
                 // TODO call default action.
             }

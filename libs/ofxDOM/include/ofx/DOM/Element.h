@@ -265,8 +265,7 @@ protected:
     void draw();
     void exit();
 
-    Element* recursiveHitTest(const std::string& event,
-                              const Position& localPosition);
+    Element* recursiveHitTest(const Position& localPosition);
 
     /// \brief Find a child by a raw Element pointer.
     /// \param The pointer to the child.

@@ -522,8 +522,7 @@ void Element::exit()
 }
 
 
-Element* Element::recursiveHitTest(const std::string& event,
-                                   const Position& localPosition)
+Element* Element::recursiveHitTest(const Position& localPosition)
 {
     if (_enabled && !_hidden)
     {
@@ -533,7 +532,7 @@ Element* Element::recursiveHitTest(const std::string& event,
         {
             for (auto& child : _children)
             {
-                Element* target = child->recursiveHitTest(event, childLocal);
+                Element* target = child->recursiveHitTest(childLocal);
 
                 if (nullptr != target)
                 {

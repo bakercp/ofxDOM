@@ -56,6 +56,9 @@ protected:
     /// \brief Captured pointer and their capture target.
     std::unordered_map<std::size_t, Element*> _capturedPointers;
 
+    /// \brief Currently active targets.
+    std::unordered_map<std::size_t, Element*> _activeTargets;
+
     /// \brief Currently active pointers and their last associated event.
     std::unordered_map<std::size_t, PointerEventArgs> _activePointers;
 
