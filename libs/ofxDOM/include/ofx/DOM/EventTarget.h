@@ -46,12 +46,13 @@ public:
 };
 
 
-class EventListener
+template<class EventTargetType>
+class EventTarget
 {
 public:
-    EventListener();
+    EventTarget();
 
-    virtual ~EventListener();
+    virtual ~EventTarget();
 
     template <class EventType, typename ArgumentsType, class ListenerClass>
     void addEventListener(EventType& event,
@@ -127,8 +128,65 @@ public:
         ofRemoveListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
     }
 
+    template<class EventType>
+    bool dispatchEvent(EventType& event)
+    {
+        EventTargetType* target = dynamic_cast<EventTargetType*>(this);
 
-    template <typename EventType>
+        // Create the path from the target to the document.
+        std::vector<EventTargetType*> targets;
+
+        do
+        {
+            targets.push_back(target);
+            target = target->parent();
+        }
+        while (target != nullptr);
+
+        // Capture and Target phase.
+        auto riter = targets.rbegin();
+
+        while (riter != targets.rend())
+        {
+            event.setPhase(event.target() == *riter ? Event::Phase::AT_TARGET : Event::Phase::CAPTURING_PHASE);
+            event.setCurrentTarget(*riter);
+            (*riter)->handleEvent(event);
+
+            if (event.isCancelled())
+            {
+                return !event.isDefaultPrevented();
+            }
+
+            ++riter;
+        }
+
+        // Bubble phase if needed.
+        if (targets.size() > 1 && event.bubbles())
+        {
+            // Begin with the parent of the target element.
+            auto bubbleIter = targets.begin() + 1;
+
+            while (bubbleIter != targets.end())
+            {
+                event.setPhase(Event::Phase::BUBBLING_PHASE);
+
+                event.setCurrentTarget(*bubbleIter);
+                (*bubbleIter)->handleEvent(event);
+
+                if (event.isCancelled())
+                {
+                    return !event.isDefaultPrevented();
+                }
+                
+                ++bubbleIter;
+            }
+        }
+        
+        return event.isDefaultPrevented();
+    }
+
+
+    template <class EventType>
     void handleEvent(EventType& e)
     {
         auto iter = _eventRegistry.find(e.type());
@@ -154,10 +212,21 @@ public:
 
     bool isEventListener(const std::string& event, bool useCapture) const;
 
-    virtual void onSetup();
-    virtual void onUpdate();
-    virtual void onDraw();
-    virtual void onExit();
+    virtual void onSetup()
+    {
+    }
+
+    virtual void onUpdate()
+    {
+    }
+
+    virtual void onDraw()
+    {
+    }
+
+    virtual void onExit()
+    {
+    }
 
     DOMEvent<PointerEvent> pointerOver;
     DOMEvent<PointerEvent> pointerEnter;
@@ -208,6 +277,51 @@ protected:
 //    std::string
 
 };
+
+
+template<class EventTargetType>
+EventTarget<EventTargetType>::EventTarget()
+{
+    _eventRegistry = {
+        { PointerEventArgs::POINTER_OVER, &pointerOver },
+        { PointerEventArgs::POINTER_ENTER, &pointerEnter },
+        { PointerEventArgs::POINTER_DOWN, &pointerDown },
+        { PointerEventArgs::POINTER_MOVE, &pointerMove },
+        { PointerEventArgs::POINTER_UP, &pointerUp },
+        { PointerEventArgs::POINTER_CANCEL, &pointerCancel },
+        { PointerEventArgs::POINTER_OUT, &pointerOut },
+        { PointerEventArgs::POINTER_LEAVE, &pointerLeave },
+        { PointerEventArgs::POINTER_SCROLL, &pointerScroll },
+
+        { PointerEventArgs::GOT_POINTER_CAPTURE, &gotPointerCapture },
+        { PointerEventArgs::LOST_POINTER_CAPTURE, &lostPointerCapture },
+
+        { KeyboardEvent::KEY_DOWN, &keyDown },
+        { KeyboardEvent::KEY_UP, &keyUp }
+    };
+}
+
+
+template<class EventTargetType>
+EventTarget<EventTargetType>::~EventTarget()
+{
+}
+
+
+template<class EventTargetType>
+bool EventTarget<EventTargetType>::isEventListener(const std::string& event, bool useCapture) const
+{
+    auto iter = _eventRegistry.find(event);
+
+    if (iter != _eventRegistry.end())
+    {
+        return iter->second->hasListeners();
+    }
+    else
+    {
+        return false;
+    }
+}
 
 
 } } // namespace ofx::DOM

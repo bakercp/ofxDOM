@@ -28,7 +28,7 @@
 #include <unordered_set>
 #include "ofx/PointerEvents.h"
 #include "ofx/DOM/Events.h"
-#include "ofx/DOM/EventListener.h"
+#include "ofx/DOM/EventTarget.h"
 #include "ofx/DOM/Exceptions.h"
 #include "ofx/DOM/Types.h"
 
@@ -41,7 +41,7 @@ class Document;
 class AbstractLayout;
 
 
-class Element: public EventListener
+class Element: public EventTarget<Element>
 {
 public:
     Element(float x, float y, float width, float height);
@@ -238,9 +238,6 @@ public:
     /// \param id The pointer id to release.
     void releasePointerCapture(std::size_t id);
 
-    template<typename EventType>
-    bool dispatchEvent(EventType& event);
-
     /// \returns true iff the Element is enabled.
     bool isEnabled() const;
 
@@ -374,62 +371,6 @@ ElementType* Element::addChild(std::unique_ptr<ElementType> element)
 }
 
 
-template<typename EventType>
-bool Element::dispatchEvent(EventType& event)
-{
-    Element* target = this;
-
-    // Create the path from the target to the document.
-    std::vector<Element*> targets;
-
-    do
-    {
-        targets.push_back(target);
-        target = target->parent();
-    }
-    while (target != nullptr);
-
-    // Capture and Target phase.
-    auto riter = targets.rbegin();
-
-    while (riter != targets.rend())
-    {
-        event.setPhase(event.target() == *riter ? Event::Phase::AT_TARGET : Event::Phase::CAPTURING_PHASE);
-        event.setCurrentTarget(*riter);
-        (*riter)->handleEvent(event);
-
-        if (event.isCancelled())
-        {
-            return !event.isDefaultPrevented();
-        }
-
-        ++riter;
-    }
-
-    // Bubble phase if needed.
-    if (targets.size() > 1 && event.bubbles())
-    {
-        // Begin with the parent of the target element.
-        auto bubbleIter = targets.begin() + 1;
-
-        while (bubbleIter != targets.end())
-        {
-            event.setPhase(Event::Phase::BUBBLING_PHASE);
-
-            event.setCurrentTarget(*bubbleIter);
-            (*bubbleIter)->handleEvent(event);
-
-            if (event.isCancelled())
-            {
-                return !event.isDefaultPrevented();
-            }
-
-            ++bubbleIter;
-        }
-    }
-    
-    return event.isDefaultPrevented();
-}
 
 
 } } // namespace ofx::DOM
