@@ -141,19 +141,14 @@ bool Document::onPointerEvent(PointerEventArgs& e)
     else
     {
         // 1. Is there an active 
-        std::vector<Element*> path;
+        Element* target = recursiveHitTest(e.eventType(),
+                                           screenToLocal(e.point()));
 
-        recursiveHitTest(e.eventType(),
-                         screenToLocal(e.point()),
-                         path);
-
-//        std::reverse(path.begin(), path.end());
-
-        if (!path.empty())
+        if (nullptr != target)
         {
-            event._target = path.front();
+            event._target = target;
 
-            if (dispatchEvent(event, path))
+            if (event._target->dispatchEvent(event))
             {
                 // TODO call default action.
             }
@@ -197,8 +192,7 @@ void Document::setPointerCapture(Element* element, std::size_t id)
         {
             _capturedPointers[id] = element;
             PointerCaptureEvent evt(id, true, this, element);
-            std::vector<Element*> path = { element };
-            dispatchEvent(evt, path);
+            element->dispatchEvent(evt);
         }
     }
 }
@@ -228,8 +222,7 @@ void Document::releasePointerCapture(Element* element, std::size_t id)
             {
                 _capturedPointers.erase(iter);
                 PointerCaptureEvent evt(id, false, this, element);
-                std::vector<Element*> path = { element };
-                dispatchEvent(evt, path);
+                element->dispatchEvent(evt);
             }
         }
     }

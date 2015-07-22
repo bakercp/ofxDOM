@@ -59,48 +59,7 @@ public:
     ///
     /// \returns a pointer to the child that was attached.
     template<typename ElementType>
-    ElementType* addChild(std::unique_ptr<ElementType> element)
-    {
-        if (nullptr != element)
-        {
-            // Get a raw pointer to the node for later.
-            ElementType* pNode = element.get();
-
-            // Assign the parent to the node via the raw pointer.
-            pNode->_parent = this;
-
-            // Take ownership of the node.
-            _children.push_back(std::move(element));
-
-            // Alert the node that its parent was set.
-            ElementEvent addedEvent(this);
-            ofNotifyEvent(pNode->addedTo, addedEvent, this);
-
-            ElementEvent childAddedEvent(pNode);
-            ofNotifyEvent(childAdded, childAddedEvent, this);
-
-            // Attach child listeners.
-            ofAddListener(pNode->move, this, &Element::_onChildMoved);
-            ofAddListener(pNode->resize, this, &Element::_onChildResized);
-
-            /// Alert the node's siblings that they have a new sibling.
-            for (auto& child : _children)
-            {
-                // Don't alert itself.
-                if (child.get() != pNode)
-                {
-                    ElementEvent evt(pNode);
-                    ofNotifyEvent(child->siblingAdded, evt, this);
-                }
-            }
-            
-            return pNode;
-        }
-        else
-        {
-            return nullptr;
-        }
-    }
+    ElementType* addChild(std::unique_ptr<ElementType> element);
     
     /// \brief Release ownership
     std::unique_ptr<Element> removeChild(Element* element);
@@ -279,6 +238,9 @@ public:
     /// \param id The pointer id to release.
     void releasePointerCapture(std::size_t id);
 
+    template<typename EventType>
+    bool dispatchEvent(EventType& event);
+
     /// \returns true iff the Element is enabled.
     bool isEnabled() const;
 
@@ -307,8 +269,7 @@ protected:
     void exit();
 
     Element* recursiveHitTest(const std::string& event,
-                              const Position& localPosition,
-                              std::vector<Element*>& path);
+                              const Position& localPosition);
 
     /// \brief Find a child by a raw Element pointer.
     /// \param The pointer to the child.
@@ -366,6 +327,109 @@ private:
     void _onChildResized(ResizeEvent& evt);
 
 };
+
+
+template<typename ElementType>
+ElementType* Element::addChild(std::unique_ptr<ElementType> element)
+{
+    if (nullptr != element)
+    {
+        // Get a raw pointer to the node for later.
+        ElementType* pNode = element.get();
+
+        // Assign the parent to the node via the raw pointer.
+        pNode->_parent = this;
+
+        // Take ownership of the node.
+        _children.push_back(std::move(element));
+
+        // Alert the node that its parent was set.
+        ElementEvent addedEvent(this);
+        ofNotifyEvent(pNode->addedTo, addedEvent, this);
+
+        ElementEvent childAddedEvent(pNode);
+        ofNotifyEvent(childAdded, childAddedEvent, this);
+
+        // Attach child listeners.
+        ofAddListener(pNode->move, this, &Element::_onChildMoved);
+        ofAddListener(pNode->resize, this, &Element::_onChildResized);
+
+        /// Alert the node's siblings that they have a new sibling.
+        for (auto& child : _children)
+        {
+            // Don't alert itself.
+            if (child.get() != pNode)
+            {
+                ElementEvent evt(pNode);
+                ofNotifyEvent(child->siblingAdded, evt, this);
+            }
+        }
+
+        return pNode;
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+
+template<typename EventType>
+bool Element::dispatchEvent(EventType& event)
+{
+    Element* target = this;
+
+    // Create the path from the target to the document.
+    std::vector<Element*> targets;
+
+    do
+    {
+        targets.push_back(target);
+        target = target->parent();
+    }
+    while (target != nullptr);
+
+    // Capture and Target phase.
+    auto riter = targets.rbegin();
+
+    while (riter != targets.rend())
+    {
+        event.setPhase(event.target() == *riter ? Event::Phase::AT_TARGET : Event::Phase::CAPTURING_PHASE);
+        event.setCurrentTarget(*riter);
+        (*riter)->handleEvent(event);
+
+        if (event.isCancelled())
+        {
+            return !event.isDefaultPrevented();
+        }
+
+        ++riter;
+    }
+
+    // Bubble phase if needed.
+    if (targets.size() > 1 && event.bubbles())
+    {
+        // Begin with the parent of the target element.
+        auto bubbleIter = targets.begin() + 1;
+
+        while (bubbleIter != targets.end())
+        {
+            event.setPhase(Event::Phase::BUBBLING_PHASE);
+
+            event.setCurrentTarget(*bubbleIter);
+            (*bubbleIter)->handleEvent(event);
+
+            if (event.isCancelled())
+            {
+                return !event.isDefaultPrevented();
+            }
+
+            ++bubbleIter;
+        }
+    }
+    
+    return event.isDefaultPrevented();
+}
 
 
 } } // namespace ofx::DOM

@@ -52,16 +52,6 @@ public:
     void setPointerCapture(Element* element, std::size_t id);
     void releasePointerCapture(Element* element, std::size_t id);
 
-    /// \brief Dispatch an event.
-    ///
-    /// This will return true if the default action should be called.
-    /// It will return false if at least one of the event targets called
-    /// event.preventDefault().
-    ///
-    /// \returns true if the default action should be called.
-    template<typename EventType, typename EventTarget>
-    bool dispatchEvent(EventType& event, std::vector<EventTarget*> targets);
-
 protected:
     /// \brief Captured pointer and their capture target.
     std::unordered_map<std::size_t, Element*> _capturedPointers;
@@ -69,55 +59,7 @@ protected:
     /// \brief Currently active pointers and their last associated event.
     std::unordered_map<std::size_t, PointerEventArgs> _activePointers;
 
-    std::unordered_map<std::size_t, std::vector<Element*>> _activePath;
-
 };
-
-
-template<typename EventType, typename EventTarget>
-bool Document::dispatchEvent(EventType& event, std::vector<EventTarget*> targets)
-{
-    // Capture and Target phase.
-    auto riter = targets.rbegin();
-
-    while (riter != targets.rend())
-    {
-        event.setPhase(event.target() == *riter ? Event::Phase::AT_TARGET : Event::Phase::CAPTURING_PHASE);
-        event.setCurrentTarget(*riter);
-        (*riter)->handleEvent(event);
-
-        if (event.isCancelled())
-        {
-            return !event.isDefaultPrevented();
-        }
-
-        ++riter;
-    }
-
-    // Bubble phase if needed.
-    if (targets.size() > 1 && event.bubbles())
-    {
-        // Begin with the parent of the target element.
-        auto bubbleIter = targets.begin() + 1;
-
-        while (bubbleIter != targets.end())
-        {
-            event.setPhase(Event::Phase::BUBBLING_PHASE);
-
-            event.setCurrentTarget(*bubbleIter);
-            (*bubbleIter)->handleEvent(event);
-
-            if (event.isCancelled())
-            {
-                return !event.isDefaultPrevented();
-            }
-
-            ++bubbleIter;
-        }
-    }
-
-    return event.isDefaultPrevented();
-}
 
 
 } } // namespace ofx::DOM

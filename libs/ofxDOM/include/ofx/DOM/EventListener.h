@@ -34,8 +34,9 @@ namespace ofx {
 namespace DOM {
 
 
-struct CapturedPointer
+class CapturedPointer
 {
+public:
     std::size_t id;
     Point start;
     Point offset;
