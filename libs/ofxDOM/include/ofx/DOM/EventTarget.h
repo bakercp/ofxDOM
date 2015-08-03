@@ -22,6 +22,7 @@
 //
 // =============================================================================
 
+
 #pragma once
 
 
@@ -32,18 +33,6 @@
 
 namespace ofx {
 namespace DOM {
-
-
-class CapturedPointer
-{
-public:
-    std::size_t id;
-    Point start;
-    Point offset;
-    Point position;
-    Point velocity;
-    uint64_t lastUpdate;
-};
 
 
 template<class EventTargetType>

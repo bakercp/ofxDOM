@@ -275,16 +275,11 @@ Element* Element::parent()
 }
 
 
-bool Element::isRoot() const
-{
-    return nullptr == _parent;
-}
-
-
 Document* Element::document()
 {
     if (nullptr == _parent)
     {
+        // Return self if a Document, otherwise, will return nullptr.
         return dynamic_cast<Document*>(this);
     }
     else
@@ -292,6 +287,33 @@ Document* Element::document()
         // If a parent exists, return it recursively.
         return _parent->document();
     }
+}
+
+
+const Element* Element::parent() const
+{
+    return _parent;
+}
+
+
+const Document* Element::document() const
+{
+    if (nullptr == _parent)
+    {
+        // Return self if a Document, otherwise, will return nullptr.
+        return dynamic_cast<const Document*>(this);
+    }
+    else
+    {
+        // If a parent exists, return it recursively.
+        return _parent->document();
+    }
+}
+
+
+bool Element::isRoot() const
+{
+    return nullptr == _parent;
 }
 
 
@@ -356,6 +378,18 @@ Position Element::getPosition() const
 }
 
 
+float Element::getX() const
+{
+    return _geometry.getX();
+}
+
+
+float Element::getY() const
+{
+    return _geometry.getY();
+}
+
+
 void Element::setSize(float width, float height)
 {
     if (_geometry.width != width || _geometry.height != height)
@@ -372,6 +406,18 @@ void Element::setSize(float width, float height)
 Size Element::getSize() const
 {
     return Size(_geometry.width, _geometry.height);
+}
+
+
+float Element::getWidth() const
+{
+    return _geometry.getWidth();
+}
+
+
+float Element::getHeight() const
+{
+    return _geometry.getHeight();
 }
 
 
@@ -450,22 +496,7 @@ bool Element::hasAttribute(const std::string& key) const
 }
 
 
-const std::string Element::getAttribute(const std::string& key) const
-{
-    auto iter = _attributes.find(key);
-
-    if (iter != _attributes.end())
-    {
-        return iter->second;
-    }
-    else
-    {
-        throw DOMException(DOMException::INVALID_ATTRIBUTE_KEY);
-    }
-}
-
-
-void Element::setAttribute(const std::string& key, const std::string& value)
+void Element::setAttribute(const std::string& key, const Poco::Any& value)
 {
     _attributes[key] = value;
 
@@ -477,7 +508,7 @@ void Element::setAttribute(const std::string& key, const std::string& value)
 void Element::clearAttribute(const std::string& key)
 {
     _attributes.erase(key);
-    AttributeEvent evt(key, "");
+    AttributeEvent evt(key);
     ofNotifyEvent(attributeCleared, evt, this);
 }
 

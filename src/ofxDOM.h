@@ -23,6 +23,9 @@
 // =============================================================================
 
 
+#pragma once
+
+
 #include "ofxPointer.h"
 #include "ofx/DOM/Document.h"
 #include "ofx/DOM/Element.h"

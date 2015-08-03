@@ -22,10 +22,12 @@
 //
 // =============================================================================
 
+
 #pragma once
 
 
 #include <unordered_set>
+#include "Poco/Any.h"
 #include "ofx/PointerEvents.h"
 #include "ofx/DOM/Events.h"
 #include "ofx/DOM/EventTarget.h"
@@ -44,10 +46,25 @@ class AbstractLayout;
 class Element: public EventTarget<Element>
 {
 public:
+    /// \brief Construct a new Element with the given parameters.
+    ///
+    /// The Element will take the default id, an empty string.
+    ///
+    /// \param x the X position of the Element in its parent coordinates.
+    /// \param y the Y position of the Element in its parent coordinates.
+    /// \param width the width of the Element.
+    /// \param height the height of the Element.
     Element(float x, float y, float width, float height);
 
+    /// \brief Construct a new Element with the given parameters.
+    /// \param id The id of the Element.
+    /// \param x the X position of the Element in its parent coordinates.
+    /// \param y the Y position of the Element in its parent coordinates.
+    /// \param width the width of the Element.
+    /// \param height the height of the Element.
     Element(const std::string& id, float x, float y, float width, float height);
 
+    /// \brief Destroy the Element.
     virtual ~Element();
 
     /// \brief Take ownership of the passed std::unique_ptr<Element>.
@@ -64,14 +81,40 @@ public:
     /// \brief Release ownership
     std::unique_ptr<Element> removeChild(Element* element);
 
+    /// \brief Move this Element in front of all of its siblings.
     void moveToFront();
+
+    /// \brief Move this Element in front of its next sibling.
     void moveForward();
+
+    /// \brief Move this Element in back of all of its siblings.
     void moveToBack();
+
+    /// \brief Move this Element in back of its next sibling.
     void moveBackward();
 
+    /// \brief Move the given Element in front of all of its siblings.
+    /// \param element The child element to move.
+    /// \throws DOMException(DOMException::INVALID_STATE_ERROR) if no matching
+    /// child element exists.
     void moveChildToFront(Element* element);
+
+    /// \brief Move the given Element in front of its next sibling.
+    /// \param element The child element to move.
+    /// \throws DOMException(DOMException::INVALID_STATE_ERROR) if no matching
+    /// child element exists.
     void moveChildForward(Element* element);
+
+    /// \brief Move the given Element in back of all of its siblings.
+    /// \param element The child element to move.
+    /// \throws DOMException(DOMException::INVALID_STATE_ERROR) if no matching
+    /// child element exists.
     void moveChildToBack(Element* element);
+
+    /// \brief Move the given Element in back of its next sibling.
+    /// \param element The child element to move.
+    /// \throws DOMException(DOMException::INVALID_STATE_ERROR) if no matching
+    /// child element exists.
     void moveChildBackward(Element* element);
 
     /// \brief Determine if the given Element is a child of this Element.
@@ -108,8 +151,16 @@ public:
     Element* parent();
 
     /// \brief Get a pointer to the parent Document.
-    /// \returns a pointer to the parent Document or a nullptr.
+    /// \returns a pointer to the parent Document, self if a Document or a nullptr.
     Document* document();
+
+    /// \brief Get a pointer to the parent.
+    /// \returns a pointer to the parent or a nullptr.
+    const Element* parent() const;
+
+    /// \brief Get a pointer to the parent Document.
+    /// \returns a pointer to the parent Document, self if a Document or a nullptr.
+    const Document* document() const;
 
     /// \returns true iff Element has no parent (i.e. parent is nullptr).
     bool isRoot() const;
@@ -155,6 +206,14 @@ public:
     /// \returns The position in parent coordinates.
     Position getPosition() const;
 
+    /// \brief Get the X position of the Element in its parent coordinates.
+    /// \returns the X position of the Element in its parent coordinates.
+    float getX() const;
+
+    /// \brief Get the Y position of the Element in its parent coordinates.
+    /// \returns the Y position of the Element in its parent coordinates.
+    float getY() const;
+
     /// \brief Set the size of the Element.
     /// \param width The new width of the Element.
     /// \param height The new height of the Element.
@@ -163,6 +222,14 @@ public:
     /// \brief Get the Size of the Element.
     /// \returns the Size of the Element.
     Size getSize() const;
+
+    /// \brief Get the width of the Element.
+    /// \returns The width of the Element.
+    float getWidth() const;
+
+    /// \brief Get the height of the Element.
+    /// \returns The height of the Element.
+    float getHeight() const;
 
     /// \brief Get the geometry of the Element in its parent coordinates.
     /// \returns the Geometry of the Element in its parent coordinates.
@@ -178,7 +245,7 @@ public:
     Geometry getChildGeometry() const;
 
     /// \brief Get the bounding box representing the union of the child geometry and the element geometry.
-    
+    /// \returns the bounding box representing the union of the child geometry and the element geometry.
     Geometry getTotalGeometry() const;
 
     /// \brief Get the id of this Element.
@@ -203,10 +270,12 @@ public:
     /// catch the DOMException.
     ///
     /// \throws DOMException if no such key.
+    /// \throws Poco::BadCastException if the types do not match.
     /// \param key The name of the attribute.
-    /// \returns The value corresponding to the key, or throws an exception if
-    /// non found.
-    const std::string getAttribute(const std::string& key) const;
+    /// \param inherit True if the Element should query its ancestors for the attribute.
+    /// \returns The value corresponding to the key, or throws an exception.
+    template<typename AnyType>
+    AnyType getAttribute(const std::string& key, bool inherit = false) const;
 
     /// \brief Set a value for a named attribute.
     ///
@@ -215,7 +284,7 @@ public:
     ///
     /// \param name The name of the attribute.
     /// \param value The new value of the attribute called name.
-    void setAttribute(const std::string& name, const std::string& value);
+    void setAttribute(const std::string& name, const Poco::Any& value);
 
     /// \brief Clear a named attribute.
     /// \param The name of the attribute to clear.
@@ -265,6 +334,9 @@ protected:
     void draw();
     void exit();
 
+    /// \brief A recursive hit test to find a target element.
+    /// \param localPosition The local coordinates to test.
+    /// \returns A pointer to the target Element or a nullptr if none found.
     Element* recursiveHitTest(const Position& localPosition);
 
     /// \brief Find a child by a raw Element pointer.
@@ -282,8 +354,9 @@ protected:
     std::string _id;
 
     /// \brief A list of the pointer ids currently captured by this Element.
-    std::unordered_set<std::size_t> _capturedPointers;
+    std::unordered_map<std::size_t, CapturedPointer> _capturedPointers;
 
+    /// \brief Called internally to invalidate the child geometry tree.
     void invalidateChildGeometry() const;
 
 private:
@@ -314,7 +387,7 @@ private:
     bool _locked = false;
 
     /// \brief A collection of named attributes.
-    std::unordered_map<std::string, std::string> _attributes;
+    std::unordered_map<std::string, Poco::Any> _attributes;
 
     /// \brief A callback for child Elements to notify their parent of movement.
     void _onChildMoved(MoveEvent& evt);
@@ -370,6 +443,24 @@ ElementType* Element::addChild(std::unique_ptr<ElementType> element)
 }
 
 
+template<typename AnyType>
+AnyType Element::getAttribute(const std::string& key, bool inherit) const
+{
+    auto iter = _attributes.find(key);
+
+    if (iter != _attributes.end())
+    {
+        return Poco::AnyCast<AnyType>(iter->second);
+    }
+    else if (inherit && !isRoot())
+    {
+        return parent()->getAttribute<AnyType>(key);
+    }
+    else
+    {
+        throw DOMException(DOMException::INVALID_ATTRIBUTE_KEY);
+    }
+}
 
 
 } } // namespace ofx::DOM
