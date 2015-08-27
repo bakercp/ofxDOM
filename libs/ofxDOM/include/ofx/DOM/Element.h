@@ -29,6 +29,7 @@
 #include <unordered_set>
 #include "Poco/Any.h"
 #include "ofx/PointerEvents.h"
+#include "ofx/DOM/CapturedPointer.h"
 #include "ofx/DOM/Events.h"
 #include "ofx/DOM/EventTarget.h"
 #include "ofx/DOM/Exceptions.h"
@@ -43,6 +44,7 @@ class Document;
 class AbstractLayout;
 
 
+/// \brief A class representing a DOM Element.
 class Element: public EventTarget<Element>
 {
 public:
@@ -73,12 +75,13 @@ public:
     /// owned by this Node.
     ///
     /// \param nodePtr the rvalue reference to the child node.
-    ///
     /// \returns a pointer to the child that was attached.
     template<typename ElementType>
     ElementType* addChild(std::unique_ptr<ElementType> element);
     
-    /// \brief Release ownership
+    /// \brief Release ownership of a child Element.
+	/// \param element The Element to release.
+	/// \returns a std::unique_ptr<Element> to the child.
     std::unique_ptr<Element> removeChild(Element* element);
 
     /// \brief Move this Element in front of all of its siblings.
@@ -150,13 +153,13 @@ public:
     /// \returns a pointer to the parent or a nullptr.
     Element* parent();
 
+	/// \brief Get a pointer to the parent.
+	/// \returns a pointer to the parent or a nullptr.
+	const Element* parent() const;
+
     /// \brief Get a pointer to the parent Document.
     /// \returns a pointer to the parent Document, self if a Document or a nullptr.
     Document* document();
-
-    /// \brief Get a pointer to the parent.
-    /// \returns a pointer to the parent or a nullptr.
-    const Element* parent() const;
 
     /// \brief Get a pointer to the parent Document.
     /// \returns a pointer to the parent Document, self if a Document or a nullptr.
@@ -165,8 +168,19 @@ public:
     /// \returns true iff Element has no parent (i.e. parent is nullptr).
     bool isRoot() const;
 
+	/// \brief Perform a hit test on the Element.
+	///
+	/// For a normal Element, the hit test will test the rectangular geometry
+	/// of the Element. Subclasses can override this method for custom hit test
+	/// geometry.
+	///
+	/// \param localPosition The Position to test in local coordinates.
+	/// \returns true iff the local position is within the hit test region.
     virtual bool hitTest(const Position& localPosition) const;
 
+	/// \brief Perform a hit test on a child Element.
+	/// \param localPosition The Position to test in local coordinates.
+	/// \returns true iff the local position is within the hit test region.
     virtual bool childHitTest(const Position& localPosition) const;
 
     /// \brief Get the Position of this Element in screen coordinates.
@@ -292,7 +306,7 @@ public:
 
     /// \brief Request that the parent Document capture the given pointer id.
     ///
-    /// Captured pointers send all of thei revents to the capturing Element.
+    /// Captured pointers send all of their revents to the capturing Element.
     ///
     /// \param id The pointer id to capture.
     void setPointerCapture(std::size_t id);
@@ -329,10 +343,17 @@ public:
     void setLocked(bool locked);
 
 protected:
-    void setup();
-    void update();
-    void draw();
-    void exit();
+	/// \brief Setup method called by parent Element.
+    void _setup();
+
+	/// \brief Update method called by parent Element.
+	void _update();
+
+	/// \brief Draw method called by parent Element.
+	void _draw();
+
+	/// \brief Exit method called by parent Element.
+	void _exit();
 
     /// \brief A recursive hit test to find a target element.
     /// \param localPosition The local coordinates to test.
@@ -345,7 +366,7 @@ protected:
     std::vector<std::unique_ptr<Element>>::iterator findChild(Element* element);
 
     /// \brief An optional pointer to a parent Node.
-    Element* _parent = nullptr;
+    Element* _parent;
 
     /// \brief A vector to Elements.
     std::vector<std::unique_ptr<Element>> _children;
@@ -353,11 +374,30 @@ protected:
     /// \brief The id for this element.
     std::string _id;
 
-    /// \brief A list of the pointer ids currently captured by this Element.
-    std::unordered_map<std::size_t, CapturedPointer> _capturedPointers;
+	bool isPointerCaptured(std::size_t id) const;
+
+	std::vector<CapturedPointer>::iterator findCapturedPointerById(std::size_t id);
+
+	std::vector<CapturedPointer>::const_iterator findCapturedPointerById(std::size_t id) const;
+
+	std::vector<CapturedPointer>& capturedPointers();
+
+	const std::vector<CapturedPointer>& capturedPointers() const;
 
     /// \brief Called internally to invalidate the child geometry tree.
     void invalidateChildGeometry() const;
+
+	/// \brief Set if the pointer is implicitly captured on pointer down.
+	///
+	/// This does not enable the pointer listener, only if the pointer should
+	/// be automatically captured when a listener is enabled.
+	///
+	/// \param implicitPointerCapture True if the pointer should be captured.
+	void setImplicitPointerCapture(bool implicitPointerCapture);
+
+	/// \brief Determine if pointer is automatically captured on pointer down.
+	/// \returns true iff implicit pointer capture is enabled.
+	bool getImplicitPointerCapture() const;
 
 private:
     /// \brief Not construction-copyable.
@@ -375,19 +415,27 @@ private:
     /// \brief True if the child geometry is invalid.
     ///
     /// This variable usually set by callbacks from the child elements.
-    mutable bool _childGeometryInvalid = true;
+    mutable bool _childGeometryInvalid;
 
     /// \brief The enabled state of this Element.
-    bool _enabled = true;
+    bool _enabled;
 
     /// \brief The visibility of this Element.
-    bool _hidden = false;
+    bool _hidden;
 
     /// \brief The locked state of this Element.
-    bool _locked = false;
+    bool _locked;
 
     /// \brief A collection of named attributes.
     std::unordered_map<std::string, Poco::Any> _attributes;
+
+	/// \brief Automatically capture the pointer on pointer down.
+	bool _implicitPointerCapture;
+
+	/// \brief A list of the pointer ids currently captured by this Element.
+	/// Captured pointers are pushed back, so the pointer at the front was the
+	/// first pointer captured, and thus the primary pointer.
+	std::vector<CapturedPointer> _capturedPointers;
 
     /// \brief A callback for child Elements to notify their parent of movement.
     void _onChildMoved(MoveEvent& evt);
@@ -395,6 +443,8 @@ private:
     /// \brief A callback for child Elements to notify their parent size changes.
     void _onChildResized(ResizeEvent& evt);
 
+	/// \brief Make Document a friend class.
+	friend class Document;
 };
 
 

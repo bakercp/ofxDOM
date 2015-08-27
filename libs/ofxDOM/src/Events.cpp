@@ -24,6 +24,7 @@
 
 
 #include "ofx/DOM/Events.h"
+#include "ofx/DOM/Element.h"
 
 
 namespace ofx {
@@ -148,6 +149,43 @@ void Event::setCurrentTarget(Element* target)
 }
 
 
+std::string Event::toString() const
+{
+	std::stringstream ss;
+
+	std::string phaseString = "";
+
+	switch (_phase)
+	{
+		case Phase::NONE:
+			phaseString = "NONE";
+			break;
+		case Phase::CAPTURING_PHASE:
+			phaseString = "CAPTURING_PHASE";
+			break;
+		case Phase::AT_TARGET:
+			phaseString = "AT_TARGET";
+			break;
+		case Phase::BUBBLING_PHASE:
+			phaseString = "BUBBLING_PHASE";
+			break;
+	}
+
+
+	ss << "Event Type: " << _type << std::endl;
+	ss << "     Phase: " << phaseString << std::endl;
+	ss << "    Source: " << (_source != nullptr ? _source->getId() : "nullptr") << std::endl;
+	ss << "    Target: " << (_target != nullptr ? _target->getId() : "nullptr") << std::endl;
+	ss << "Rel-Target: " << (_relatedTarget != nullptr ? _relatedTarget->getId() : "nullptr") << std::endl;
+	ss << "Cur-Target: " << (_currentTaget != nullptr ? _currentTaget->getId() : "nullptr") << std::endl;
+	ss << " Bubs/Canc: " << _bubbles << "/" << _cancelable << std::endl;
+	ss << " DP/Canc'd: " << _defaultPrevented << "/" << _canceled << std::endl;
+	ss << " timestamp: " << _timestamp << std::endl;
+
+	return ss.str();
+}
+
+
 PointerCaptureEvent::PointerCaptureEvent(std::size_t id,
                                          bool wasCaptured,
                                          Element* source,
@@ -176,8 +214,8 @@ std::size_t PointerCaptureEvent::id() const
 
 
 PointerEvent::PointerEvent(const PointerEventArgs& pointer,
-                           Element* target,
-                           Element* source):
+                           Element* source,
+                           Element* target):
     UIEvent(pointer.eventType(),
             source,
             target,

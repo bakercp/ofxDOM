@@ -36,7 +36,7 @@ namespace DOM {
 class Document: public Element
 {
 public:
-    Document();
+	Document();
     virtual ~Document();
 
     void setup(ofEventArgs& e);
@@ -55,12 +55,20 @@ public:
 
 protected:
     /// \brief Captured pointer and their capture target.
-    std::unordered_map<std::size_t, Element*> _capturedPointers;
+    std::unordered_map<std::size_t, Element*> _capturedPointerIdToElementMap;
+
+//	std::unordered_map<Element*, std::vector<CapturedPointer>> _elementPointerMap;
 
     /// \brief Currently active targets.
+	///
+	/// It is not required that these targets are captured, only that they
+	/// passed a hit test. This is used for doing pointer in / pointer out, etc
+	/// when the pointer isn't captured (e.g. mouse over, etc).
     std::unordered_map<std::size_t, Element*> _activeTargets;
 
     /// \brief Currently active pointers and their last associated event.
+	///
+	/// This map is a basic list of the pointers that we know about.
     std::unordered_map<std::size_t, PointerEventArgs> _activePointers;
 
 };

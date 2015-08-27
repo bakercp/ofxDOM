@@ -84,7 +84,7 @@ void Document::update(ofEventArgs& e)
 
 void Document::draw(ofEventArgs& e)
 {
-    Element::draw();
+    Element::_draw();
 }
 
 
@@ -114,154 +114,202 @@ bool Document::onKeyEvent(ofKeyEventArgs& e)
 
 bool Document::onPointerEvent(PointerEventArgs& e)
 {
+	// If there's an event, then this is an active pointer.
+	_activePointers[e.id()] = e;
+
+	// The begins unhandled.
     bool wasEventHandled = false;
 
-    // If there's an event for it, it's active.
-    _activePointers[e.id()] = e;
+	// Determine the current and last active target elements.
+	Element* activeTarget = nullptr;
+	Element* lastActiveTarget = nullptr;
 
-    auto capturedPointerIter = _capturedPointers.find(e.id());
+	// Search for an existing active target associated with this pointer id.
+	auto i = _activeTargets.find(e.id());
 
-    PointerEvent event(e, this, nullptr);
+	if (i != _activeTargets.end())
+	{
+		lastActiveTarget = i->second;
+	}
 
-    if (capturedPointerIter != _capturedPointers.end())
-    {
-        Element* targetElement = capturedPointerIter->second;
-        event._target = targetElement;
-        event.setPhase(Event::Phase::AT_TARGET);
-        targetElement->handleEvent(event);
+	// Cache the local position.
+	Position localPosition = screenToLocal(e.point());
 
-        // Release capture if it wasn't explicitly released by the target.
-        if (event.type() == PointerEventArgs::POINTER_UP ||
-            event.type() == PointerEventArgs::POINTER_CANCEL)
-        {
-            releasePointerCapture(targetElement, e.id());
-        }
+	// Find the current active target.
+	// TODO: Use lastActiveTarget to seed target search.
+	activeTarget = recursiveHitTest(localPosition);
 
-        wasEventHandled = true;
-    }
-    else
-    {
-        // Do a hit test to figure out what element is the target.
-        Element* target = recursiveHitTest(screenToLocal(e.point()));
+	// The event target is the target that will receive the event.
+	// This may be different from the active target and last active target if
+	// the pointer is captured.
+	Element* eventTarget = nullptr;
 
-        // If this is a move event, we need to synthesize some other events.
-        if (event.type() == PointerEventArgs::POINTER_MOVE)
-        {
-            auto i = _activeTargets.find(e.id());
+	bool isCaptured = false;
 
-            // Is there an old target, and is it different than this one?
-            if (i != _activeTargets.end() && i->second != target)
-            {
-                PointerEventArgs pointerOut(PointerEventArgs::POINTER_OUT,
-                                            e.point(),
-                                            e.deviceId(),
-                                            e.index(),
-                                            e.deviceType(),
-                                            e.isPrimary(),
-                                            e.button(),
-                                            e.buttons(),
-                                            e.modifiers(),
-                                            e.pressCount(),
-                                            e.timestamp());
-                
-                // Call pointerout ONLY on old target
-                PointerEvent pointerOutEvent(pointerOut, this, i->second);
-                pointerOutEvent.setPhase(Event::Phase::AT_TARGET);
-                i->second->handleEvent(pointerOutEvent);
+	// Determine if this is a captured pointer.
+	auto capturedPointerIter = _capturedPointerIdToElementMap.find(e.id());
 
-                PointerEventArgs pointerLeave(PointerEventArgs::POINTER_LEAVE,
-                                              e.point(),
-                                              e.deviceId(),
-                                              e.index(),
-                                              e.deviceType(),
-                                              e.isPrimary(),
-                                              e.button(),
-                                              e.buttons(),
-                                              e.modifiers(),
-                                              e.pressCount(),
-                                              e.timestamp());
+	if (capturedPointerIter != _capturedPointerIdToElementMap.end())
+	{
+		eventTarget = capturedPointerIter->second;
+		isCaptured = true;
+	}
+	else
+	{
+		eventTarget = activeTarget;
+	}
 
-                // Call pointerleave on old target and ancestors
-                PointerEvent pointerLeaveEvent(pointerLeave, this, i->second);
-                i->second->dispatchEvent(pointerLeaveEvent);
-            }
+	// If this is a move event, we need to synthesize some other events.
+	if (e.eventType() == PointerEventArgs::POINTER_MOVE)
+	{
+		// Has the target changed since the last event?
+		if (lastActiveTarget != activeTarget)
+		{
+			if (lastActiveTarget != nullptr && (!isCaptured || lastActiveTarget == eventTarget))
+			{
+				PointerEventArgs pointerOut(PointerEventArgs::POINTER_OUT,
+											e.point(),
+											e.deviceId(),
+											e.index(),
+											e.deviceType(),
+											e.isPrimary(),
+											e.button(),
+											e.buttons(),
+											e.modifiers(),
+											e.pressCount(),
+											e.timestamp());
 
-            if (nullptr != target)
-            {
-                if (i == _activeTargets.end() || i->second != target)
-                {
-                    PointerEventArgs pointerOver(PointerEventArgs::POINTER_OVER,
-                                                 e.point(),
-                                                 e.deviceId(),
-                                                 e.index(),
-                                                 e.deviceType(),
-                                                 e.isPrimary(),
-                                                 e.button(),
-                                                 e.buttons(),
-                                                 e.modifiers(),
-                                                 e.pressCount(),
-                                                 e.timestamp());
+				// Call pointerout ONLY on old target
+				PointerEvent pointerOutEvent(pointerOut, this, lastActiveTarget);
+				pointerOutEvent.setPhase(Event::Phase::AT_TARGET);
+				lastActiveTarget->handleEvent(pointerOutEvent);
 
-                    // Call pointerout ONLY on old target
-                    PointerEvent pointerOverEvent(pointerOver, this, target);
-                    pointerOverEvent.setPhase(Event::Phase::AT_TARGET);
-                    target->handleEvent(pointerOverEvent);
+				PointerEventArgs pointerLeave(PointerEventArgs::POINTER_LEAVE,
+											  e.point(),
+											  e.deviceId(),
+											  e.index(),
+											  e.deviceType(),
+											  e.isPrimary(),
+											  e.button(),
+											  e.buttons(),
+											  e.modifiers(),
+											  e.pressCount(),
+											  e.timestamp());
 
-                    PointerEventArgs pointerEnter(PointerEventArgs::POINTER_ENTER,
-                                                  e.point(),
-                                                  e.deviceId(),
-                                                  e.index(),
-                                                  e.deviceType(),
-                                                  e.isPrimary(),
-                                                  e.button(),
-                                                  e.buttons(),
-                                                  e.modifiers(),
-                                                  e.pressCount(),
-                                                  e.timestamp());
+				// Call pointerleave on old target AND ancestors.
+				PointerEvent pointerLeaveEvent(pointerLeave, this, lastActiveTarget);
+				lastActiveTarget->dispatchEvent(pointerLeaveEvent);
+			}
 
-                    // Call pointerover ONLY on the target.
-                    // Call pointerenter on target and ancestors.
-                    // Call pointerleave on old target and ancestors
-                    PointerEvent pointerEnterEvent(pointerEnter, this, target);
-                    target->dispatchEvent(pointerEnterEvent);
+			if (activeTarget != nullptr && (!isCaptured || activeTarget == eventTarget))
+			{
+				PointerEventArgs pointerOver(PointerEventArgs::POINTER_OVER,
+											 e.point(),
+											 e.deviceId(),
+											 e.index(),
+											 e.deviceType(),
+											 e.isPrimary(),
+											 e.button(),
+											 e.buttons(),
+											 e.modifiers(),
+											 e.pressCount(),
+											 e.timestamp());
 
-                    _activeTargets[e.id()] = target;
+				// Call pointerout ONLY on old target
+				PointerEvent pointerOverEvent(pointerOver, this, activeTarget);
+				pointerOverEvent.setPhase(Event::Phase::AT_TARGET);
+				activeTarget->handleEvent(pointerOverEvent);
 
-                }
-            }
-            else
-            {
-                // No longer an active target for this id.
-                _activeTargets.erase(e.id());
-            }
-        }
+				PointerEventArgs pointerEnter(PointerEventArgs::POINTER_ENTER,
+											  e.point(),
+											  e.deviceId(),
+											  e.index(),
+											  e.deviceType(),
+											  e.isPrimary(),
+											  e.button(),
+											  e.buttons(),
+											  e.modifiers(),
+											  e.pressCount(),
+											  e.timestamp());
 
-        // Now, dispatch the original event if there is a target.
-        if (nullptr != target)
-        {
-            event._target = target;
+				// Call pointerover ONLY on the target.
+				// Call pointerenter on target and ancestors.
+				// Call pointerleave on old target and ancestors
+				PointerEvent pointerEnterEvent(pointerEnter, this, activeTarget);
+				activeTarget->dispatchEvent(pointerEnterEvent);
+			}
+		}
+	}
 
-            if (target->dispatchEvent(event))
-            {
-                // TODO call default action.
-            }
+	// Now, dispatch the original event if there is a target.
+	if (eventTarget != nullptr)
+	{
+		PointerEvent event(e, this, eventTarget);
 
-            wasEventHandled = true;
-        }
-        else
-        {
-            wasEventHandled = false;
-        }
-    }
+		if (isCaptured)
+		{
+			event.setPhase(Event::Phase::AT_TARGET);
 
-    // Mouse events are always active.
-    // Touch and pen events are no longer active if up or cancelled.
-    if (e.deviceType() != PointerEventArgs::TYPE_MOUSE &&
-        (event.type() == PointerEventArgs::POINTER_UP ||
-         event.type() == PointerEventArgs::POINTER_CANCEL))
-    {
-        _activePointers.erase(e.id());
-    }
+			// Update captured pointer data.
+			auto capturedPointer = eventTarget->findCapturedPointerById(e.id());
+
+			if (capturedPointer != eventTarget->capturedPointers().end())
+			{
+				capturedPointer->update(eventTarget, event);
+			}
+			else
+			{
+				throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Document::onPointerEvent");
+			}
+
+			// Handle event.
+			eventTarget->handleEvent(event);
+
+			// Release pointer capture if needed.
+			if (e.eventType() == PointerEventArgs::POINTER_UP ||
+				e.eventType() == PointerEventArgs::POINTER_CANCEL)
+			{
+				releasePointerCapture(eventTarget, e.id());
+			}
+		}
+		else
+		{
+			if (!eventTarget->dispatchEvent(event))
+			{
+				// TODO: call default action if there is one.
+			}
+
+			// Capture the pointer if implicitly required to.
+			// This prevents the default event listeners from being
+			// configured on the Element.
+			if (eventTarget->getImplicitPointerCapture() &&
+				e.eventType() == PointerEventArgs::POINTER_DOWN)
+			{
+				setPointerCapture(eventTarget, e.id());
+			}
+		}
+
+		wasEventHandled = true;
+	}
+
+	// Bookkeeping
+	if (activeTarget != nullptr)
+	{
+		_activeTargets[e.id()] = activeTarget;
+	}
+	else
+	{
+		_activeTargets.erase(e.id());
+	}
+
+	// Mouse events are always active.
+	// Touch and pen events are no longer active if up or cancelled.
+	if (e.deviceType() != PointerEventArgs::TYPE_MOUSE &&
+		(e.eventType() == PointerEventArgs::POINTER_UP ||
+		 e.eventType() == PointerEventArgs::POINTER_CANCEL))
+	{
+		_activePointers.erase(e.id());
+	}
 
     return wasEventHandled;
 }
@@ -269,24 +317,30 @@ bool Document::onPointerEvent(PointerEventArgs& e)
 
 void Document::setPointerCapture(Element* element, std::size_t id)
 {
-    if (nullptr == element || this != element->document())
+	// Is the element null
+
+	if (element != nullptr && this == element->document())
     {
-        throw DOMException(DOMException::INVALID_STATE_ERROR);
+		auto activePointersIter = _activePointers.find(id);
+
+		if (activePointersIter == _activePointers.end())
+		{
+			throw DOMException(DOMException::INVALID_POINTER_ID + ": " + "Document::setPointerCapture");
+		}
+		else if (activePointersIter->second.buttons() > 0 &&
+				 _capturedPointerIdToElementMap.find(id) == _capturedPointerIdToElementMap.end())
+		{
+			_capturedPointerIdToElementMap[id] = element;
+
+			element->_capturedPointers.emplace_back(CapturedPointer(id));
+
+			PointerCaptureEvent evt(id, true, this, element);
+			element->dispatchEvent(evt);
+		}
     }
     else
     {
-        auto activePointersIter = _activePointers.find(id);
-
-        if (activePointersIter == _activePointers.end())
-        {
-            throw DOMException(DOMException::INVALID_POINTER_ID);
-        }
-        else if (activePointersIter->second.buttons() > 0 && _capturedPointers.find(id) == _capturedPointers.end())
-        {
-            _capturedPointers[id] = element;
-            PointerCaptureEvent evt(id, true, this, element);
-            element->dispatchEvent(evt);
-        }
+		throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Document::setPointerCapture");
     }
 }
 
@@ -295,29 +349,32 @@ void Document::releasePointerCapture(Element* element, std::size_t id)
 {
     // TODO: release if the target element is removed from the document.
 
-    if (nullptr == element)
+    if (element != nullptr)
     {
-        throw DOMException(DOMException::INVALID_STATE_ERROR);
+		auto activePointersIter = _activePointers.find(id);
+
+		if (activePointersIter != _activePointers.end())
+		{
+			auto iter = _capturedPointerIdToElementMap.find(id);
+
+			if (iter != _capturedPointerIdToElementMap.end())
+			{
+				_capturedPointerIdToElementMap.erase(iter);
+
+				element->_capturedPointers.erase(element->findCapturedPointerById(id));
+
+				PointerCaptureEvent evt(id, false, this, element);
+				element->dispatchEvent(evt);
+			}
+		}
+		else
+		{
+			throw DOMException(DOMException::INVALID_POINTER_ID + ": " + "Document::releasePointerCapture");
+		}
     }
     else
     {
-        auto activePointersIter = _activePointers.find(id);
-
-        if (activePointersIter == _activePointers.end())
-        {
-            throw DOMException(DOMException::INVALID_POINTER_ID);
-        }
-        else
-        {
-            auto iter = _capturedPointers.find(id);
-
-            if (iter != _capturedPointers.end())
-            {
-                _capturedPointers.erase(iter);
-                PointerCaptureEvent evt(id, false, this, element);
-                element->dispatchEvent(evt);
-            }
-        }
+		throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Document::releasePointerCapture");
     }
 }
 

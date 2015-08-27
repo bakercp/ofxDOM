@@ -26,7 +26,8 @@
 #pragma once
 
 
-#include "ofBaseTypes.h"
+#include "ofx/DOM/Types.h"
+#include "ofx/DOM/Events.h"
 
 
 namespace ofx {
@@ -34,12 +35,96 @@ namespace DOM {
 
 
 class Element;
-class PointerEvent;
 
 
-typedef ofPoint Position;
-typedef ofPoint Size;
-typedef ofRectangle Geometry;
+class GestureRecognizer
+{
+public:
+    enum class State
+	{
+        POSSIBLE,
+        BEGAN,
+        CHANGED,
+        ENDED,
+        CANCELLED,
+        FAILED,
+        RECOGNIZED = ENDED
+    };
+
+    GestureRecognizer(Element* element);
+
+    virtual ~GestureRecognizer();
+
+    State state() const;
+
+    void reset();
+
+    void onPointerEvent(PointerEvent& e);
+
+private:
+    State _state = State::POSSIBLE;
+
+    Element* _element;
+
+};
+
+
+class PressGestureRecognizer: public GestureRecognizer
+{
+public:
+
+private:
+    unsigned long _flags = 0;
+    Point _location;
+    unsigned long _buttonMask = 0;
+    unsigned long _numberOfClicksRequired = 1;
+    unsigned long _currentButtonCount = 0;
+    unsigned long _activeButtonCount = 0;
+    unsigned long _currentClickCount = 0;
+
+    uint64_t _minimumPressDuration = 500;
+
+    float _allowableMovement = 5;
+
+};
+
+
+class MagnificationGestureRecognizer: public GestureRecognizer
+{
+public:
+
+private:
+    Point _location;
+    float  _magnification = 1;
+
+};
+
+
+class PanGestureRecognizer: public GestureRecognizer
+{
+public:
+
+private:
+    Point _location;
+    Point _translation;
+    unsigned long _buttonMask;
+    unsigned long _buttonCount;
+    // id _velocityFilter;
+
+};
+
+
+class RotationGestureRecognizer: public GestureRecognizer
+{
+public:
+
+private:
+    Point _location;
+    float _rotation;
+
+};
+
+
 
 
 

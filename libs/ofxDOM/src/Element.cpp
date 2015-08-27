@@ -40,8 +40,14 @@ Element::Element(float x, float y, float width, float height):
 
 
 Element::Element(const std::string& id, float x, float y, float width, float height):
-    _id(id),
-    _geometry(x, y, width, height)
+	_parent(nullptr),
+	_id(id),
+    _geometry(x, y, width, height),
+	_childGeometryInvalid(true),
+	_enabled(true),
+	_hidden(false),
+	_locked(false),
+	_implicitPointerCapture(false)
 {
 }
 
@@ -275,6 +281,12 @@ Element* Element::parent()
 }
 
 
+const Element* Element::parent() const
+{
+	return _parent;
+}
+
+	
 Document* Element::document()
 {
     if (nullptr == _parent)
@@ -287,12 +299,6 @@ Document* Element::document()
         // If a parent exists, return it recursively.
         return _parent->document();
     }
-}
-
-
-const Element* Element::parent() const
-{
-    return _parent;
 }
 
 
@@ -514,31 +520,31 @@ void Element::clearAttribute(const std::string& key)
 
 
 
-void Element::setup()
+void Element::_setup()
 {
-    for (auto& child : _children) child->setup();
+    for (auto& child : _children) child->_setup();
     onSetup();
 }
 
 
-void Element::update()
+void Element::_update()
 {
     if (_enabled && !_hidden)
     {
-        for (auto& child : _children) child->update();
+        for (auto& child : _children) child->_update();
         onUpdate();
     }
 }
 
 
-void Element::draw()
+void Element::_draw()
 {
     if (_enabled && !_hidden)
     {
         ofPushStyle();
         ofPushMatrix();
         ofTranslate(_geometry.getPosition());
-        for (auto& child : _children) child->draw();
+        for (auto& child : _children) child->_draw();
         onDraw();
         ofPopMatrix();
         ofPopStyle();
@@ -546,9 +552,9 @@ void Element::draw()
 }
 
 
-void Element::exit()
+void Element::_exit()
 {
-    for (auto& child : _children) child->exit();
+    for (auto& child : _children) child->_exit();
     onExit();
 }
 
@@ -599,7 +605,7 @@ void Element::setPointerCapture(std::size_t id)
     }
     else
     {
-        throw DOMException(DOMException::INVALID_STATE_ERROR);
+        throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Element::setPointerCapture");
     }
 }
 
@@ -614,7 +620,7 @@ void Element::releasePointerCapture(std::size_t id)
     }
     else
     {
-        throw DOMException(DOMException::INVALID_STATE_ERROR);
+        throw DOMException(DOMException::INVALID_STATE_ERROR + ": Element::releasePointerCapture");
     }
 }
 
@@ -663,7 +669,7 @@ bool Element::isLocked() const
 
 void Element::setLocked(bool __locked)
 {
-    if(_locked != __locked)
+    if (_locked != __locked)
     {
         _locked = __locked;
 
@@ -681,6 +687,59 @@ void Element::invalidateChildGeometry() const
     {
         _parent->invalidateChildGeometry();
     }
+}
+
+
+bool Element::isPointerCaptured(std::size_t id) const
+{
+	return findCapturedPointerById(id) != _capturedPointers.end();
+}
+	
+
+std::vector<CapturedPointer>::iterator Element::findCapturedPointerById(std::size_t id)
+{
+	return std::find_if(_capturedPointers.begin(),
+						_capturedPointers.end(),
+						[id](const CapturedPointer& pointer)
+						{
+							return id == pointer.id();
+						});
+}
+
+
+
+std::vector<CapturedPointer>::const_iterator Element::findCapturedPointerById(std::size_t id) const
+{
+	return std::find_if(_capturedPointers.begin(),
+						_capturedPointers.end(),
+						[id](const CapturedPointer& pointer)
+						{
+							return id == pointer.id();
+						});
+}
+
+
+std::vector<CapturedPointer>& Element::capturedPointers()
+{
+	return _capturedPointers;
+}
+
+
+const std::vector<CapturedPointer>& Element::capturedPointers() const
+{
+	return _capturedPointers;
+}
+
+
+void Element::setImplicitPointerCapture(bool implicitPointerCapture)
+{
+	_implicitPointerCapture = implicitPointerCapture;
+}
+
+
+bool Element::getImplicitPointerCapture() const
+{
+	return _implicitPointerCapture;
 }
 
 

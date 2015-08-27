@@ -26,21 +26,51 @@
 #pragma once
 
 
-#include "ofBaseTypes.h"
+#include "ofx/DOM/Events.h"
 
 
 namespace ofx {
 namespace DOM {
 
 
-class Element;
-class PointerEvent;
+/// \brief A class for keeping track of captured pointers.
+class CapturedPointer
+{
+public:
+    CapturedPointer(std::size_t id);
+    ~CapturedPointer();
+
+    void update(Element* element, const PointerEvent& e);
+
+	std::size_t id() const;
+	const Position& start() const;
+	const Position& offset() const;
+	const Position& position() const;
+	const Position& velocity() const;
+	uint64_t lastUpdate() const;
+	uint64_t timestamp() const;
+
+	friend std::ostream& operator << (std::ostream& os,
+									  const CapturedPointer& vec);
+
+private:
+    std::size_t _id;
+    Position _start;
+    Position _offset;
+    Position _position;
+    Position _velocity;
+    uint64_t _lastUpdate;
+    uint64_t _timestamp;
+
+};
 
 
-typedef ofPoint Position;
-typedef ofPoint Size;
-typedef ofRectangle Geometry;
-
+inline std::ostream& operator<<(std::ostream& os,
+								const CapturedPointer& pointer)
+{
+	os << pointer.id() << " " << pointer.lastUpdate();
+	return os;
+}
 
 
 } } // namespace ofx::DOM

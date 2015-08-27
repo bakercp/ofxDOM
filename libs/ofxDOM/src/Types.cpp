@@ -24,55 +24,11 @@
 
 
 #include "ofx/DOM/Types.h"
-#include "ofx/DOM/Element.h"
-#include "ofx/DOM/Events.h"
 
 
 namespace ofx {
 namespace DOM {
 
-
-CapturedPointer::CapturedPointer(std::size_t id):
-    id(id),
-    start(Position()),
-    offset(Position()),
-    position(Position()),
-    velocity(Position()),
-    lastUpdate(std::numeric_limits<uint64_t>::min()),
-    timestamp(std::numeric_limits<uint64_t>::min())
-{
-}
-
-
-CapturedPointer::~CapturedPointer()
-{
-}
-
-
-void CapturedPointer::update(Element* element, const PointerEvent& e)
-{
-    uint64_t now = ofGetElapsedTimeMillis();
-
-    if (timestamp != std::numeric_limits<uint64_t>::min())
-    {
-        uint64_t dt = now - lastUpdate;
-        Point ds = position - e.pointer().point();
-
-        velocity = ds / dt;
-        position = e.pointer().point();
-        lastUpdate = now;
-    }
-    else
-    {
-        id = e.pointer().id();
-        start = e.pointer().point();
-        offset = start - element->screenPosition();
-        position = e.pointer().point();
-        velocity = Position();
-        lastUpdate = now;
-        timestamp = now;
-    }
-}
 
 
 } } // namespace ofx::DOM

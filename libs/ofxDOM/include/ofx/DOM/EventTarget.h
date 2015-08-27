@@ -35,6 +35,11 @@ namespace ofx {
 namespace DOM {
 
 
+/// \brief A class representing an EventTarget.
+///
+/// EventTargets know how to handle events.
+///
+/// \tparam EventTargetType The type of the Tvent target.
 template<class EventTargetType>
 class EventTarget
 {
@@ -117,6 +122,14 @@ public:
         ofRemoveListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
     }
 
+	/// \brief Dispatch the given event.
+	///
+	/// This will return true if the default action for this event should be
+	/// prevented.
+	///
+	/// \param event The Event to dispatch.
+	/// \tparam EventType The Event type to dispatch.
+	/// \returns true iff one of the responders called Event::preventDefault().
     template<class EventType>
     bool dispatchEvent(EventType& event)
     {
@@ -137,9 +150,10 @@ public:
 
         while (riter != targets.rend())
         {
-            event.setPhase(event.target() == *riter ? Event::Phase::AT_TARGET : Event::Phase::CAPTURING_PHASE);
+			event.setPhase(event.target() == *riter ? Event::Phase::AT_TARGET : Event::Phase::CAPTURING_PHASE);
             event.setCurrentTarget(*riter);
-            (*riter)->handleEvent(event);
+
+			(*riter)->handleEvent(event);
 
             if (event.isCancelled())
             {
@@ -175,30 +189,42 @@ public:
     }
 
 
+	/// \brief Handle the given event.
+	///
+	/// This will return true if the default action for this event should be
+	/// prevented.
+	///
+	/// \param event The Event to dispatch.
+	/// \tparam EventType The Event type to dispatch.
+	/// \returns true iff one of the responders called Event::preventDefault().
     template <class EventType>
-    void handleEvent(EventType& e)
+    void handleEvent(EventType& event)
     {
-        auto iter = _eventRegistry.find(e.type());
+        auto iter = _eventRegistry.find(event.type());
 
         if (iter != _eventRegistry.end())
         {
-            DOMEvent<EventType>* event = dynamic_cast<DOMEvent<EventType>*>(iter->second);
+            DOMEvent<EventType>* _event = dynamic_cast<DOMEvent<EventType>*>(iter->second);
 
-            if (nullptr != event)
+            if (nullptr != _event)
             {
-                event->notify(e);
+                _event->notify(event);
             }
             else
             {
-                throw DOMException(DOMException::INVALID_STATE_ERROR);
+                throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "EventTarget::handleEvent");
             }
         }
         else
         {
-            throw DOMException(DOMException::UNREGISTERED_EVENT);
+            throw DOMException(DOMException::UNREGISTERED_EVENT + ": " + "EventTarget::handleEvent");
         }
     }
 
+	/// \brief Determine if the EventTarget is a listener for an event.
+	/// \param event The Event name.
+	/// \param useCapture true if the EventTarget listens for event during capture phase.
+	/// \returns true if it is a listener to the named event and phase.
     bool isEventListener(const std::string& event, bool useCapture) const;
 
     virtual void onSetup()
@@ -262,8 +288,6 @@ public:
 
 protected:
     std::unordered_map<std::string, BaseDOMEvent*> _eventRegistry;
-
-//    std::string
 
 };
 

@@ -44,14 +44,14 @@ namespace DOM {
 class Element;
 
 
-/// \brief The base type describing a named Layout Event.
+/// \brief The base type describing a named Element Event.
 ///
 /// \sa http://www.w3.org/TR/DOM-Level-3-Events/
 class Event
 {
 public:
     /// \brief Create an Event with a type.
-    /// \param type The event type string.
+    /// \param type The event type string (case-insensitive).
     /// \param source The source of the event.
     /// \param target The target element.
     /// \param bubbles True iff the argument bubbles after AT_TARGET phase.
@@ -64,7 +64,7 @@ public:
           bool cancelable,
           uint64_t timestamp);
 
-    /// \brief Destroy the event type.
+    /// \brief Destroy the Event.
     virtual ~Event();
 
     /// \brief Get the event type.
@@ -74,13 +74,13 @@ public:
     enum class Phase
     {
         /// \brief Events not currently dispatched are in this phase.
-        NONE,
+        NONE = 0,
         /// \brief When an event is dispatched to an object that participates in a tree it will be in this phase before it reaches its target attribute value.
-        CAPTURING_PHASE,
+        CAPTURING_PHASE = 1,
         /// \brief When an event is dispatched it will be in this phase on its target attribute value.
-        AT_TARGET,
+        AT_TARGET = 2,
         /// \brief When an event is dispatched to an object that participates in a tree it will be in this phase after it reaches its target attribute value.
-        BUBBLING_PHASE
+        BUBBLING_PHASE = 3
     };
 
 
@@ -115,29 +115,43 @@ public:
     /// both methods must be called.
     void preventDefault();
 
+	/// \returns true iff the event was cancelled.
     bool isCancelled() const;
 
+	/// \returns true iff the default activity was prevented.
     bool isDefaultPrevented() const;
 
-    void setPhase(Phase phase);
+	/// \brief Set the Phase of the event.
+	/// \param phase The phase to set.
+	void setPhase(Phase phase);
 
+	/// \returns the Phase of the event.
     Phase getPhase() const;
 
     /// \brief Determine if the event has a bubbling phase.
     /// \returns true iff the event should bubble.
     bool bubbles() const;
 
+	/// \returns true iff the Event can be cancelled.
     bool isCancelable() const;
 
+	/// \returns the source Element.
     Element* source() const;
 
+	/// \returns the target Element.
     Element* target() const;
 
+	/// \returns the related target Element.
     Element* relatedTarget() const;
 
+	/// \returns a pointer to the current target Element.
     Element* getCurrentTarget() const;
 
+	/// \brief Set the current target Element.
+	/// \param target The current target Element.
     void setCurrentTarget(Element* target);
+
+	std::string toString() const;
 
 protected:
     /// \brief The name of the event (case-insensitive).
@@ -172,8 +186,10 @@ protected:
     /// \brief Used to indicate if an event is canceled.
     bool _canceled = false;
 
-    /// \brief Used to specify the time (in milliseconds relative to the epoch) at which the event was created.
-    /// Due to the fact that some systems may not provide this information the
+    /// \brief Used to specify the time (in milliseconds relative to the epoch)
+	/// at which the event was created.
+	///
+	/// Due to the fact that some systems may not provide this information the
     /// value of timeStamp may be not available for all events. When not
     /// available, a value of 0 will be returned. Examples of epoch time are
     /// the time of the system start or 0:0:0 UTC 1st January 1970.
@@ -313,7 +329,7 @@ public:
         switch (e.getPhase())
         {
             case Event::Phase::NONE:
-                throw DOMException(DOMException::INVALID_STATE_ERROR);
+                throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "DOMEvent::notify");
             case Event::Phase::CAPTURING_PHASE:
                 capture.notify(e.source(), e);
                 return;
