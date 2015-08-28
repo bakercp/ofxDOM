@@ -358,8 +358,34 @@ Position Element::screenToLocal(const Position& position) const
 {
     return position - screenPosition();
 }
-    
-    
+
+
+Position Element::parentToScreen(const Position& parentPosition) const
+{
+	if (_parent != nullptr)
+	{
+		return _parent->localToScreen(parentPosition);
+	}
+	else
+	{
+		return parentPosition;
+	}
+}
+
+
+Position Element::screenToParent(const Position& screenPosition) const
+{
+	if (_parent != nullptr)
+	{
+		return _parent->screenToLocal(screenPosition);
+	}
+	else
+	{
+		return screenPosition;
+	}
+}
+
+
 void Element::setPosition(float x, float y)
 {
     if (_geometry.x != x || _geometry.y != y)

@@ -192,6 +192,7 @@ public:
     /// Local coordinates are defined with reference to the position of the box.
     /// The Position of this element will be in its parent's local coordinates.
     ///
+	/// \param localPosition The local coordinates to convert.
     /// \returns the position converted from local to screen coordinates.
     Position localToScreen(const Position& localPosition) const;
 
@@ -200,8 +201,19 @@ public:
     /// Local coordinates are defined with reference to the position of the box.
     /// The Position of this element will be in its parent's local coordinates.
     ///
+	/// \param screenPosition The screen coordinates to convert.
     /// \returns the position converted from screen to local coordinates.
     Position screenToLocal(const Position& screenPosition) const;
+
+	/// \brief Convert the parent coordinates to screen coordinates.
+	/// \param parentPosition The parent coordinates to convert.
+	/// \returns the position converted from parent to screen coordinates.
+	Position parentToScreen(const Position& parentPosition) const;
+
+	/// \brief Convert the screen coordinates to parent coordinates.
+	/// \param screenPosition The screen coordinates to convert.
+	/// \returns the position converted from screen to parent coordinates.
+	Position screenToParent(const Position& screenPosition) const;
 
     /// \brief Set the position of the Element in its parent coordinates.
     /// \param x The new x position.
