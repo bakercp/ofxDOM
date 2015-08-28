@@ -157,6 +157,13 @@ bool Document::onPointerEvent(PointerEventArgs& e)
 	else
 	{
 		eventTarget = activeTarget;
+
+		if (e.eventType() == PointerEventArgs::POINTER_DOWN &&
+			eventTarget != nullptr &&
+			eventTarget->getImplicitPointerCapture())
+		{
+			setPointerCapture(eventTarget, e.id());
+		}
 	}
 
 	// If this is a move event, we need to synthesize some other events.
@@ -277,15 +284,6 @@ bool Document::onPointerEvent(PointerEventArgs& e)
 			if (!eventTarget->dispatchEvent(event))
 			{
 				// TODO: call default action if there is one.
-			}
-
-			// Capture the pointer if implicitly required to.
-			// This prevents the default event listeners from being
-			// configured on the Element.
-			if (eventTarget->getImplicitPointerCapture() &&
-				e.eventType() == PointerEventArgs::POINTER_DOWN)
-			{
-				setPointerCapture(eventTarget, e.id());
 			}
 		}
 
