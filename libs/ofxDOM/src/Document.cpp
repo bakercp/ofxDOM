@@ -36,7 +36,7 @@ Document::Document(): Element("document", 0, 0, ofGetWidth(), ofGetHeight())
 {
     ofAddListener(ofEvents().setup, this, &Document::setup);
     ofAddListener(ofEvents().update, this, &Document::update);
-    ofAddListener(ofEvents().draw, this, &Document::draw);
+    ofAddListener(ofEvents().draw, this, &Document::draw, OF_EVENT_ORDER_BEFORE_APP);
     ofAddListener(ofEvents().exit, this, &Document::exit);
     ofAddListener(ofEvents().windowResized, this, &Document::windowResized, std::numeric_limits<int>::min());
 
@@ -56,7 +56,7 @@ Document::~Document()
 {
     ofRemoveListener(ofEvents().setup, this, &Document::setup);
     ofRemoveListener(ofEvents().update, this, &Document::update);
-    ofRemoveListener(ofEvents().draw, this, &Document::draw);
+    ofRemoveListener(ofEvents().draw, this, &Document::draw, OF_EVENT_ORDER_BEFORE_APP);
     ofRemoveListener(ofEvents().exit, this, &Document::exit);
     ofRemoveListener(ofEvents().windowResized, this, &Document::windowResized, std::numeric_limits<int>::min());
 
