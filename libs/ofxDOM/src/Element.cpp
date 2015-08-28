@@ -570,7 +570,15 @@ void Element::_draw()
         ofPushStyle();
         ofPushMatrix();
         ofTranslate(_geometry.getPosition());
-        for (auto& child : _children) child->_draw();
+
+		auto iter = _children.rbegin();
+
+		while (iter != _children.rend())
+		{
+			(*iter)->_draw();
+			++iter;
+		}
+
         onDraw();
         ofPopMatrix();
         ofPopStyle();
