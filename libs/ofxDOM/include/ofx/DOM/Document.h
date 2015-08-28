@@ -33,10 +33,16 @@ namespace ofx {
 namespace DOM {
 
 
+/// \brief The Document represents the root DOM Element in an DOM tree.
 class Document: public Element
 {
 public:
+	/// \brief Create a default Document.
+	///
+	/// The Document will have the default id of "document" and will fill
+	/// the entire screen.
 	Document();
+	
     virtual ~Document();
 
     void setup(ofEventArgs& e);
@@ -50,14 +56,21 @@ public:
     bool onKeyEvent(ofKeyEventArgs& e);
     bool onPointerEvent(PointerEventArgs& e);
 
+	/// \brief Set a pointer capture on a given Element.
+	/// \param element A pointer to the capturing Element.
+	/// \param id The pointer id to capture.
+	/// \throws DOMException on invalid DOM state or pointer id.
     void setPointerCapture(Element* element, std::size_t id);
-    void releasePointerCapture(Element* element, std::size_t id);
+
+	/// \brief Release a pointer capture on a given Element.
+	/// \param element A pointer to the capturing Element.
+	/// \param id The pointer id to release.
+	/// \throws DOMException on invalid DOM state or pointer id.
+	void releasePointerCapture(Element* element, std::size_t id);
 
 protected:
     /// \brief Captured pointer and their capture target.
     std::unordered_map<std::size_t, Element*> _capturedPointerIdToElementMap;
-
-//	std::unordered_map<Element*, std::vector<CapturedPointer>> _elementPointerMap;
 
     /// \brief Currently active targets.
 	///
