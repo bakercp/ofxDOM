@@ -235,7 +235,7 @@ public:
     {
     }
 
-    virtual void onDraw()
+    virtual void onDraw() const
     {
     }
 
