@@ -78,7 +78,10 @@ public:
     /// \returns a pointer to the child that was attached.
     template<typename ElementType>
     ElementType* addChild(std::unique_ptr<ElementType> element);
-    
+
+	template <typename ElementType, typename... Args>
+	ElementType* addChild(Args&&... args);
+
     /// \brief Release ownership of a child Element.
 	/// \param element The Element to release.
 	/// \returns a std::unique_ptr<Element> to the child.
@@ -473,6 +476,13 @@ private:
 	/// \brief Make Document a friend class.
 	friend class Document;
 };
+
+
+template <typename ElementType, typename... Args>
+ElementType* Element::addChild(Args&&... args)
+{
+	return addChild(std::make_unique<ElementType>(std::forward<Args>(args)...));
+}
 
 
 template<typename ElementType>

@@ -593,6 +593,10 @@ void Element::_draw()
         ofPushMatrix();
         ofTranslate(_geometry.getPosition());
 
+		// Draw parent in back.
+		onDraw();
+
+		// Now draw children.
 		auto iter = _children.rbegin();
 
 		while (iter != _children.rend())
@@ -601,7 +605,6 @@ void Element::_draw()
 			++iter;
 		}
 
-        onDraw();
         ofPopMatrix();
         ofPopStyle();
     }
