@@ -95,6 +95,7 @@ std::unique_ptr<Element> Element::removeChild(Element* element)
 
         // Return the detached child.
         // If the return value is ignored, it will be deleted.
+
         return detachedChild;
     }
     else
