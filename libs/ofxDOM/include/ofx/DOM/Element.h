@@ -474,6 +474,9 @@ ElementType* Element::addChild(std::unique_ptr<ElementType> element)
         // Take ownership of the node.
         _children.push_back(std::move(element));
 
+		// Invalidate all cached child geometry.
+		invalidateChildGeometry();
+
         // Alert the node that its parent was set.
         ElementEvent addedEvent(this);
         ofNotifyEvent(pNode->addedTo, addedEvent, this);

@@ -72,6 +72,9 @@ std::unique_ptr<Element> Element::removeChild(Element* element)
         // Set the parent to nullptr.
         detachedChild->_parent = nullptr;
 
+		// Invalidate all cached child geometry.
+		invalidateChildGeometry();
+
         // Alert the node that its parent was set.
         ElementEvent removedFromEvent(this);
         ofNotifyEvent(detachedChild->removedFrom, removedFromEvent, this);
