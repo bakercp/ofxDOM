@@ -327,9 +327,9 @@ bool Element::isRoot() const
 }
 
 
-bool Element::hitTest(const Position& localPosition) const
+bool Element::hitTest(const Position& parentPosition) const
 {
-    return getGeometry().inside(localPosition);
+    return getGeometry().inside(parentPosition);
 }
 
 
@@ -423,6 +423,24 @@ float Element::getX() const
 float Element::getY() const
 {
     return _geometry.getY();
+}
+
+
+Position Element::getScreenPosition() const
+{
+	return parentToScreen(getPosition());
+}
+
+
+float Element::getScreenX() const
+{
+	return parentToScreen(getPosition()).x;
+}
+
+
+float Element::getScreenY() const
+{
+	return parentToScreen(getPosition()).y;
 }
 
 
@@ -597,11 +615,11 @@ void Element::_exit()
 }
 
 
-Element* Element::recursiveHitTest(const Position& localPosition)
+Element* Element::recursiveHitTest(const Position& parentPosition)
 {
     if (_enabled && !_hidden)
     {
-        Position childLocal = localPosition - this->getPosition();
+        Position childLocal = parentPosition - this->getPosition();
 
         if (hasChildren() && childHitTest(childLocal))
         {
@@ -617,7 +635,7 @@ Element* Element::recursiveHitTest(const Position& localPosition)
         }
 
         // If there is no child target, is this a viable target?
-        if (hitTest(localPosition))
+        if (hitTest(parentPosition))
         {
             return this;
         }

@@ -174,9 +174,12 @@ public:
 	/// of the Element. Subclasses can override this method for custom hit test
 	/// geometry.
 	///
-	/// \param localPosition The Position to test in local coordinates.
+	/// Parent coordinates are used because the geometry / position of the
+	/// Element are in parent coordinates.
+	///
+	/// \param parentPosition The Position to test in parent coordinates.
 	/// \returns true iff the local position is within the hit test region.
-    virtual bool hitTest(const Position& localPosition) const;
+    virtual bool hitTest(const Position& parentPosition) const;
 
 	/// \brief Perform a hit test on a child Element.
 	/// \param localPosition The Position to test in local coordinates.
@@ -239,6 +242,18 @@ public:
     /// \brief Get the Y position of the Element in its parent coordinates.
     /// \returns the Y position of the Element in its parent coordinates.
     float getY() const;
+
+	/// \brief Get the Position of the Element in screen coordinates.
+	/// \returns the Position of the Element in screen coordinates.
+	Position getScreenPosition() const;
+
+	/// \brief Get the X position of the Element in screen coordinates.
+	/// \returns the X position of the Element in screen coordinates.
+	float getScreenX() const;
+
+	/// \brief Get the Y position of the Element in screen coordinates.
+	/// \returns the Y position of the Element in screen coordinates.
+	float getScreenY() const;
 
     /// \brief Set the size of the Element.
     /// \param width The new width of the Element.
@@ -368,9 +383,9 @@ protected:
 	void _exit();
 
     /// \brief A recursive hit test to find a target element.
-    /// \param localPosition The local coordinates to test.
+    /// \param parentPosition The parent coordinates to test.
     /// \returns A pointer to the target Element or a nullptr if none found.
-    Element* recursiveHitTest(const Position& localPosition);
+    Element* recursiveHitTest(const Position& parentPosition);
 
     /// \brief Find a child by a raw Element pointer.
     /// \param The pointer to the child.
