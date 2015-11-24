@@ -60,15 +60,18 @@ public:
 	/// \param element A pointer to the capturing Element.
 	/// \param id The pointer id to capture.
 	/// \throws DOMException on invalid DOM state or pointer id.
-    void setPointerCapture(Element* element, std::size_t id);
+    void setPointerCaptureForElement(Element* element, std::size_t id);
 
 	/// \brief Release a pointer capture on a given Element.
 	/// \param element A pointer to the capturing Element.
 	/// \param id The pointer id to release.
 	/// \throws DOMException on invalid DOM state or pointer id.
-	void releasePointerCapture(Element* element, std::size_t id);
+	void releasePointerCaptureForElement(Element* element, std::size_t id);
 
 protected:
+	/// \brief True if the Document size should always match the screen size.
+	bool _autoFitScreen;
+
     /// \brief Captured pointer and their capture target.
     std::unordered_map<std::size_t, Element*> _capturedPointerIdToElementMap;
 

@@ -45,6 +45,22 @@ class AbstractLayout;
 
 
 /// \brief A class representing a DOM Element.
+///
+///	There are several DOM coordiante systems with respect to an Element.
+///
+/// 1. Local Coordinates: The origin of the local coordiantes are at 0, 0 of the
+/// Element Geometry.  The coordiantes of the local Geometry range from (0, 0)
+/// - the upper left corner to (width, height) - the lower right corner of the
+/// Element.
+///
+/// 2. Parent Coordinates: The (x, y) position of the Element geometry are in
+/// "Parent" Coordinates, meaning they are oriented with respect to the
+/// parent's Local Coordinates.
+///
+/// 3. Screen Coordinates: The screen coordinates are the coordinates (x, y)
+/// in terms of the global screen coordiantes where (0, 0) is the upper left
+/// corner of the screen / window, and (ofGetWidth(), ofGetHeight()) are the
+/// coordiantes of the lower right corner.
 class Element: public EventTarget<Element>
 {
 public:
@@ -74,11 +90,23 @@ public:
     /// This this is "sink" meaning that any child passed to this will be
     /// owned by this Node.
     ///
-    /// \param nodePtr the rvalue reference to the child node.
-    /// \returns a pointer to the child that was attached.
+    /// \param element the rvalue reference to the child node.
+	/// \returns A pointer to the added Element. The parent Element retains
+	/// ownership of the pointer via a std::unique_ptr.
     template<typename ElementType>
     ElementType* addChild(std::unique_ptr<ElementType> element);
 
+	/// \brief Create a child using a templated Element type.
+	///
+	/// To create a child Element you can use this method like:
+	///
+	/// ElementType* element = parentElement->addChild<ElementType>(arguments ...);
+	///
+	/// \tparam ElementType The subclass of Element that will be added.
+	/// \tparam Args The variable constructor arguments for the ElementType.
+	/// \param args The variable constructor arguments for the ElementType.
+	/// \returns A pointer to the added Element. The parent Element retains
+	/// ownership of the pointer via a std::unique_ptr.
 	template <typename ElementType, typename... Args>
 	ElementType* addChild(Args&&... args);
 
@@ -142,6 +170,10 @@ public:
     /// \returns true iff this Element has any children.
     bool hasChildren() const;
 
+	/// \brief Determine if this Element has a parent Element.
+	/// \returns true if this Element has a parent Element.
+	bool hasParent() const;
+
     /// \brief Find this Element's first child by its id.
     /// \param id The id of the child Element to find.
     /// \returns a pointer to the first child or nullptr if no such child exists.
@@ -168,9 +200,6 @@ public:
     /// \returns a pointer to the parent Document, self if a Document or a nullptr.
     const Document* document() const;
 
-    /// \returns true iff Element has no parent (i.e. parent is nullptr).
-    bool isRoot() const;
-
 	/// \brief Perform a hit test on the Element.
 	///
 	/// For a normal Element, the hit test will test the rectangular geometry
@@ -188,10 +217,6 @@ public:
 	/// \param localPosition The Position to test in local coordinates.
 	/// \returns true iff the local position is within the hit test region.
     virtual bool childHitTest(const Position& localPosition) const;
-
-    /// \brief Get the Position of this Element in screen coordinates.
-    /// \returns the Position of this Element in screen coordinates.
-    Position screenPosition() const;
 
     /// \brief Convert the local coordinates to screen coordinates.
     ///
@@ -248,6 +273,7 @@ public:
 
 	/// \brief Get the Position of the Element in screen coordinates.
 	/// \returns the Position of the Element in screen coordinates.
+	/// \todo Cache screen position w/ geometry.
 	Position getScreenPosition() const;
 
 	/// \brief Get the X position of the Element in screen coordinates.
@@ -374,16 +400,16 @@ public:
 
 protected:
 	/// \brief Setup method called by parent Element.
-    void _setup();
+    void _setup(ofEventArgs& e);
 
 	/// \brief Update method called by parent Element.
-	void _update();
+	void _update(ofEventArgs& e);
 
 	/// \brief Draw method called by parent Element.
-	void _draw();
+	void _draw(ofEventArgs& e);
 
 	/// \brief Exit method called by parent Element.
-	void _exit();
+	void _exit(ofEventArgs& e);
 
     /// \brief A recursive hit test to find a target element.
     /// \param parentPosition The parent coordinates to test.
@@ -404,14 +430,27 @@ protected:
     /// \brief The id for this element.
     std::string _id;
 
+	/// \brief Determine if a given pointer id is captured.
+	/// \param id The pointer id to test.
+	/// \returns true if the given pointer id is captured.
 	bool isPointerCaptured(std::size_t id) const;
 
+	/// \brief Find the given CapturePointer info by id.
+	/// \param id The pointer id to find.
+	/// \returns An const iterator to the CapturedPointer info if found.
 	std::vector<CapturedPointer>::iterator findCapturedPointerById(std::size_t id);
 
+	/// \brief Find the given CapturePointer info by id.
+	/// \param id The pointer id to find.
+	/// \returns An const iterator to the CapturedPointer info if found.
 	std::vector<CapturedPointer>::const_iterator findCapturedPointerById(std::size_t id) const;
 
+	/// \brief Get a reference to the captured pointer vector.
+	/// \returns a reference to all pointers captured by this Element.
 	std::vector<CapturedPointer>& capturedPointers();
 
+	/// \brief Get a reference to the captured pointer vector.
+	/// \returns a reference to all pointers captured by this Element.
 	const std::vector<CapturedPointer>& capturedPointers() const;
 
     /// \brief Called internally to invalidate the child geometry tree.
@@ -542,7 +581,7 @@ AnyType Element::getAttribute(const std::string& key, bool inherit) const
     {
         return Poco::AnyCast<AnyType>(iter->second);
     }
-    else if (inherit && !isRoot())
+    else if (inherit && hasParent())
     {
         return parent()->getAttribute<AnyType>(key);
     }

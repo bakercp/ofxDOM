@@ -32,23 +32,25 @@ namespace ofx {
 namespace DOM {
 
 
-Document::Document(): Element("document", 0, 0, ofGetWidth(), ofGetHeight())
+Document::Document():
+	Element("document", 0, 0, 1024, 768),
+	_autoFitScreen(true)
 {
     ofAddListener(ofEvents().setup, this, &Document::setup);
     ofAddListener(ofEvents().update, this, &Document::update);
     ofAddListener(ofEvents().draw, this, &Document::draw, OF_EVENT_ORDER_BEFORE_APP);
     ofAddListener(ofEvents().exit, this, &Document::exit);
-    ofAddListener(ofEvents().windowResized, this, &Document::windowResized, std::numeric_limits<int>::min());
+    ofAddListener(ofEvents().windowResized, this, &Document::windowResized, std::numeric_limits<int>::lowest());
 
-    ofAddListener(ofEvents().fileDragEvent, this, &Document::fileDragEvent, std::numeric_limits<int>::min());
+    ofAddListener(ofEvents().fileDragEvent, this, &Document::fileDragEvent, std::numeric_limits<int>::lowest());
 
-    ofAddListener(ofEvents().keyPressed, this, &Document::onKeyEvent, std::numeric_limits<int>::min());
-    ofAddListener(ofEvents().keyReleased, this, &Document::onKeyEvent, std::numeric_limits<int>::min());
+    ofAddListener(ofEvents().keyPressed, this, &Document::onKeyEvent, std::numeric_limits<int>::lowest());
+    ofAddListener(ofEvents().keyReleased, this, &Document::onKeyEvent, std::numeric_limits<int>::lowest());
 
-    ofAddListener(PointerEvents::instance().onPointerDown, this, &Document::onPointerEvent, std::numeric_limits<int>::min());
-    ofAddListener(PointerEvents::instance().onPointerUp, this, &Document::onPointerEvent, std::numeric_limits<int>::min());
-    ofAddListener(PointerEvents::instance().onPointerMove, this, &Document::onPointerEvent, std::numeric_limits<int>::min());
-    ofAddListener(PointerEvents::instance().onPointerCancel, this, &Document::onPointerEvent, std::numeric_limits<int>::min());
+    ofAddListener(PointerEvents::instance().onPointerDown, this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
+    ofAddListener(PointerEvents::instance().onPointerUp, this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
+    ofAddListener(PointerEvents::instance().onPointerMove, this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
+    ofAddListener(PointerEvents::instance().onPointerCancel, this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
 }
 
 
@@ -58,45 +60,55 @@ Document::~Document()
     ofRemoveListener(ofEvents().update, this, &Document::update);
     ofRemoveListener(ofEvents().draw, this, &Document::draw, OF_EVENT_ORDER_BEFORE_APP);
     ofRemoveListener(ofEvents().exit, this, &Document::exit);
-    ofRemoveListener(ofEvents().windowResized, this, &Document::windowResized, std::numeric_limits<int>::min());
+    ofRemoveListener(ofEvents().windowResized, this, &Document::windowResized, std::numeric_limits<int>::lowest());
 
-    ofRemoveListener(ofEvents().fileDragEvent, this, &Document::fileDragEvent, std::numeric_limits<int>::min());
+    ofRemoveListener(ofEvents().fileDragEvent, this, &Document::fileDragEvent, std::numeric_limits<int>::lowest());
 
-    ofRemoveListener(ofEvents().keyPressed, this, &Document::onKeyEvent, std::numeric_limits<int>::min());
-    ofRemoveListener(ofEvents().keyReleased, this, &Document::onKeyEvent, std::numeric_limits<int>::min());
+    ofRemoveListener(ofEvents().keyPressed, this, &Document::onKeyEvent, std::numeric_limits<int>::lowest());
+    ofRemoveListener(ofEvents().keyReleased, this, &Document::onKeyEvent, std::numeric_limits<int>::lowest());
 
-    ofRemoveListener(PointerEvents::instance().onPointerDown, this, &Document::onPointerEvent, std::numeric_limits<int>::min());
-    ofRemoveListener(PointerEvents::instance().onPointerUp, this, &Document::onPointerEvent, std::numeric_limits<int>::min());
-    ofRemoveListener(PointerEvents::instance().onPointerMove, this, &Document::onPointerEvent, std::numeric_limits<int>::min());
-    ofRemoveListener(PointerEvents::instance().onPointerCancel, this, &Document::onPointerEvent, std::numeric_limits<int>::min());
+    ofRemoveListener(PointerEvents::instance().onPointerDown, this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
+    ofRemoveListener(PointerEvents::instance().onPointerUp, this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
+    ofRemoveListener(PointerEvents::instance().onPointerMove, this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
+    ofRemoveListener(PointerEvents::instance().onPointerCancel, this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
 }
 
 
 void Document::setup(ofEventArgs& e)
 {
+	if (_autoFitScreen)
+	{
+		setSize(ofGetWidth(), ofGetHeight());
+	}
+
+	Element::_setup(e);
 }
 
 
 void Document::update(ofEventArgs& e)
 {
+	Element::_update(e);
 }
 
 
 void Document::draw(ofEventArgs& e)
 {
-    Element::_draw();
+    Element::_draw(e);
 }
 
 
 void Document::exit(ofEventArgs& e)
 {
-//    doExit();
+	Element::_exit(e);
 }
 
 
 void Document::windowResized(ofResizeEventArgs& e)
 {
-    setSize(e.width, e.height);
+	if (_autoFitScreen)
+	{
+		setSize(e.width, e.height);
+	}
 }
 
 
@@ -162,7 +174,7 @@ bool Document::onPointerEvent(PointerEventArgs& e)
 			eventTarget != nullptr &&
 			eventTarget->getImplicitPointerCapture())
 		{
-			setPointerCapture(eventTarget, e.id());
+			setPointerCaptureForElement(eventTarget, e.id());
 		}
 	}
 
@@ -276,7 +288,7 @@ bool Document::onPointerEvent(PointerEventArgs& e)
 			if (e.eventType() == PointerEventArgs::POINTER_UP ||
 				e.eventType() == PointerEventArgs::POINTER_CANCEL)
 			{
-				releasePointerCapture(eventTarget, e.id());
+				releasePointerCaptureForElement(eventTarget, e.id());
 			}
 		}
 		else
@@ -313,7 +325,7 @@ bool Document::onPointerEvent(PointerEventArgs& e)
 }
 
 
-void Document::setPointerCapture(Element* element, std::size_t id)
+void Document::setPointerCaptureForElement(Element* element, std::size_t id)
 {
 	// Is the element null
 
@@ -343,7 +355,7 @@ void Document::setPointerCapture(Element* element, std::size_t id)
 }
 
 
-void Document::releasePointerCapture(Element* element, std::size_t id)
+void Document::releasePointerCaptureForElement(Element* element, std::size_t id)
 {
     // TODO: release if the target element is removed from the document.
 

@@ -111,7 +111,7 @@ std::unique_ptr<Element> Element::removeChild(Element* element)
 
 void Element::moveToFront()
 {
-    if (!isRoot())
+    if (hasParent())
     {
         _parent->moveChildToFront(this);
         ElementOrderEvent evt(this, ElementOrderEvent::TO_FRONT);
@@ -122,7 +122,7 @@ void Element::moveToFront()
 
 void Element::moveForward()
 {
-    if (!isRoot())
+    if (hasParent())
     {
         _parent->moveChildForward(this);
         ElementOrderEvent evt(this, ElementOrderEvent::FORWARD);
@@ -133,7 +133,7 @@ void Element::moveForward()
 
 void Element::moveToBack()
 {
-    if (!isRoot())
+    if (hasParent())
     {
         _parent->moveChildToBack(this);
         ElementOrderEvent evt(this, ElementOrderEvent::TO_BACK);
@@ -144,7 +144,7 @@ void Element::moveToBack()
 
 void Element::moveBackward()
 {
-    if (!isRoot())
+    if (hasParent())
     {
         _parent->moveChildBackward(this);
         ElementOrderEvent evt(this, ElementOrderEvent::BACKWARD);
@@ -241,6 +241,12 @@ bool Element::hasChildren() const
 }
 
 
+bool Element::hasParent() const
+{
+	return nullptr != _parent;
+}
+
+
 Element* Element::findFirstChildById(const std::string& id)
 {
     auto iter = std::find_if(_children.begin(),
@@ -293,37 +299,31 @@ const Element* Element::parent() const
 	
 Document* Element::document()
 {
-    if (nullptr == _parent)
+    if (hasParent())
     {
-        // Return self if a Document, otherwise, will return nullptr.
-        return dynamic_cast<Document*>(this);
+		// If a parent exists, return it recursively.
+		return _parent->document();
     }
     else
     {
-        // If a parent exists, return it recursively.
-        return _parent->document();
+		// Return self if a Document, otherwise, will return nullptr.
+		return dynamic_cast<Document*>(this);
     }
 }
 
 
 const Document* Element::document() const
 {
-    if (nullptr == _parent)
-    {
-        // Return self if a Document, otherwise, will return nullptr.
-        return dynamic_cast<const Document*>(this);
-    }
-    else
-    {
-        // If a parent exists, return it recursively.
-        return _parent->document();
-    }
-}
-
-
-bool Element::isRoot() const
-{
-    return nullptr == _parent;
+	if (hasParent())
+	{
+		// If a parent exists, return it recursively.
+		return _parent->document();
+	}
+	else
+	{
+		// Return self if a Document, otherwise, will return nullptr.
+		return dynamic_cast<const Document*>(this);
+	}
 }
 
 
@@ -339,36 +339,23 @@ bool Element::childHitTest(const Position& localPosition) const
 }
 
 
-Position Element::screenPosition() const
+Position Element::localToScreen(const Position& localPosition) const
 {
-    return localToScreen(getPosition());
+	return localPosition + getScreenPosition();;
 }
 
 
-Position Element::localToScreen(const Position& position) const
+Position Element::screenToLocal(const Position& screenPosition) const
 {
-    if (isRoot())
-    {
-        return position;
-    }
-    else
-    {
-        return _parent->screenPosition() + position;
-    }
-}
-
-
-Position Element::screenToLocal(const Position& position) const
-{
-    return position - screenPosition();
+    return screenPosition - getScreenPosition();
 }
 
 
 Position Element::parentToScreen(const Position& parentPosition) const
 {
-	if (_parent != nullptr)
+	if (hasParent())
 	{
-		return _parent->localToScreen(parentPosition);
+		return parentPosition + _parent->getScreenPosition();
 	}
 	else
 	{
@@ -379,9 +366,9 @@ Position Element::parentToScreen(const Position& parentPosition) const
 
 Position Element::screenToParent(const Position& screenPosition) const
 {
-	if (_parent != nullptr)
+	if (hasParent())
 	{
-		return _parent->screenToLocal(screenPosition);
+		return screenPosition - _parent->getScreenPosition();
 	}
 	else
 	{
@@ -392,13 +379,9 @@ Position Element::screenToParent(const Position& screenPosition) const
 
 void Element::setPosition(float x, float y)
 {
-    if (_geometry.x != x || _geometry.y != y)
-    {
-        _geometry.setPosition(x, y);
-
-        MoveEvent evt(getPosition());
-        ofNotifyEvent(move, evt, this);
-    }
+	_geometry.setPosition(x, y);
+	MoveEvent evt(getPosition());
+	ofNotifyEvent(move, evt, this);
 }
 
 
@@ -428,32 +411,36 @@ float Element::getY() const
 
 Position Element::getScreenPosition() const
 {
-	return parentToScreen(getPosition());
+	if (hasParent())
+	{
+		return getPosition() + _parent->getScreenPosition();
+	}
+	else
+	{
+		return getPosition();
+	}
 }
 
 
 float Element::getScreenX() const
 {
-	return parentToScreen(getPosition()).x;
+	return getScreenPosition().x;
 }
 
 
 float Element::getScreenY() const
 {
-	return parentToScreen(getPosition()).y;
+	return getScreenPosition().y;
 }
 
 
 void Element::setSize(float width, float height)
 {
-    if (_geometry.width != width || _geometry.height != height)
-    {
-        _geometry.setWidth(width);
-        _geometry.setHeight(height);
-
-        ResizeEvent evt(_geometry);
-        ofNotifyEvent(resize, evt, this);
-    }
+	_geometry.setWidth(width);
+	_geometry.setHeight(height);
+	_geometry.standardize();
+	ResizeEvent evt(_geometry);
+	ofNotifyEvent(resize, evt, this);
 }
 
 
@@ -568,24 +555,32 @@ void Element::clearAttribute(const std::string& key)
 
 
 
-void Element::_setup()
+void Element::_setup(ofEventArgs& e)
 {
-    for (auto& child : _children) child->_setup();
-    onSetup();
+    for (auto& child : _children)
+	{
+		child->_setup(e);
+	}
+
+	onSetup();
 }
 
 
-void Element::_update()
+void Element::_update(ofEventArgs& e)
 {
     if (_enabled && !_hidden)
     {
-        for (auto& child : _children) child->_update();
-        onUpdate();
+        for (auto& child : _children)
+		{
+			child->_update(e);
+		}
+
+		onUpdate();
     }
 }
 
 
-void Element::_draw()
+void Element::_draw(ofEventArgs& e)
 {
     if (_enabled && !_hidden)
     {
@@ -593,15 +588,15 @@ void Element::_draw()
         ofPushMatrix();
         ofTranslate(_geometry.getPosition());
 
-		// Draw parent in back.
+		// Draw parent behind children.
 		onDraw();
 
-		// Now draw children.
+		// Now draw in reverse order.
 		auto iter = _children.rbegin();
 
 		while (iter != _children.rend())
 		{
-			(*iter)->_draw();
+			(*iter)->_draw(e);
 			++iter;
 		}
 
@@ -611,10 +606,14 @@ void Element::_draw()
 }
 
 
-void Element::_exit()
+void Element::_exit(ofEventArgs& e)
 {
-    for (auto& child : _children) child->_exit();
-    onExit();
+    for (auto& child : _children)
+	{
+		child->_exit(e);
+	}
+
+	onExit();
 }
 
 
@@ -656,11 +655,11 @@ Element* Element::recursiveHitTest(const Position& parentPosition)
 
 void Element::setPointerCapture(std::size_t id)
 {
-    Document* d = document();
+    Document* _document = document();
 
-    if (nullptr != d)
+    if (nullptr != _document)
     {
-        d->setPointerCapture(this, id);
+        _document->setPointerCaptureForElement(this, id);
     }
     else
     {
@@ -671,11 +670,11 @@ void Element::setPointerCapture(std::size_t id)
 
 void Element::releasePointerCapture(std::size_t id)
 {
-    Document* d = document();
+	Document* _document = document();
 
-    if (nullptr != d)
-    {
-        d->releasePointerCapture(this, id);
+	if (nullptr != _document)
+	{
+        _document->releasePointerCaptureForElement(this, id);
     }
     else
     {
@@ -690,15 +689,11 @@ bool Element::isEnabled() const
 }
 
 
-void Element::setEnabled(bool __enabled)
+void Element::setEnabled(bool enabled_)
 {
-    if (_enabled != __enabled)
-    {
-        _enabled = __enabled;
-
-        EnablerEvent evt(_enabled);
-        ofNotifyEvent(enabled, evt, this);
-    }
+	_enabled = enabled_;
+	EnablerEvent evt(_enabled);
+	ofNotifyEvent(enabled, evt, this);
 }
 
 
@@ -708,15 +703,11 @@ bool Element::isHidden() const
 }
 
 
-void Element::setHidden(bool __hidden)
+void Element::setHidden(bool hidden_)
 {
-    if (_hidden != __hidden)
-    {
-        _hidden = __hidden;
-
-        EnablerEvent evt(_hidden);
-        ofNotifyEvent(hidden, evt, this);
-    }
+	_hidden = hidden_;
+	EnablerEvent evt(_hidden);
+	ofNotifyEvent(hidden, evt, this);
 }
 
 
@@ -726,15 +717,11 @@ bool Element::isLocked() const
 }
 
 
-void Element::setLocked(bool __locked)
+void Element::setLocked(bool locked_)
 {
-    if (_locked != __locked)
-    {
-        _locked = __locked;
-
-        EnablerEvent evt(_locked);
-        ofNotifyEvent(locked, evt, this);
-    }
+	_locked = locked_;
+	EnablerEvent evt(_locked);
+	ofNotifyEvent(locked, evt, this);
 }
 
 
@@ -742,10 +729,10 @@ void Element::invalidateChildGeometry() const
 {
     _childGeometryInvalid = true;
 
-    if (!isRoot())
-    {
-        _parent->invalidateChildGeometry();
-    }
+	if (hasParent())
+	{
+		_parent->invalidateChildGeometry();
+	}
 }
 
 
@@ -769,12 +756,7 @@ std::vector<CapturedPointer>::iterator Element::findCapturedPointerById(std::siz
 
 std::vector<CapturedPointer>::const_iterator Element::findCapturedPointerById(std::size_t id) const
 {
-	return std::find_if(_capturedPointers.begin(),
-						_capturedPointers.end(),
-						[id](const CapturedPointer& pointer)
-						{
-							return id == pointer.id();
-						});
+	return findCapturedPointerById(id);
 }
 
 

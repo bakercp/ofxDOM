@@ -234,6 +234,10 @@ public:
 
     const PointerEventArgs& pointer() const;
 
+	Position screenPosition() const;
+
+	Position localPosition() const;
+
 protected:
     static bool eventBubbles(const std::string& event);
     static bool eventCancelable(const std::string& event);
@@ -286,7 +290,8 @@ public:
 };
 
 
-class AbstractDOMEvent {
+class AbstractDOMEvent
+{
 public:
     virtual ~AbstractDOMEvent()
     {
@@ -385,6 +390,7 @@ public:
     virtual ~AttributeEvent();
 
     const std::string& key() const;
+	
     const Poco::Any& value() const;
 
 protected:

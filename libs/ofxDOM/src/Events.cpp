@@ -238,6 +238,25 @@ const PointerEventArgs& PointerEvent::pointer() const
 }
 
 
+Position PointerEvent::screenPosition() const
+{
+	return pointer().point();
+}
+
+
+Position PointerEvent::localPosition() const
+{
+	if (nullptr != getCurrentTarget())
+	{
+		return getCurrentTarget()->screenToLocal(pointer().point());
+	}
+	else
+	{
+		return pointer().point();
+	}
+}
+
+
 bool PointerEvent::eventBubbles(const std::string& event)
 {
     return !(event == PointerEventArgs::POINTER_ENTER

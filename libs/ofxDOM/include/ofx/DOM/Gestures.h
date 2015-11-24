@@ -95,7 +95,7 @@ public:
 
 private:
     Point _location;
-    float  _magnification = 1;
+    float _magnification = 1;
 
 };
 
