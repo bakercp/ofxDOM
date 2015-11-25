@@ -195,7 +195,7 @@ bool Document::onPointerEvent(PointerEventArgs& e)
 											e.button(),
 											e.buttons(),
 											e.modifiers(),
-											e.pressCount(),
+											e.tapCount(),
 											e.timestamp());
 
 				// Call pointerout ONLY on old target
@@ -212,7 +212,7 @@ bool Document::onPointerEvent(PointerEventArgs& e)
 											  e.button(),
 											  e.buttons(),
 											  e.modifiers(),
-											  e.pressCount(),
+											  e.tapCount(),
 											  e.timestamp());
 
 				// Call pointerleave on old target AND ancestors.
@@ -231,7 +231,7 @@ bool Document::onPointerEvent(PointerEventArgs& e)
 											 e.button(),
 											 e.buttons(),
 											 e.modifiers(),
-											 e.pressCount(),
+											 e.tapCount(),
 											 e.timestamp());
 
 				// Call pointerout ONLY on old target
@@ -248,7 +248,7 @@ bool Document::onPointerEvent(PointerEventArgs& e)
 											  e.button(),
 											  e.buttons(),
 											  e.modifiers(),
-											  e.pressCount(),
+											  e.tapCount(),
 											  e.timestamp());
 
 				// Call pointerover ONLY on the target.
