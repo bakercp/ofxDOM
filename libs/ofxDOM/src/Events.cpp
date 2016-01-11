@@ -221,7 +221,7 @@ PointerEvent::PointerEvent(const PointerEventArgs& pointer,
             target,
             eventBubbles(pointer.eventType()),
             eventCancelable(pointer.eventType()),
-            _pointer.timestamp()),
+            pointer.timestamp()),
     _pointer(pointer)
 {
 }
