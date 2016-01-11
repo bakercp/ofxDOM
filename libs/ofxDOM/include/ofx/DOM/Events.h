@@ -30,7 +30,6 @@
 #include <type_traits>
 #include <utility>
 #include <ctime>
-#include "Poco/Any.h"
 #include "ofEvents.h"
 #include "ofx/PointerEvents.h"
 #include "ofx/DOM/Exceptions.h"
@@ -386,16 +385,16 @@ protected:
 class AttributeEvent: public ofEventArgs
 {
 public:
-    AttributeEvent(const std::string& key, const Poco::Any& value = Poco::Any());
+    AttributeEvent(const std::string& key, const Any& value = Any());
     virtual ~AttributeEvent();
 
     const std::string& key() const;
 	
-    const Poco::Any& value() const;
+    const Any& value() const;
 
 protected:
     std::string _key;
-    Poco::Any _value;
+    Any _value;
     
 };
 

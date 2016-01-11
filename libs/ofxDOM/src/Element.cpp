@@ -537,7 +537,7 @@ bool Element::hasAttribute(const std::string& key) const
 }
 
 
-void Element::setAttribute(const std::string& key, const Poco::Any& value)
+void Element::setAttribute(const std::string& key, const Any& value)
 {
     _attributes[key] = value;
 

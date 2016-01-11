@@ -363,7 +363,7 @@ const Geometry& ResizeEvent::geometry() const
 }
 
 
-AttributeEvent::AttributeEvent(const std::string& key, const Poco::Any& value):
+AttributeEvent::AttributeEvent(const std::string& key, const Any& value):
     _key(key),
     _value(value)
 {
@@ -381,7 +381,7 @@ const std::string& AttributeEvent::key() const
 }
 
 
-const Poco::Any& AttributeEvent::value() const
+const Any& AttributeEvent::value() const
 {
     return _value;
 }

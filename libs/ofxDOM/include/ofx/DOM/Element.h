@@ -27,7 +27,6 @@
 
 
 #include <unordered_set>
-#include "Poco/Any.h"
 #include "ofx/PointerEvents.h"
 #include "ofx/DOM/CapturedPointer.h"
 #include "ofx/DOM/Events.h"
@@ -354,7 +353,7 @@ public:
     ///
     /// \param name The name of the attribute.
     /// \param value The new value of the attribute called name.
-    void setAttribute(const std::string& name, const Poco::Any& value);
+    void setAttribute(const std::string& name, const Any& value);
 
     /// \brief Clear a named attribute.
     /// \param The name of the attribute to clear.
@@ -496,7 +495,7 @@ private:
     bool _locked;
 
     /// \brief A collection of named attributes.
-    std::unordered_map<std::string, Poco::Any> _attributes;
+    std::unordered_map<std::string, Any> _attributes;
 
 	/// \brief Automatically capture the pointer on pointer down.
 	bool _implicitPointerCapture;
@@ -577,9 +576,9 @@ AnyType Element::getAttribute(const std::string& key, bool inherit) const
 {
     auto iter = _attributes.find(key);
 
-    if (iter != _attributes.end())
+    if (iter != _attributes.end() && iter->second.is<AnyType>())
     {
-        return Poco::AnyCast<AnyType>(iter->second);
+        return iter->second.as<AnyType>();
     }
     else if (inherit && hasParent())
     {
