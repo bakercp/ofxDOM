@@ -92,6 +92,7 @@ public:
     /// \param element the rvalue reference to the child node.
 	/// \returns A pointer to the added Element. The parent Element retains
 	/// ownership of the pointer via a std::unique_ptr.
+    /// \tparam ElementType The Element Type.
     template<typename ElementType>
     ElementType* addChild(std::unique_ptr<ElementType> element);
 
@@ -106,6 +107,8 @@ public:
 	/// \param args The variable constructor arguments for the ElementType.
 	/// \returns A pointer to the added Element. The parent Element retains
 	/// ownership of the pointer via a std::unique_ptr.
+    /// \tparam ElementType The Element Type.
+    /// \tparam Args the ElementType constructor arguments.
 	template <typename ElementType, typename... Args>
 	ElementType* addChild(Args&&... args);
 
