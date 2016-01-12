@@ -335,7 +335,7 @@ public:
     /// \param name The name of the Attribute to query.
     /// \returns true iff the Element has an attribute with the given name.
     bool hasAttribute(const std::string& name) const;
-
+ 
     /// \brief Get a named attribute via its key.
     ///
     /// Users should check to see if the attribute exists using hasAttribute or
