@@ -198,9 +198,9 @@ public:
 	/// \tparam EventType The Event type to dispatch.
 	/// \returns true iff one of the responders called Event::preventDefault().
     template <class EventType>
-    void handleEvent(EventType& event)
+    void handleEvent(EventType& e)
     {
-        auto iter = _eventRegistry.find(event.type());
+        auto iter = _eventRegistry.find(e.type());
 
         if (iter != _eventRegistry.end())
         {
@@ -208,7 +208,7 @@ public:
 
             if (nullptr != _event)
             {
-                _event->notify(event);
+                _event->notify(e);
             }
             else
             {
