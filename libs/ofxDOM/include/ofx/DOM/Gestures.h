@@ -74,13 +74,13 @@ class PressGestureRecognizer: public GestureRecognizer
 public:
 
 private:
-    unsigned long _flags = 0;
+    uint64_t _flags = 0;
     Point _location;
-    unsigned long _buttonMask = 0;
-    unsigned long _numberOfClicksRequired = 1;
-    unsigned long _currentButtonCount = 0;
-    unsigned long _activeButtonCount = 0;
-    unsigned long _currentClickCount = 0;
+    uint64_t _buttonMask = 0;
+    uint64_t _numberOfClicksRequired = 1;
+    uint64_t _currentButtonCount = 0;
+    uint64_t _activeButtonCount = 0;
+    uint64_t _currentClickCount = 0;
 
     uint64_t _minimumPressDuration = 500;
 
@@ -107,8 +107,8 @@ public:
 private:
     Point _location;
     Point _translation;
-    unsigned long _buttonMask;
-    unsigned long _buttonCount;
+    uint64_t _buttonMask;
+    uint64_t _buttonCount;
     // id _velocityFilter;
 
 };
