@@ -37,15 +37,18 @@ namespace DOM {
 
 /// \brief A class representing an EventTarget.
 ///
-/// EventTargets know how to handle events.
+/// EventTargets know how to handle events. This class is usually inherited
+/// using the curiously-recurring template pattern.
 ///
 /// \tparam EventTargetType The type of the Tvent target.
 template<class EventTargetType>
 class EventTarget
 {
 public:
+    /// \brief Create an EventTarget.
     EventTarget();
 
+    /// \brief Destroy the EventTarget.
     virtual ~EventTarget();
 
     template <class EventType, typename ArgumentsType, class ListenerClass>
@@ -322,7 +325,8 @@ EventTarget<EventTargetType>::~EventTarget()
 
 
 template<class EventTargetType>
-bool EventTarget<EventTargetType>::isEventListener(const std::string& event, bool useCapture) const
+bool EventTarget<EventTargetType>::isEventListener(const std::string& event,
+                                                   bool useCapture) const
 {
     auto iter = _eventRegistry.find(event);
 
