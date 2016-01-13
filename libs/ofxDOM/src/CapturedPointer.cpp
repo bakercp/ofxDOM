@@ -33,10 +33,10 @@ namespace DOM {
 
 CapturedPointer::CapturedPointer(std::size_t id):
     _id(id),
-    _start(ofPoint()),
-    _offset(ofPoint()),
-    _position(ofPoint()),
-    _velocity(ofPoint()),
+    _start(Position()),
+    _offset(Position()),
+    _position(Position()),
+    _velocity(Position()),
     _lastUpdate(std::numeric_limits<uint64_t>::lowest()),
     _timestamp(std::numeric_limits<uint64_t>::lowest())
 {
