@@ -114,46 +114,46 @@ public:
     /// both methods must be called.
     void preventDefault();
 
-	/// \returns true iff the event was cancelled.
+    /// \returns true iff the event was cancelled.
     bool isCancelled() const;
 
-	/// \returns true iff the default activity was prevented.
+    /// \returns true iff the default activity was prevented.
     bool isDefaultPrevented() const;
 
-	/// \brief Set the Phase of the event.
-	/// \param phase The phase to set.
-	void setPhase(Phase phase);
+    /// \brief Set the Phase of the event.
+    /// \param phase The phase to set.
+    void setPhase(Phase phase);
 
-	/// \returns the Phase of the event.
+    /// \returns the Phase of the event.
     Phase getPhase() const;
 
     /// \brief Determine if the event has a bubbling phase.
     /// \returns true iff the event should bubble.
     bool bubbles() const;
 
-	/// \returns true iff the Event can be cancelled.
+    /// \returns true iff the Event can be cancelled.
     bool isCancelable() const;
 
-	/// \returns the source Element.
+    /// \returns the source Element.
     Element* source() const;
 
-	/// \returns the target Element.
+    /// \returns the target Element.
     Element* target() const;
 
-	/// \returns the related target Element.
+    /// \returns the related target Element.
     Element* relatedTarget() const;
 
-	/// \returns a pointer to the current target Element.
+    /// \returns a pointer to the current target Element.
     Element* getCurrentTarget() const;
 
-	/// \brief Set the current target Element.
-	/// \param target The current target Element.
+    /// \brief Set the current target Element.
+    /// \param target The current target Element.
     void setCurrentTarget(Element* target);
 
     /// \brief A utility method to print get the Event as a std::string.
     /// \returns The Event as a std::string.
     /// \note Not for serialization.
-	std::string toString() const;
+    std::string toString() const;
 
 protected:
     /// \brief The name of the event (case-insensitive).
@@ -190,9 +190,9 @@ protected:
     bool _canceled = false;
 
     /// \brief Used to specify the time (in milliseconds relative to the epoch)
-	/// at which the event was created.
-	///
-	/// Due to the fact that some systems may not provide this information the
+    /// at which the event was created.
+    ///
+    /// Due to the fact that some systems may not provide this information the
     /// value of timeStamp may be not available for all events. When not
     /// available, a value of 0 will be returned. Examples of epoch time are
     /// the time of the system start or 0:0:0 UTC 1st January 1970.
@@ -208,7 +208,7 @@ class UIEvent: public Event
 {
 public:
     using Event::Event;
-    
+
     virtual ~UIEvent()
     {
     }
@@ -238,16 +238,16 @@ public:
 
     const PointerEventArgs& pointer() const;
 
-	Position screenPosition() const;
+    Position screenPosition() const;
 
-	Position localPosition() const;
+    Position localPosition() const;
 
 protected:
     static bool eventBubbles(const std::string& event);
     static bool eventCancelable(const std::string& event);
 
     PointerEventArgs _pointer;
-    
+
 };
 
 
@@ -290,7 +290,7 @@ public:
 class DragDropEvent: public Event
 {
 public:
-    
+
 };
 
 
@@ -394,13 +394,13 @@ public:
     virtual ~AttributeEvent();
 
     const std::string& key() const;
-	
+
     const Any& value() const;
 
 protected:
     std::string _key;
     Any _value;
-    
+
 };
 
 
@@ -409,12 +409,12 @@ class EnablerEvent: public ofEventArgs
 public:
     EnablerEvent(bool value);
     virtual ~EnablerEvent();
-    
+
     bool value() const;
-    
+
 protected:
     bool _value;
-    
+
 };
 
 
@@ -444,7 +444,7 @@ public:
     };
 
     ElementOrderEvent(Element* element, Type type);
-    
+
     virtual ~ElementOrderEvent();
 
     Type type() const;

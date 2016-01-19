@@ -147,25 +147,25 @@ struct Any
         if (ptr)
             delete ptr;
     }
-    
+
 private:
     struct Base
     {
         virtual ~Base() {}
-        
+
         virtual Base* clone() const = 0;
     };
-    
+
     template<typename T>
     struct Derived: Base
     {
         template<typename U> Derived(U&& value) : value(forward<U>(value)) { }
-        
+
         T value;
-        
+
         Base* clone() const { return new Derived<T>(value); }
     };
-    
+
     Base* clone() const
     {
         if (ptr)
@@ -173,9 +173,9 @@ private:
         else
             return nullptr;
     }
-    
+
     Base* ptr;
 };
 
-    
+
 } } // namespace ofx::DOM

@@ -40,14 +40,14 @@ Element::Element(float x, float y, float width, float height):
 
 
 Element::Element(const std::string& id, float x, float y, float width, float height):
-	_parent(nullptr),
-	_id(id),
+    _parent(nullptr),
+    _id(id),
     _geometry(x, y, width, height),
-	_childGeometryInvalid(true),
-	_enabled(true),
-	_hidden(false),
-	_locked(false),
-	_implicitPointerCapture(false)
+    _childGeometryInvalid(true),
+    _enabled(true),
+    _hidden(false),
+    _locked(false),
+    _implicitPointerCapture(false)
 {
 }
 
@@ -72,8 +72,8 @@ std::unique_ptr<Element> Element::removeChild(Element* element)
         // Set the parent to nullptr.
         detachedChild->_parent = nullptr;
 
-		// Invalidate all cached child geometry.
-		invalidateChildGeometry();
+        // Invalidate all cached child geometry.
+        invalidateChildGeometry();
 
         // Alert the node that its parent was set.
         ElementEvent removedFromEvent(this);
@@ -243,7 +243,7 @@ bool Element::hasChildren() const
 
 bool Element::hasParent() const
 {
-	return nullptr != _parent;
+    return nullptr != _parent;
 }
 
 
@@ -254,7 +254,7 @@ Element* Element::findFirstChildById(const std::string& id)
                              [&](const std::unique_ptr<Element>& child) {
                                  return child->getId() == id;
                              });
-    
+
     return (iter != _children.end()) ? iter->get() : nullptr;
 }
 
@@ -293,37 +293,37 @@ Element* Element::parent()
 
 const Element* Element::parent() const
 {
-	return _parent;
+    return _parent;
 }
 
-	
+
 Document* Element::document()
 {
     if (hasParent())
     {
-		// If a parent exists, return it recursively.
-		return _parent->document();
+        // If a parent exists, return it recursively.
+        return _parent->document();
     }
     else
     {
-		// Return self if a Document, otherwise, will return nullptr.
-		return dynamic_cast<Document*>(this);
+        // Return self if a Document, otherwise, will return nullptr.
+        return dynamic_cast<Document*>(this);
     }
 }
 
 
 const Document* Element::document() const
 {
-	if (hasParent())
-	{
-		// If a parent exists, return it recursively.
-		return _parent->document();
-	}
-	else
-	{
-		// Return self if a Document, otherwise, will return nullptr.
-		return dynamic_cast<const Document*>(this);
-	}
+    if (hasParent())
+    {
+        // If a parent exists, return it recursively.
+        return _parent->document();
+    }
+    else
+    {
+        // Return self if a Document, otherwise, will return nullptr.
+        return dynamic_cast<const Document*>(this);
+    }
 }
 
 
@@ -341,7 +341,7 @@ bool Element::childHitTest(const Position& localPosition) const
 
 Position Element::localToScreen(const Position& localPosition) const
 {
-	return localPosition + getScreenPosition();;
+    return localPosition + getScreenPosition();;
 }
 
 
@@ -353,35 +353,35 @@ Position Element::screenToLocal(const Position& screenPosition) const
 
 Position Element::parentToScreen(const Position& parentPosition) const
 {
-	if (hasParent())
-	{
-		return parentPosition + _parent->getScreenPosition();
-	}
-	else
-	{
-		return parentPosition;
-	}
+    if (hasParent())
+    {
+        return parentPosition + _parent->getScreenPosition();
+    }
+    else
+    {
+        return parentPosition;
+    }
 }
 
 
 Position Element::screenToParent(const Position& screenPosition) const
 {
-	if (hasParent())
-	{
-		return screenPosition - _parent->getScreenPosition();
-	}
-	else
-	{
-		return screenPosition;
-	}
+    if (hasParent())
+    {
+        return screenPosition - _parent->getScreenPosition();
+    }
+    else
+    {
+        return screenPosition;
+    }
 }
 
 
 void Element::setPosition(float x, float y)
 {
-	_geometry.setPosition(x, y);
-	MoveEvent evt(getPosition());
-	ofNotifyEvent(move, evt, this);
+    _geometry.setPosition(x, y);
+    MoveEvent evt(getPosition());
+    ofNotifyEvent(move, evt, this);
 }
 
 
@@ -411,36 +411,36 @@ float Element::getY() const
 
 Position Element::getScreenPosition() const
 {
-	if (hasParent())
-	{
-		return getPosition() + _parent->getScreenPosition();
-	}
-	else
-	{
-		return getPosition();
-	}
+    if (hasParent())
+    {
+        return getPosition() + _parent->getScreenPosition();
+    }
+    else
+    {
+        return getPosition();
+    }
 }
 
 
 float Element::getScreenX() const
 {
-	return getScreenPosition().x;
+    return getScreenPosition().x;
 }
 
 
 float Element::getScreenY() const
 {
-	return getScreenPosition().y;
+    return getScreenPosition().y;
 }
 
 
 void Element::setSize(float width, float height)
 {
-	_geometry.setWidth(width);
-	_geometry.setHeight(height);
-	_geometry.standardize();
-	ResizeEvent evt(_geometry);
-	ofNotifyEvent(resize, evt, this);
+    _geometry.setWidth(width);
+    _geometry.setHeight(height);
+    _geometry.standardize();
+    ResizeEvent evt(_geometry);
+    ofNotifyEvent(resize, evt, this);
 }
 
 
@@ -558,11 +558,11 @@ void Element::clearAttribute(const std::string& key)
 void Element::_setup(ofEventArgs& e)
 {
     for (auto& child : _children)
-	{
-		child->_setup(e);
-	}
+    {
+        child->_setup(e);
+    }
 
-	onSetup();
+    onSetup();
 }
 
 
@@ -571,11 +571,11 @@ void Element::_update(ofEventArgs& e)
     if (_enabled && !_hidden)
     {
         for (auto& child : _children)
-		{
-			child->_update(e);
-		}
+        {
+            child->_update(e);
+        }
 
-		onUpdate();
+        onUpdate();
     }
 }
 
@@ -588,17 +588,17 @@ void Element::_draw(ofEventArgs& e)
         ofPushMatrix();
         ofTranslate(_geometry.getPosition());
 
-		// Draw parent behind children.
-		onDraw();
+        // Draw parent behind children.
+        onDraw();
 
-		// Now draw in reverse order.
-		auto iter = _children.rbegin();
+        // Now draw in reverse order.
+        auto iter = _children.rbegin();
 
-		while (iter != _children.rend())
-		{
-			(*iter)->_draw(e);
-			++iter;
-		}
+        while (iter != _children.rend())
+        {
+            (*iter)->_draw(e);
+            ++iter;
+        }
 
         ofPopMatrix();
         ofPopStyle();
@@ -609,11 +609,11 @@ void Element::_draw(ofEventArgs& e)
 void Element::_exit(ofEventArgs& e)
 {
     for (auto& child : _children)
-	{
-		child->_exit(e);
-	}
+    {
+        child->_exit(e);
+    }
 
-	onExit();
+    onExit();
 }
 
 
@@ -670,10 +670,10 @@ void Element::setPointerCapture(std::size_t id)
 
 void Element::releasePointerCapture(std::size_t id)
 {
-	Document* _document = document();
+    Document* _document = document();
 
-	if (nullptr != _document)
-	{
+    if (nullptr != _document)
+    {
         _document->releasePointerCaptureForElement(this, id);
     }
     else
@@ -691,9 +691,9 @@ bool Element::isEnabled() const
 
 void Element::setEnabled(bool enabled_)
 {
-	_enabled = enabled_;
-	EnablerEvent evt(_enabled);
-	ofNotifyEvent(enabled, evt, this);
+    _enabled = enabled_;
+    EnablerEvent evt(_enabled);
+    ofNotifyEvent(enabled, evt, this);
 }
 
 
@@ -705,9 +705,9 @@ bool Element::isHidden() const
 
 void Element::setHidden(bool hidden_)
 {
-	_hidden = hidden_;
-	EnablerEvent evt(_hidden);
-	ofNotifyEvent(hidden, evt, this);
+    _hidden = hidden_;
+    EnablerEvent evt(_hidden);
+    ofNotifyEvent(hidden, evt, this);
 }
 
 
@@ -719,9 +719,9 @@ bool Element::isLocked() const
 
 void Element::setLocked(bool locked_)
 {
-	_locked = locked_;
-	EnablerEvent evt(_locked);
-	ofNotifyEvent(locked, evt, this);
+    _locked = locked_;
+    EnablerEvent evt(_locked);
+    ofNotifyEvent(locked, evt, this);
 }
 
 
@@ -729,58 +729,58 @@ void Element::invalidateChildGeometry() const
 {
     _childGeometryInvalid = true;
 
-	if (hasParent())
-	{
-		_parent->invalidateChildGeometry();
-	}
+    if (hasParent())
+    {
+        _parent->invalidateChildGeometry();
+    }
 }
 
 
 bool Element::isPointerCaptured(std::size_t id) const
 {
-	return findCapturedPointerById(id) != _capturedPointers.end();
+    return findCapturedPointerById(id) != _capturedPointers.end();
 }
-	
+
 
 std::vector<CapturedPointer>::iterator Element::findCapturedPointerById(std::size_t id)
 {
-	return std::find_if(_capturedPointers.begin(),
-						_capturedPointers.end(),
-						[id](const CapturedPointer& pointer)
-						{
-							return id == pointer.id();
-						});
+    return std::find_if(_capturedPointers.begin(),
+                        _capturedPointers.end(),
+                        [id](const CapturedPointer& pointer)
+                        {
+                            return id == pointer.id();
+                        });
 }
 
 
 
 std::vector<CapturedPointer>::const_iterator Element::findCapturedPointerById(std::size_t id) const
 {
-	return findCapturedPointerById(id);
+    return findCapturedPointerById(id);
 }
 
 
 std::vector<CapturedPointer>& Element::capturedPointers()
 {
-	return _capturedPointers;
+    return _capturedPointers;
 }
 
 
 const std::vector<CapturedPointer>& Element::capturedPointers() const
 {
-	return _capturedPointers;
+    return _capturedPointers;
 }
 
 
 void Element::setImplicitPointerCapture(bool implicitPointerCapture)
 {
-	_implicitPointerCapture = implicitPointerCapture;
+    _implicitPointerCapture = implicitPointerCapture;
 }
 
 
 bool Element::getImplicitPointerCapture() const
 {
-	return _implicitPointerCapture;
+    return _implicitPointerCapture;
 }
 
 

@@ -65,7 +65,7 @@ void CapturedPointer::update(Element* element, const PointerEvent& e)
     {
         _id = e.pointer().id();
         _start = e.pointer().point();
-        _offset = _start - element->screenPosition();
+        _offset = _start - element->getScreenPosition();
         _position = e.pointer().point();
         _velocity = Position();
         _lastUpdate = now;
@@ -76,43 +76,43 @@ void CapturedPointer::update(Element* element, const PointerEvent& e)
 
 std::size_t CapturedPointer::id() const
 {
-	return _id;
+    return _id;
 }
 
 
 const Position& CapturedPointer::start() const
 {
-	return _start;
+    return _start;
 }
 
 
 const Position& CapturedPointer::offset() const
 {
-	return _offset;
+    return _offset;
 }
 
 
 const Position& CapturedPointer::position() const
 {
-	return _position;
+    return _position;
 }
 
 
 const Position& CapturedPointer::velocity() const
 {
-	return _velocity;
+    return _velocity;
 }
 
 
 uint64_t CapturedPointer::lastUpdate() const
 {
-	return _lastUpdate;
+    return _lastUpdate;
 }
 
 
 uint64_t CapturedPointer::timestamp() const
 {
-	return _timestamp;
+    return _timestamp;
 }
 
 

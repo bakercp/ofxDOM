@@ -151,38 +151,38 @@ void Event::setCurrentTarget(Element* target)
 
 std::string Event::toString() const
 {
-	std::stringstream ss;
+    std::stringstream ss;
 
-	std::string phaseString = "";
+    std::string phaseString = "";
 
-	switch (_phase)
-	{
-		case Phase::NONE:
-			phaseString = "NONE";
-			break;
-		case Phase::CAPTURING_PHASE:
-			phaseString = "CAPTURING_PHASE";
-			break;
-		case Phase::AT_TARGET:
-			phaseString = "AT_TARGET";
-			break;
-		case Phase::BUBBLING_PHASE:
-			phaseString = "BUBBLING_PHASE";
-			break;
-	}
+    switch (_phase)
+    {
+        case Phase::NONE:
+            phaseString = "NONE";
+            break;
+        case Phase::CAPTURING_PHASE:
+            phaseString = "CAPTURING_PHASE";
+            break;
+        case Phase::AT_TARGET:
+            phaseString = "AT_TARGET";
+            break;
+        case Phase::BUBBLING_PHASE:
+            phaseString = "BUBBLING_PHASE";
+            break;
+    }
 
 
-	ss << "Event Type: " << _type << std::endl;
-	ss << "     Phase: " << phaseString << std::endl;
-	ss << "    Source: " << (_source != nullptr ? _source->getId() : "nullptr") << std::endl;
-	ss << "    Target: " << (_target != nullptr ? _target->getId() : "nullptr") << std::endl;
-	ss << "Rel-Target: " << (_relatedTarget != nullptr ? _relatedTarget->getId() : "nullptr") << std::endl;
-	ss << "Cur-Target: " << (_currentTaget != nullptr ? _currentTaget->getId() : "nullptr") << std::endl;
-	ss << " Bubs/Canc: " << _bubbles << "/" << _cancelable << std::endl;
-	ss << " DP/Canc'd: " << _defaultPrevented << "/" << _canceled << std::endl;
-	ss << " timestamp: " << _timestamp << std::endl;
+    ss << "Event Type: " << _type << std::endl;
+    ss << "     Phase: " << phaseString << std::endl;
+    ss << "    Source: " << (_source != nullptr ? _source->getId() : "nullptr") << std::endl;
+    ss << "    Target: " << (_target != nullptr ? _target->getId() : "nullptr") << std::endl;
+    ss << "Rel-Target: " << (_relatedTarget != nullptr ? _relatedTarget->getId() : "nullptr") << std::endl;
+    ss << "Cur-Target: " << (_currentTaget != nullptr ? _currentTaget->getId() : "nullptr") << std::endl;
+    ss << " Bubs/Canc: " << _bubbles << "/" << _cancelable << std::endl;
+    ss << " DP/Canc'd: " << _defaultPrevented << "/" << _canceled << std::endl;
+    ss << " timestamp: " << _timestamp << std::endl;
 
-	return ss.str();
+    return ss.str();
 }
 
 
@@ -240,20 +240,20 @@ const PointerEventArgs& PointerEvent::pointer() const
 
 Position PointerEvent::screenPosition() const
 {
-	return pointer().point();
+    return pointer().point();
 }
 
 
 Position PointerEvent::localPosition() const
 {
-	if (nullptr != getCurrentTarget())
-	{
-		return getCurrentTarget()->screenToLocal(pointer().point());
-	}
-	else
-	{
-		return pointer().point();
-	}
+    if (nullptr != getCurrentTarget())
+    {
+        return getCurrentTarget()->screenToLocal(pointer().point());
+    }
+    else
+    {
+        return pointer().point();
+    }
 }
 
 

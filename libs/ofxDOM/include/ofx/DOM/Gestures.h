@@ -41,7 +41,7 @@ class GestureRecognizer
 {
 public:
     enum class State
-	{
+    {
         POSSIBLE,
         BEGAN,
         CHANGED,

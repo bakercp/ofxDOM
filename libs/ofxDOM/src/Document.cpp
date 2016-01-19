@@ -33,8 +33,8 @@ namespace DOM {
 
 
 Document::Document():
-	Element("document", 0, 0, 1024, 768),
-	_autoFillScreen(true)
+    Element("document", 0, 0, 1024, 768),
+    _autoFillScreen(true)
 {
     ofAddListener(ofEvents().setup, this, &Document::setup);
     ofAddListener(ofEvents().update, this, &Document::update);
@@ -76,18 +76,18 @@ Document::~Document()
 
 void Document::setup(ofEventArgs& e)
 {
-	if (_autoFillScreen)
-	{
-		setSize(ofGetWidth(), ofGetHeight());
-	}
+    if (_autoFillScreen)
+    {
+        setSize(ofGetWidth(), ofGetHeight());
+    }
 
-	Element::_setup(e);
+    Element::_setup(e);
 }
 
 
 void Document::update(ofEventArgs& e)
 {
-	Element::_update(e);
+    Element::_update(e);
 }
 
 
@@ -99,16 +99,16 @@ void Document::draw(ofEventArgs& e)
 
 void Document::exit(ofEventArgs& e)
 {
-	Element::_exit(e);
+    Element::_exit(e);
 }
 
 
 void Document::windowResized(ofResizeEventArgs& e)
 {
-	if (_autoFillScreen)
-	{
-		setSize(e.width, e.height);
-	}
+    if (_autoFillScreen)
+    {
+        setSize(e.width, e.height);
+    }
 }
 
 
@@ -146,10 +146,10 @@ bool Document::onPointerEvent(PointerEventArgs& e)
     // Determine if the event was handled.
     bool wasEventHandled = false;
 
-	// Add this pointer to the list of active pointers.
-	_activePointers[e.id()] = e;
+    // Add this pointer to the list of active pointers.
+    _activePointers[e.id()] = e;
 
-	// The last element that the current pointer was hitting.
+    // The last element that the current pointer was hitting.
     Element* lastActiveTarget = findElementInMap(e.id(), _activeTargets);
 
     // The Element that the pointer is currently hitting.
@@ -157,7 +157,7 @@ bool Document::onPointerEvent(PointerEventArgs& e)
     // TODO: Use lastActiveTarget to seed target search?
     Element* activeTarget = recursiveHitTest(screenToParent(e.point()));
 
-	// The event target is the target that will receive the event.
+    // The event target is the target that will receive the event.
     //
     // We start off assuming that the event target is the active target.
     // If we determine that the pointer has already been captured, we will
@@ -221,10 +221,10 @@ bool Document::onPointerEvent(PointerEventArgs& e)
     PointerEvent event(e, this, eventTarget);
 
 
-	// Now, dispatch the original event if there is a target.
+    // Now, dispatch the original event if there is a target.
     // If eventTarget != nullptr, that means the current pointer id is captured.
-	if (eventTarget != nullptr)
-	{
+    if (eventTarget != nullptr)
+    {
         event.setPhase(Event::Phase::AT_TARGET);
 
         // Update captured pointer data.
@@ -282,28 +282,28 @@ bool Document::onPointerEvent(PointerEventArgs& e)
 void Document::setPointerCaptureForElement(Element* element, std::size_t id)
 {
     // Make sure the element isn't nullptr and the caller is this document.
-	if (element != nullptr && this == element->document())
+    if (element != nullptr && this == element->document())
     {
-		auto activePointersIter = _activePointers.find(id);
+        auto activePointersIter = _activePointers.find(id);
 
         // If called from within Document, this shouldn't happen, but check anyway.
-		if (activePointersIter == _activePointers.end())
-		{
-			throw DOMException(DOMException::INVALID_POINTER_ID + ": " + "Document::setPointerCapture");
-		}
-		else if (activePointersIter->second.buttons() > 0 && // Capture only if "button" is pressed.
+        if (activePointersIter == _activePointers.end())
+        {
+            throw DOMException(DOMException::INVALID_POINTER_ID + ": " + "Document::setPointerCapture");
+        }
+        else if (activePointersIter->second.buttons() > 0 && // Capture only if "button" is pressed.
                  _capturedPointerIdToElementMap.find(id) == _capturedPointerIdToElementMap.end()) // And pointer is not yet captured.
-		{
+        {
             // Add the pointer to our map.
-			_capturedPointerIdToElementMap[id] = element;
+            _capturedPointerIdToElementMap[id] = element;
 
             // Add the pointer id to the element's captured pointer list.
-			element->_capturedPointers.emplace_back(CapturedPointer(id));
+            element->_capturedPointers.emplace_back(CapturedPointer(id));
 
             // Emit a pointer captured event.
-			PointerCaptureEvent evt(id, true, this, element);
-			element->dispatchEvent(evt);
-		}
+            PointerCaptureEvent evt(id, true, this, element);
+            element->dispatchEvent(evt);
+        }
         else
         {
             // Ignore if already captured OR no buttons were pressed.
@@ -311,7 +311,7 @@ void Document::setPointerCaptureForElement(Element* element, std::size_t id)
     }
     else
     {
-		throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Document::setPointerCapture");
+        throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Document::setPointerCapture");
     }
 }
 
@@ -322,30 +322,30 @@ void Document::releasePointerCaptureForElement(Element* element, std::size_t id)
 
     if (element != nullptr)
     {
-		auto activePointersIter = _activePointers.find(id);
+        auto activePointersIter = _activePointers.find(id);
 
-		if (activePointersIter != _activePointers.end())
-		{
-			auto iter = _capturedPointerIdToElementMap.find(id);
+        if (activePointersIter != _activePointers.end())
+        {
+            auto iter = _capturedPointerIdToElementMap.find(id);
 
-			if (iter != _capturedPointerIdToElementMap.end())
-			{
-				_capturedPointerIdToElementMap.erase(iter);
+            if (iter != _capturedPointerIdToElementMap.end())
+            {
+                _capturedPointerIdToElementMap.erase(iter);
 
-				element->_capturedPointers.erase(element->findCapturedPointerById(id));
+                element->_capturedPointers.erase(element->findCapturedPointerById(id));
 
-				PointerCaptureEvent evt(id, false, this, element);
-				element->dispatchEvent(evt);
-			}
-		}
-		else
-		{
-			throw DOMException(DOMException::INVALID_POINTER_ID + ": " + "Document::releasePointerCapture");
-		}
+                PointerCaptureEvent evt(id, false, this, element);
+                element->dispatchEvent(evt);
+            }
+        }
+        else
+        {
+            throw DOMException(DOMException::INVALID_POINTER_ID + ": " + "Document::releasePointerCapture");
+        }
     }
     else
     {
-		throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Document::releasePointerCapture");
+        throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Document::releasePointerCapture");
     }
 }
 

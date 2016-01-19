@@ -125,14 +125,14 @@ public:
         ofRemoveListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
     }
 
-	/// \brief Dispatch the given event.
-	///
-	/// This will return true if the default action for this event should be
-	/// prevented.
-	///
-	/// \param event The Event to dispatch.
-	/// \tparam EventType The Event type to dispatch.
-	/// \returns true iff one of the responders called Event::preventDefault().
+    /// \brief Dispatch the given event.
+    ///
+    /// This will return true if the default action for this event should be
+    /// prevented.
+    ///
+    /// \param event The Event to dispatch.
+    /// \tparam EventType The Event type to dispatch.
+    /// \returns true iff one of the responders called Event::preventDefault().
     template<class EventType>
     bool dispatchEvent(EventType& event)
     {
@@ -153,10 +153,10 @@ public:
 
         while (riter != targets.rend())
         {
-			event.setPhase(event.target() == *riter ? Event::Phase::AT_TARGET : Event::Phase::CAPTURING_PHASE);
+            event.setPhase(event.target() == *riter ? Event::Phase::AT_TARGET : Event::Phase::CAPTURING_PHASE);
             event.setCurrentTarget(*riter);
 
-			(*riter)->handleEvent(event);
+            (*riter)->handleEvent(event);
 
             if (event.isCancelled())
             {
@@ -183,23 +183,23 @@ public:
                 {
                     return !event.isDefaultPrevented();
                 }
-                
+
                 ++bubbleIter;
             }
         }
-        
+
         return event.isDefaultPrevented();
     }
 
 
-	/// \brief Handle the given event.
-	///
-	/// This will return true if the default action for this event should be
-	/// prevented.
-	///
-	/// \param event The Event to dispatch.
-	/// \tparam EventType The Event type to dispatch.
-	/// \returns true iff one of the responders called Event::preventDefault().
+    /// \brief Handle the given event.
+    ///
+    /// This will return true if the default action for this event should be
+    /// prevented.
+    ///
+    /// \param event The Event to dispatch.
+    /// \tparam EventType The Event type to dispatch.
+    /// \returns true iff one of the responders called Event::preventDefault().
     template <class EventType>
     void handleEvent(EventType& e)
     {
@@ -224,10 +224,10 @@ public:
         }
     }
 
-	/// \brief Determine if the EventTarget is a listener for an event.
-	/// \param event The Event name.
-	/// \param useCapture true if the EventTarget listens for event during capture phase.
-	/// \returns true if it is a listener to the named event and phase.
+    /// \brief Determine if the EventTarget is a listener for an event.
+    /// \param event The Event name.
+    /// \param useCapture true if the EventTarget listens for event during capture phase.
+    /// \returns true if it is a listener to the named event and phase.
     bool isEventListener(const std::string& event, bool useCapture) const;
 
     virtual void onSetup()

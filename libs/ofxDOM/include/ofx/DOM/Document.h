@@ -37,11 +37,11 @@ namespace DOM {
 class Document: public Element
 {
 public:
-	/// \brief Create a default Document.
-	///
-	/// The Document will have the default id of "document" and will fill
-	/// the entire screen.
-	Document();
+    /// \brief Create a default Document.
+    ///
+    /// The Document will have the default id of "document" and will fill
+    /// the entire screen.
+    Document();
 
     /// \brief Destroy the Document.
     virtual ~Document();
@@ -89,33 +89,33 @@ public:
     /// \todo Implement way to call default action if the event is not handled.
     bool onPointerEvent(PointerEventArgs& e);
 
-	/// \brief Set a pointer capture on a given Element.
-	/// \param element A pointer to the capturing Element.
-	/// \param id The pointer id to capture.
-	/// \throws DOMException on invalid DOM state or pointer id.
+    /// \brief Set a pointer capture on a given Element.
+    /// \param element A pointer to the capturing Element.
+    /// \param id The pointer id to capture.
+    /// \throws DOMException on invalid DOM state or pointer id.
     void setPointerCaptureForElement(Element* element, std::size_t id);
 
-	/// \brief Release a pointer capture on a given Element.
-	/// \param element A pointer to the capturing Element.
-	/// \param id The pointer id to release.
-	/// \throws DOMException on invalid DOM state or pointer id.
-	void releasePointerCaptureForElement(Element* element, std::size_t id);
+    /// \brief Release a pointer capture on a given Element.
+    /// \param element A pointer to the capturing Element.
+    /// \param id The pointer id to release.
+    /// \throws DOMException on invalid DOM state or pointer id.
+    void releasePointerCaptureForElement(Element* element, std::size_t id);
 
 protected:
     /// \brief Map pointer ids to Elements.
     typedef std::unordered_map<std::size_t, Element*> PointerElementMap;
 
-	/// \brief True if the Document size should always match the screen size.
-	bool _autoFillScreen;
+    /// \brief True if the Document size should always match the screen size.
+    bool _autoFillScreen;
 
     /// \brief Captured pointer and their capture target.
     PointerElementMap _capturedPointerIdToElementMap;
 
     /// \brief Currently active targets for given pointer ids.
-	///
-	/// It is not required that these targets are captured, only that they
-	/// passed a hit test. This is used for doing pointer in / pointer out, etc
-	/// when the pointer isn't captured (e.g. mouse over, etc).
+    ///
+    /// It is not required that these targets are captured, only that they
+    /// passed a hit test. This is used for doing pointer in / pointer out, etc
+    /// when the pointer isn't captured (e.g. mouse over, etc).
     ///
     /// In some cases, an active target may be a nullptr, meaning that the
     /// last pointer event could not be handled by any Element in the Document
@@ -127,8 +127,8 @@ protected:
     PointerElementMap _activeTargets;
 
     /// \brief Currently active pointers and their last associated event.
-	///
-	/// This map is a basic list of the pointers that we know about.
+    ///
+    /// This map is a basic list of the pointers that we know about.
     ///
     /// For pointers that support hovering (e.g. mouse, trackball, etc) the
     /// pointer's id will always be active. For pointers that do not support

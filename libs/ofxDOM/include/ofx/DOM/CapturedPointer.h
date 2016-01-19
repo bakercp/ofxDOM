@@ -54,28 +54,28 @@ public:
     void update(Element* element, const PointerEvent& e);
 
     /// \returns the captured pointer's id.
-	std::size_t id() const;
+    std::size_t id() const;
 
     /// \returns the start position of the captured pointer.
-	const Position& start() const;
+    const Position& start() const;
 
     /// \returns the start()-position() of the captured pointer.
     const Position& offset() const;
 
     /// \returns the current position of the captured pointer.
-	const Position& position() const;
+    const Position& position() const;
 
     /// \returns the velocity of the captured pointer (lastPosition() - position()).
-	const Position& velocity() const;
+    const Position& velocity() const;
 
     /// \returns the last update time.
-	uint64_t lastUpdate() const;
+    uint64_t lastUpdate() const;
 
     /// \returns the initial timestamp when the pointer was captured.
-	uint64_t timestamp() const;
+    uint64_t timestamp() const;
 
-	friend std::ostream& operator << (std::ostream& os,
-									  const CapturedPointer& pointer);
+    friend std::ostream& operator << (std::ostream& os,
+                                      const CapturedPointer& pointer);
 
 private:
     /// \brief The captured pointer's id.
@@ -103,10 +103,10 @@ private:
 
 
 inline std::ostream& operator<<(std::ostream& os,
-								const CapturedPointer& pointer)
+                                const CapturedPointer& pointer)
 {
-	os << pointer.id() << " " << pointer.lastUpdate();
-	return os;
+    os << pointer.id() << " " << pointer.lastUpdate();
+    return os;
 }
 
 
