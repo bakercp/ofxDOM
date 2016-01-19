@@ -150,6 +150,9 @@ public:
 	/// \param target The current target Element.
     void setCurrentTarget(Element* target);
 
+    /// \brief A utility method to print get the Event as a std::string.
+    /// \returns The Event as a std::string.
+    /// \note Not for serialization.
 	std::string toString() const;
 
 protected:
@@ -162,6 +165,7 @@ protected:
     /// \brief The event's target.
     Element* _target = nullptr;
 
+    /// \brief The event's related target.
     Element* _relatedTarget = nullptr;
 
     /// \brief Used to indicate whether or not an event is a bubbling event.
@@ -194,6 +198,7 @@ protected:
     /// the time of the system start or 0:0:0 UTC 1st January 1970.
     uint64_t _timestamp = 0;
 
+    /// \brief The Document class has access to Event data.
     friend class Document;
 };
 
@@ -439,6 +444,7 @@ public:
     };
 
     ElementOrderEvent(Element* element, Type type);
+    
     virtual ~ElementOrderEvent();
 
     Type type() const;

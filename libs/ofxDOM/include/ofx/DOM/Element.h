@@ -402,20 +402,25 @@ public:
 
 protected:
 	/// \brief Setup method called by parent Element.
+    /// \param e The event data.
     void _setup(ofEventArgs& e);
 
 	/// \brief Update method called by parent Element.
+    /// \param e The event data.
 	void _update(ofEventArgs& e);
 
 	/// \brief Draw method called by parent Element.
+    /// \param e The event data.
 	void _draw(ofEventArgs& e);
 
 	/// \brief Exit method called by parent Element.
+    /// \param e The event data.
 	void _exit(ofEventArgs& e);
 
     /// \brief A recursive hit test to find a target element.
     /// \param parentPosition The parent coordinates to test.
     /// \returns A pointer to the target Element or a nullptr if none found.
+    /// \todo Provide a seed position to speed up search?
     Element* recursiveHitTest(const Position& parentPosition);
 
     /// \brief Find a child by a raw Element pointer.

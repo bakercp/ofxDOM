@@ -52,7 +52,9 @@ typedef ofRectangle Geometry;
 template <class T>
 using StorageType = typename decay<T>::type;
 
-
+/// \brief C++11 Any class.
+/// \sa https://codereview.stackexchange.com/questions/20058/c11-any-class
+/// \note This class may change in the near future.
 struct Any
 {
     bool is_null() const { return !ptr; }
