@@ -259,7 +259,7 @@ bool Document::onPointerEvent(PointerEventArgs& e)
         }
 
         wasEventHandled = true;
-        
+
     }
     else if (activeTarget == nullptr || !activeTarget->dispatchEvent(event))
     {
@@ -377,14 +377,23 @@ void Document::synthesizePointerOutAndLeave(const PointerEventArgs& e,
     PointerEventArgs pointerOut(PointerEventArgs::POINTER_OUT, e);
 
     // Call pointerout ONLY on old target
-    PointerUIEventArgs pointerOutEvent(pointerOut, this, target, relatedTarget);
+    PointerUIEventArgs pointerOutEvent(pointerOut,
+                                       this,
+                                       target,
+                                       relatedTarget);
+
     pointerOutEvent.setPhase(EventArgs::Phase::AT_TARGET);
+
     target->handleEvent(pointerOutEvent);
 
     PointerEventArgs pointerLeave(PointerEventArgs::POINTER_LEAVE, e);
 
     // Call pointerleave on old target AND ancestors.
-    PointerUIEventArgs pointerLeaveEvent(pointerLeave, this, target, relatedTarget);
+    PointerUIEventArgs pointerLeaveEvent(pointerLeave,
+                                         this,
+                                         target,
+                                         relatedTarget);
+
     target->dispatchEvent(pointerLeaveEvent);
 }
 
@@ -396,8 +405,13 @@ void Document::synthesizePointerOverAndEnter(const PointerEventArgs& e,
     PointerEventArgs pointerOver(PointerEventArgs::POINTER_OVER, e);
 
     // Call pointerout ONLY on old target
-    PointerUIEventArgs pointerOverEvent(pointerOver, this, target, relatedTarget);
+    PointerUIEventArgs pointerOverEvent(pointerOver,
+                                        this,
+                                        target,
+                                        relatedTarget);
+
     pointerOverEvent.setPhase(EventArgs::Phase::AT_TARGET);
+
     target->handleEvent(pointerOverEvent);
 
     PointerEventArgs pointerEnter(PointerEventArgs::POINTER_ENTER, e);
@@ -405,7 +419,11 @@ void Document::synthesizePointerOverAndEnter(const PointerEventArgs& e,
     // Call pointerover ONLY on the target.
     // Call pointerenter on target and ancestors.
     // Call pointerleave on old target and ancestors
-    PointerUIEventArgs pointerEnterEvent(pointerEnter, this, target, relatedTarget);
+    PointerUIEventArgs pointerEnterEvent(pointerEnter,
+                                         this,
+                                         target,
+                                         relatedTarget);
+
     target->dispatchEvent(pointerEnterEvent);
 }
 
