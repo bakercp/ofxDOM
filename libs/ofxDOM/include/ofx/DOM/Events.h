@@ -63,6 +63,21 @@ public:
               bool cancelable,
               uint64_t timestamp);
 
+    /// \brief Create EventArgs with a type.
+    /// \param type The event type string (case-insensitive).
+    /// \param source The source of the event.
+    /// \param target The target element.
+    /// \param bubbles True iff the argument bubbles after AT_TARGET phase.
+    /// \param cancelable True iff the event can be cancelled by a listener.
+    /// \param timestamp The timestamp of the event.
+    EventArgs(const std::string& type,
+              Element* source,
+              Element* target,
+              Element* relatedTarget,
+              bool bubbles,
+              bool cancelable,
+              uint64_t timestamp);
+
     /// \brief Destroy the EventArgs.
     virtual ~EventArgs();
 
@@ -135,16 +150,19 @@ public:
     bool isCancelable() const;
 
     /// \returns the source Element.
-    Element* source() const;
+    Element* source();
 
     /// \returns the target Element.
-    Element* target() const;
+    Element* target();
 
     /// \returns the related target Element.
-    Element* relatedTarget() const;
+    Element* relatedTarget();
 
     /// \returns a pointer to the current target Element.
-    Element* getCurrentTarget() const;
+    Element* getCurrentTarget();
+
+    /// \returns a pointer to the current target Element.
+    const Element* getCurrentTarget() const;
 
     /// \brief Set the current target Element.
     /// \param target The current target Element.
@@ -240,8 +258,9 @@ class PointerUIEventArgs: public UIEventArgs
 {
 public:
     PointerUIEventArgs(const PointerEventArgs& args,
-                     Element* source,
-                     Element* target);
+                       Element* source,
+                       Element* target,
+                       Element* relatedTarget = nullptr);
 
     virtual ~PointerUIEventArgs();
 

@@ -187,14 +187,16 @@ bool Document::onPointerEvent(PointerEventArgs& e)
         // isn't the current active target.
         if (lastActiveTarget != nullptr)
         {
-            synthesizePointerOutAndLeave(lastActiveTarget, e);
+            // From lastActiveTarget -> activeTarget.
+            synthesizePointerOutAndLeave(e, lastActiveTarget, activeTarget);
         }
 
         // Sytnesize pointerover and pointerenter events if the current
         // active target is valid.
         if (activeTarget != nullptr)
         {
-            synthesizePointerOverAndEnter(activeTarget, e);
+            // From lastActiveTarget -> activeTarget.
+            synthesizePointerOverAndEnter(e, activeTarget, lastActiveTarget);
         }
     }
 
@@ -212,7 +214,9 @@ bool Document::onPointerEvent(PointerEventArgs& e)
         }
         else
         {
-            synthesizePointerOutAndLeave(activeTarget, e);
+            // Since lastActiveTarget may be nullptr, we use:
+            // activeTarget -> nullptr.
+            synthesizePointerOutAndLeave(e, activeTarget, nullptr);
         }
     }
 
@@ -244,7 +248,7 @@ bool Document::onPointerEvent(PointerEventArgs& e)
         // Sythesized events if needed.
         if (sythesizeUpAndLeaveForEventTarget)
         {
-            synthesizePointerOutAndLeave(eventTarget, e);
+            synthesizePointerOutAndLeave(e, eventTarget, nullptr);
         }
 
         // Release pointer capture if needed.
@@ -255,6 +259,7 @@ bool Document::onPointerEvent(PointerEventArgs& e)
         }
 
         wasEventHandled = true;
+        
     }
     else if (activeTarget == nullptr || !activeTarget->dispatchEvent(event))
     {
@@ -365,31 +370,33 @@ Element* Document::findElementInMap(std::size_t id, PointerElementMap& pem)
 }
 
 
-void Document::synthesizePointerOutAndLeave(Element* target,
-                                            const PointerEventArgs& e)
+void Document::synthesizePointerOutAndLeave(const PointerEventArgs& e,
+                                            Element* target,
+                                            Element* relatedTarget)
 {
     PointerEventArgs pointerOut(PointerEventArgs::POINTER_OUT, e);
 
     // Call pointerout ONLY on old target
-    PointerUIEventArgs pointerOutEvent(pointerOut, this, target);
+    PointerUIEventArgs pointerOutEvent(pointerOut, this, target, relatedTarget);
     pointerOutEvent.setPhase(EventArgs::Phase::AT_TARGET);
     target->handleEvent(pointerOutEvent);
 
     PointerEventArgs pointerLeave(PointerEventArgs::POINTER_LEAVE, e);
 
     // Call pointerleave on old target AND ancestors.
-    PointerUIEventArgs pointerLeaveEvent(pointerLeave, this, target);
+    PointerUIEventArgs pointerLeaveEvent(pointerLeave, this, target, relatedTarget);
     target->dispatchEvent(pointerLeaveEvent);
 }
 
 
-void Document::synthesizePointerOverAndEnter(Element* target,
-                                             const PointerEventArgs& e)
+void Document::synthesizePointerOverAndEnter(const PointerEventArgs& e,
+                                             Element* target,
+                                             Element* relatedTarget)
 {
     PointerEventArgs pointerOver(PointerEventArgs::POINTER_OVER, e);
 
     // Call pointerout ONLY on old target
-    PointerUIEventArgs pointerOverEvent(pointerOver, this, target);
+    PointerUIEventArgs pointerOverEvent(pointerOver, this, target, relatedTarget);
     pointerOverEvent.setPhase(EventArgs::Phase::AT_TARGET);
     target->handleEvent(pointerOverEvent);
 
@@ -398,7 +405,7 @@ void Document::synthesizePointerOverAndEnter(Element* target,
     // Call pointerover ONLY on the target.
     // Call pointerenter on target and ancestors.
     // Call pointerleave on old target and ancestors
-    PointerUIEventArgs pointerEnterEvent(pointerEnter, this, target);
+    PointerUIEventArgs pointerEnterEvent(pointerEnter, this, target, relatedTarget);
     target->dispatchEvent(pointerEnterEvent);
 }
 

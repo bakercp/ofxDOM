@@ -224,11 +224,19 @@ public:
         }
     }
 
-    /// \brief Determine if the EventTarget is a listener for an event.
-    /// \param event The Event name.
-    /// \param useCapture true if the EventTarget listens for event during capture phase.
-    /// \returns true if it is a listener to the named event and phase.
-    bool isEventListener(const std::string& event, bool useCapture) const;
+    /// \brief Determine if the EventTarget has listeners for an event.
+    /// \param event The event name.
+    /// \returns true if it has registered listeners for this event.
+    bool hasListenersForEventType(const std::string& type) const;
+
+    /// \brief Determine if the EventTarget is registered to receive the type of events.
+    /// \param type The event type.
+    /// \returns true if it is registered to receive the type of events.
+    bool isEventTypeRegistered(const std::string& type) const;
+
+    void registerEventType(const std::string& type, BaseDOMEvent* event);
+
+    void unregisterEventType(const std::string& type);
 
     virtual void onSetup()
     {
@@ -325,10 +333,9 @@ EventTarget<EventTargetType>::~EventTarget()
 
 
 template<class EventTargetType>
-bool EventTarget<EventTargetType>::isEventListener(const std::string& event,
-                                                   bool useCapture) const
+bool EventTarget<EventTargetType>::hasListenersForEventType(const std::string& type) const
 {
-    auto iter = _eventRegistry.find(event);
+    auto iter = _eventRegistry.find(type);
 
     if (iter != _eventRegistry.end())
     {
@@ -338,6 +345,28 @@ bool EventTarget<EventTargetType>::isEventListener(const std::string& event,
     {
         return false;
     }
+}
+
+
+template<class EventTargetType>
+bool EventTarget<EventTargetType>::isEventTypeRegistered(const std::string& type) const
+{
+    return _eventRegistry.find(type) != _eventRegistry.end();
+}
+
+
+template<class EventTargetType>
+void EventTarget<EventTargetType>::registerEventType(const std::string& type,
+                                                     BaseDOMEvent* event)
+{
+    _eventRegistry[type] = event;
+}
+
+
+template<class EventTargetType>
+void EventTarget<EventTargetType>::unregisterEventType(const std::string& type)
+{
+    _eventRegistry.erase(_eventRegistry.find(type));
 }
 
 

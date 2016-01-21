@@ -145,16 +145,20 @@ private:
     static Element* findElementInMap(std::size_t id, PointerElementMap& pem);
 
     /// \brief Synthesize pointerout and pointerleave events on the target.
-    /// \param target The target to receive the events.
     /// \param e The PointerEventArgs that caused the events.
-    void synthesizePointerOutAndLeave(Element* target,
-                                      const PointerEventArgs& e);
+    /// \param target The target to receive the events.
+    /// \param relatedTarget The target that this is transitioning from.
+    void synthesizePointerOutAndLeave(const PointerEventArgs& e,
+                                      Element* target,
+                                      Element* relatedTarget);
 
     /// \brief Synthesize pointerover and pointerenter events on the target.
-    /// \param target The target to receive the events.
     /// \param e The PointerEventArgs that caused the events.
-    void synthesizePointerOverAndEnter(Element* target,
-                                       const PointerEventArgs& e);
+    /// \param target The target to receive the events.
+    /// \param relatedTarget The target that this is transitioning from.
+    void synthesizePointerOverAndEnter(const PointerEventArgs& e,
+                                       Element* target,
+                                       Element* relatedTarget);
 
 };
 

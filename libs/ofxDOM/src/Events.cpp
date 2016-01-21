@@ -37,9 +37,22 @@ EventArgs::EventArgs(const std::string& type,
                      bool bubbles,
                      bool cancelable,
                      uint64_t timestamp):
+    EventArgs(type, source, target, nullptr, bubbles, cancelable, timestamp)
+{
+}
+
+
+EventArgs::EventArgs(const std::string& type,
+                     Element* source,
+                     Element* target,
+                     Element* relatedTarget,
+                     bool bubbles,
+                     bool cancelable,
+                     uint64_t timestamp):
     _type(type),
     _source(source),
     _target(target),
+    _relatedTarget(relatedTarget),
     _bubbles(bubbles),
     _cancelable(cancelable),
     _timestamp(timestamp)
@@ -119,25 +132,31 @@ bool EventArgs::isCancelable() const
 }
 
 
-Element* EventArgs::source() const
+Element* EventArgs::source()
 {
     return _source;
 }
 
 
-Element* EventArgs::target() const
+Element* EventArgs::target()
 {
     return _target;
 }
 
 
-Element* EventArgs::relatedTarget() const
+Element* EventArgs::relatedTarget()
 {
     return _relatedTarget;
 }
 
 
-Element* EventArgs::getCurrentTarget() const
+Element* EventArgs::getCurrentTarget()
+{
+    return _currentTaget;
+}
+
+
+const Element* EventArgs::getCurrentTarget() const
 {
     return _currentTaget;
 }
@@ -215,10 +234,12 @@ std::size_t PointerCaptureUIEventArgs::id() const
 
 PointerUIEventArgs::PointerUIEventArgs(const PointerEventArgs& pointer,
                                        Element* source,
-                                       Element* target):
+                                       Element* target,
+                                       Element* relatedTarget):
     UIEventArgs(pointer.eventType(),
                 source,
                 target,
+                relatedTarget,
             	eventBubbles(pointer.eventType()),
                 eventCancelable(pointer.eventType()),
                 pointer.timestamp()),
