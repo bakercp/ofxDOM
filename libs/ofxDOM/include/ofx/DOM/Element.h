@@ -45,7 +45,7 @@ class AbstractLayout;
 
 /// \brief A class representing a DOM Element.
 ///
-///    There are several DOM coordiante systems with respect to an Element.
+/// There are several DOM coordiante systems with respect to an Element.
 ///
 /// 1. Local Coordinates: The origin of the local coordiantes are at 0, 0 of the
 /// Element Geometry.  The coordiantes of the local Geometry range from (0, 0)
@@ -129,8 +129,18 @@ public:
     /// \brief Move this Element in back of its next sibling.
     void moveBackward();
 
-    /// \brief Move the given Element in front of all of its siblings.
+    /// \brief Move the given Element to the the given index.
+    ///
+    /// If the index value is greater than the number of children, the element
+    /// will be moved into the last position.
+    ///
     /// \param element The child element to move.
+    /// \param index The child index to move to.
+    /// \throws DOMException(DOMException::INVALID_STATE_ERROR) if no matching
+    /// child element exists.
+    void moveChildToIndex(Element* element, std::size_t index);
+
+    /// \brief Move the given Element in front of all of its siblings.
     /// \throws DOMException(DOMException::INVALID_STATE_ERROR) if no matching
     /// child element exists.
     void moveChildToFront(Element* element);
@@ -163,6 +173,9 @@ public:
     /// \returns true iff the given element is a sibling of this Element.
     bool isSibling(Element* element) const;
 
+    /// \returns the number of siblings.
+    std::size_t numSiblings() const;
+
     /// \brief Determine if the given Element is the parent of this Element.
     /// \param element A pointer the the Element to test.
     /// \returns true iff the given element is the parent of this Element.
@@ -171,6 +184,9 @@ public:
     /// \brief Determine if this Element has any children.
     /// \returns true iff this Element has any children.
     bool hasChildren() const;
+
+    /// \returns the number of children.
+    std::size_t numChildren() const;
 
     /// \brief Determine if this Element has a parent Element.
     /// \returns true if this Element has a parent Element.
@@ -428,15 +444,6 @@ protected:
     /// \returns An iterator pointing to the matching Element or the end.
     std::vector<std::unique_ptr<Element>>::iterator findChild(Element* element);
 
-    /// \brief An optional pointer to a parent Node.
-    Element* _parent;
-
-    /// \brief A vector to Elements.
-    std::vector<std::unique_ptr<Element>> _children;
-
-    /// \brief The id for this element.
-    std::string _id;
-
     /// \brief Determine if a given pointer id is captured.
     /// \param id The pointer id to test.
     /// \returns true if the given pointer id is captured.
@@ -461,7 +468,7 @@ protected:
     const std::vector<CapturedPointer>& capturedPointers() const;
 
     /// \brief Called internally to invalidate the child geometry tree.
-    void invalidateChildGeometry() const;
+    virtual void invalidateChildGeometry() const;
 
     /// \brief Set if the pointer is implicitly captured on pointer down.
     ///
@@ -475,12 +482,27 @@ protected:
     /// \returns true iff implicit pointer capture is enabled.
     bool getImplicitPointerCapture() const;
 
+    /// \brief An optional pointer to a parent Node.
+    Element* _parent = nullptr;
+
+    /// \brief A vector to Elements.
+    std::vector<std::unique_ptr<Element>> _children;
+
+    /// \brief The id for this element.
+    std::string _id;
+
 private:
     /// \brief Not construction-copyable.
     Element(const Element& other) = delete; // non-construction-copyable
 
     /// \brief Non copyable.
     Element& operator = (const Element&) = delete;
+
+    /// \brief A callback for child Elements to notify their parent of movement.
+    void _onChildMoved(MoveEventArgs&);
+
+    /// \brief A callback for child Elements to notify their parent size changes.
+    void _onChildResized(ResizeEventArgs&);
 
     /// \brief The basic geometry of this element.
     Geometry _geometry;
@@ -491,36 +513,31 @@ private:
     /// \brief True if the child geometry is invalid.
     ///
     /// This variable usually set by callbacks from the child elements.
-    mutable bool _childGeometryInvalid;
+    mutable bool _childGeometryInvalid = true;
 
     /// \brief The enabled state of this Element.
-    bool _enabled;
+    bool _enabled = true;
 
     /// \brief The visibility of this Element.
-    bool _hidden;
+    bool _hidden = false;
 
     /// \brief The locked state of this Element.
-    bool _locked;
+    bool _locked = false;
 
     /// \brief A collection of named attributes.
     std::unordered_map<std::string, Any> _attributes;
 
     /// \brief Automatically capture the pointer on pointer down.
-    bool _implicitPointerCapture;
+    bool _implicitPointerCapture = false;
 
     /// \brief A list of the pointer ids currently captured by this Element.
     /// Captured pointers are pushed back, so the pointer at the front was the
     /// first pointer captured, and thus the primary pointer.
     std::vector<CapturedPointer> _capturedPointers;
 
-    /// \brief A callback for child Elements to notify their parent of movement.
-    void _onChildMoved(MoveEvent& evt);
-
-    /// \brief A callback for child Elements to notify their parent size changes.
-    void _onChildResized(ResizeEvent& evt);
-
     /// \brief Make Document a friend class.
     friend class Document;
+
 };
 
 
@@ -534,6 +551,8 @@ ElementType* Element::addChild(Args&&... args)
 template<typename ElementType>
 ElementType* Element::addChild(std::unique_ptr<ElementType> element)
 {
+    static_assert(std::is_base_of<Element, ElementType>(), "ElementType must be a subclass of Element.");
+
     if (nullptr != element)
     {
         // Get a raw pointer to the node for later.
@@ -549,10 +568,10 @@ ElementType* Element::addChild(std::unique_ptr<ElementType> element)
         invalidateChildGeometry();
 
         // Alert the node that its parent was set.
-        ElementEvent addedEvent(this);
+        ElementEventArgs addedEvent(this);
         ofNotifyEvent(pNode->addedTo, addedEvent, this);
 
-        ElementEvent childAddedEvent(pNode);
+        ElementEventArgs childAddedEvent(pNode);
         ofNotifyEvent(childAdded, childAddedEvent, this);
 
         // Attach child listeners.
@@ -565,8 +584,8 @@ ElementType* Element::addChild(std::unique_ptr<ElementType> element)
             // Don't alert itself.
             if (child.get() != pNode)
             {
-                ElementEvent evt(pNode);
-                ofNotifyEvent(child->siblingAdded, evt, this);
+                ElementEventArgs event(pNode);
+                ofNotifyEvent(child->siblingAdded, event, this);
             }
         }
 

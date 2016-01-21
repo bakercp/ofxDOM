@@ -59,7 +59,7 @@ public:
 
     void reset();
 
-    void onPointerEvent(PointerEvent& e);
+    void onPointerEvent(PointerUIEventArgs& e);
 
 private:
     State _state = State::POSSIBLE;

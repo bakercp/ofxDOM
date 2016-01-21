@@ -106,7 +106,7 @@ protected:
     typedef std::unordered_map<std::size_t, Element*> PointerElementMap;
 
     /// \brief True if the Document size should always match the screen size.
-    bool _autoFillScreen;
+    bool _autoFillScreen = true;
 
     /// \brief Captured pointer and their capture target.
     PointerElementMap _capturedPointerIdToElementMap;

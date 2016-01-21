@@ -39,15 +39,13 @@ Element::Element(float x, float y, float width, float height):
 }
 
 
-Element::Element(const std::string& id, float x, float y, float width, float height):
-    _parent(nullptr),
+Element::Element(const std::string& id,
+                 float x,
+                 float y,
+                 float width,
+                 float height):
     _id(id),
-    _geometry(x, y, width, height),
-    _childGeometryInvalid(true),
-    _enabled(true),
-    _hidden(false),
-    _locked(false),
-    _implicitPointerCapture(false)
+    _geometry(x, y, width, height)
 {
 }
 
@@ -76,10 +74,10 @@ std::unique_ptr<Element> Element::removeChild(Element* element)
         invalidateChildGeometry();
 
         // Alert the node that its parent was set.
-        ElementEvent removedFromEvent(this);
+        ElementEventArgs removedFromEvent(this);
         ofNotifyEvent(detachedChild->removedFrom, removedFromEvent, this);
 
-        ElementEvent childRemovedEvent(detachedChild.get());
+        ElementEventArgs childRemovedEvent(detachedChild.get());
         ofNotifyEvent(childRemoved, childRemovedEvent, this);
 
         /// Alert the node's siblings that it no longer has a sibling.
@@ -87,8 +85,8 @@ std::unique_ptr<Element> Element::removeChild(Element* element)
         {
             if (detachedChild.get() != child.get())
             {
-                ElementEvent evt(detachedChild.get());
-                ofNotifyEvent(child->siblingRemoved, evt, this);
+                ElementEventArgs e(detachedChild.get());
+                ofNotifyEvent(child->siblingRemoved, e, this);
             }
         }
 
@@ -114,8 +112,6 @@ void Element::moveToFront()
     if (hasParent())
     {
         _parent->moveChildToFront(this);
-        ElementOrderEvent evt(this, ElementOrderEvent::TO_FRONT);
-        ofNotifyEvent(reordered, evt, this);
     }
 }
 
@@ -125,8 +121,6 @@ void Element::moveForward()
     if (hasParent())
     {
         _parent->moveChildForward(this);
-        ElementOrderEvent evt(this, ElementOrderEvent::FORWARD);
-        ofNotifyEvent(reordered, evt, this);
     }
 }
 
@@ -136,8 +130,6 @@ void Element::moveToBack()
     if (hasParent())
     {
         _parent->moveChildToBack(this);
-        ElementOrderEvent evt(this, ElementOrderEvent::TO_BACK);
-        ofNotifyEvent(reordered, evt, this);
     }
 }
 
@@ -147,8 +139,32 @@ void Element::moveBackward()
     if (hasParent())
     {
         _parent->moveChildBackward(this);
-        ElementOrderEvent evt(this, ElementOrderEvent::BACKWARD);
-        ofNotifyEvent(reordered, evt, this);
+    }
+}
+
+
+void Element::moveChildToIndex(Element* element, std::size_t index)
+{
+    auto iter = findChild(element);
+
+    if (iter != _children.end())
+    {
+        std::size_t oldIndex = iter - _children.begin();
+        std::size_t newIndex = std::min(index, _children.size() - 1);
+
+        auto detachedChild = std::move(*iter);
+
+        _children.erase(iter);
+
+        _children.insert(_children.begin() + newIndex, std::move(detachedChild));
+
+        ElementOrderEventArgs e(element, oldIndex, newIndex);
+        ofNotifyEvent(reordered, e, element);
+        ofNotifyEvent(childReordered, e, this);
+    }
+    else
+    {
+        throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Element::moveChildToFront: Element does not exist.");
     }
 }
 
@@ -159,12 +175,20 @@ void Element::moveChildToFront(Element* element)
 
     if (iter != _children.end())
     {
+        std::size_t oldIndex = iter - _children.begin();
+        std::size_t newIndex = 0;
+
         auto detachedChild = std::move(*iter);
         _children.erase(iter);
         _children.insert(_children.begin(), std::move(detachedChild));
 
-        ElementOrderEvent evt(element, ElementOrderEvent::TO_FRONT);
-        ofNotifyEvent(childReordered, evt, this);
+        ElementOrderEventArgs e(element, oldIndex, newIndex);
+        ofNotifyEvent(reordered, e, element);
+        ofNotifyEvent(childReordered, e, this);
+    }
+    else
+    {
+        throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Element::moveChildToFront: Element does not exist.");
     }
 }
 
@@ -173,12 +197,24 @@ void Element::moveChildForward(Element* element)
 {
     auto iter = findChild(element);
 
-    if (iter != _children.end() &&
-        iter != _children.begin())
+    if (iter != _children.end())
     {
-        std::iter_swap(iter, iter - 1);
-        ElementOrderEvent evt(element, ElementOrderEvent::FORWARD);
-        ofNotifyEvent(childReordered, evt, this);
+        // Make sure it's not already in the front.
+        if (iter != _children.begin())
+        {
+            std::size_t oldIndex = iter - _children.begin();
+            std::size_t newIndex = oldIndex - 1;
+
+            std::iter_swap(iter, iter - 1);
+
+            ElementOrderEventArgs e(element, oldIndex, newIndex);
+            ofNotifyEvent(reordered, e, element);
+            ofNotifyEvent(childReordered, e, this);
+        }
+    }
+    else
+    {
+        throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Element::moveChildForward: Element does not exist.");
     }
 }
 
@@ -187,14 +223,26 @@ void Element::moveChildToBack(Element* element)
 {
     auto iter = findChild(element);
 
-    if (iter != _children.end() &&
-        iter != _children.end() - 1)
+    if (iter != _children.end())
     {
-        auto detachedChild = std::move(*iter);
-        _children.erase(iter);
-        _children.push_back(std::move(detachedChild));
-        ElementOrderEvent evt(element, ElementOrderEvent::TO_BACK);
-        ofNotifyEvent(childReordered, evt, this);
+        // Make sure it's not already in the back.
+        if (iter != _children.end() - 1)
+        {
+            std::size_t oldIndex = iter - _children.begin();
+            std::size_t newIndex = _children.size() - 1;
+
+            auto detachedChild = std::move(*iter);
+            _children.erase(iter);
+            _children.push_back(std::move(detachedChild));
+
+            ElementOrderEventArgs e(element, oldIndex, newIndex);
+            ofNotifyEvent(reordered, e, element);
+            ofNotifyEvent(childReordered, e, this);
+        }
+    }
+    else
+    {
+        throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Element::moveChildToBack: Element does not exist.");
     }
 }
 
@@ -203,12 +251,19 @@ void Element::moveChildBackward(Element* element)
 {
     auto iter = findChild(element);
 
-    if (iter != _children.end() &&
-        iter != _children.end() - 1)
+    if (iter != _children.end())
     {
-        std::iter_swap(iter, iter + 1);
-        ElementOrderEvent evt(element, ElementOrderEvent::BACKWARD);
-        ofNotifyEvent(childReordered, evt, this);
+        if (iter != _children.end() - 1)
+        {
+            std::size_t oldIndex = iter - _children.begin();
+            std::size_t newIndex = _children.size() + 1;
+
+            std::iter_swap(iter, iter + 1);
+
+            ElementOrderEventArgs e(element, oldIndex, newIndex);
+            ofNotifyEvent(reordered, e, element);
+            ofNotifyEvent(childReordered, e, this);
+        }
     }
 }
 
@@ -228,6 +283,13 @@ bool Element::isSibling(Element* element) const
 }
 
 
+std::size_t Element::numSiblings() const
+{
+    // Don't count self.
+    return _parent ? (_parent->numChildren() - 1) : 0;
+}
+
+
 bool Element::isParent(Element* element) const
 {
     return (nullptr != element)
@@ -238,6 +300,12 @@ bool Element::isParent(Element* element) const
 bool Element::hasChildren() const
 {
     return !_children.empty();
+}
+
+
+std::size_t Element::numChildren() const
+{
+    return _children.size();
 }
 
 
@@ -380,8 +448,8 @@ Position Element::screenToParent(const Position& screenPosition) const
 void Element::setPosition(float x, float y)
 {
     _geometry.setPosition(x, y);
-    MoveEvent evt(getPosition());
-    ofNotifyEvent(move, evt, this);
+    MoveEventArgs e(getPosition());
+    ofNotifyEvent(move, e, this);
 }
 
 
@@ -439,8 +507,8 @@ void Element::setSize(float width, float height)
     _geometry.setWidth(width);
     _geometry.setHeight(height);
     _geometry.standardize();
-    ResizeEvent evt(_geometry);
-    ofNotifyEvent(resize, evt, this);
+    ResizeEventArgs e(_geometry);
+    ofNotifyEvent(resize, e, this);
 }
 
 
@@ -541,16 +609,16 @@ void Element::setAttribute(const std::string& key, const Any& value)
 {
     _attributes[key] = value;
 
-    AttributeEvent evt(key, value);
-    ofNotifyEvent(attributeSet, evt, this);
+    AttributeEventArgs e(key, value);
+    ofNotifyEvent(attributeSet, e, this);
 }
 
 
 void Element::clearAttribute(const std::string& key)
 {
     _attributes.erase(key);
-    AttributeEvent evt(key);
-    ofNotifyEvent(attributeCleared, evt, this);
+    AttributeEventArgs e(key);
+    ofNotifyEvent(attributeCleared, e, this);
 }
 
 
@@ -692,8 +760,8 @@ bool Element::isEnabled() const
 void Element::setEnabled(bool enabled_)
 {
     _enabled = enabled_;
-    EnablerEvent evt(_enabled);
-    ofNotifyEvent(enabled, evt, this);
+    EnablerEventArgs e(_enabled);
+    ofNotifyEvent(enabled, e, this);
 }
 
 
@@ -706,8 +774,8 @@ bool Element::isHidden() const
 void Element::setHidden(bool hidden_)
 {
     _hidden = hidden_;
-    EnablerEvent evt(_hidden);
-    ofNotifyEvent(hidden, evt, this);
+    EnablerEventArgs e(_hidden);
+    ofNotifyEvent(hidden, e, this);
 }
 
 
@@ -720,8 +788,8 @@ bool Element::isLocked() const
 void Element::setLocked(bool locked_)
 {
     _locked = locked_;
-    EnablerEvent evt(_locked);
-    ofNotifyEvent(locked, evt, this);
+    EnablerEventArgs e(_locked);
+    ofNotifyEvent(locked, e, this);
 }
 
 
@@ -784,13 +852,13 @@ bool Element::getImplicitPointerCapture() const
 }
 
 
-void Element::_onChildMoved(MoveEvent& evt)
+void Element::_onChildMoved(MoveEventArgs&)
 {
     invalidateChildGeometry();
 }
 
 
-void Element::_onChildResized(ResizeEvent& evt)
+void Element::_onChildResized(ResizeEventArgs&)
 {
     invalidateChildGeometry();
 }

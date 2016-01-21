@@ -50,8 +50,8 @@ public:
     /// parameters of the CapturedPointer.
     ///
     /// \param element The element that is currently handling the Pointer.
-    /// \param e The PointerEvent used to update the CapturedPointer's data.
-    void update(Element* element, const PointerEvent& e);
+    /// \param e The PointerUIEventArgs used to update the CapturedPointer's data.
+    void update(Element* element, const PointerUIEventArgs& e);
 
     /// \returns the captured pointer's id.
     std::size_t id() const;

@@ -33,8 +33,7 @@ namespace DOM {
 
 
 Document::Document():
-    Element("document", 0, 0, 1024, 768),
-    _autoFillScreen(true)
+    Element("document", 0, 0, 1024, 768)
 {
     ofAddListener(ofEvents().setup, this, &Document::setup);
     ofAddListener(ofEvents().update, this, &Document::update);
@@ -218,14 +217,14 @@ bool Document::onPointerEvent(PointerEventArgs& e)
     }
 
     // Create a DOM pointer event.
-    PointerEvent event(e, this, eventTarget);
+    PointerUIEventArgs event(e, this, eventTarget);
 
 
     // Now, dispatch the original event if there is a target.
     // If eventTarget != nullptr, that means the current pointer id is captured.
     if (eventTarget != nullptr)
     {
-        event.setPhase(Event::Phase::AT_TARGET);
+        event.setPhase(EventArgs::Phase::AT_TARGET);
 
         // Update captured pointer data.
         auto capturedPointer = eventTarget->findCapturedPointerById(e.id());
@@ -301,8 +300,8 @@ void Document::setPointerCaptureForElement(Element* element, std::size_t id)
             element->_capturedPointers.emplace_back(CapturedPointer(id));
 
             // Emit a pointer captured event.
-            PointerCaptureEvent evt(id, true, this, element);
-            element->dispatchEvent(evt);
+            PointerCaptureUIEventArgs e(id, true, this, element);
+            element->dispatchEvent(e);
         }
         else
         {
@@ -334,8 +333,8 @@ void Document::releasePointerCaptureForElement(Element* element, std::size_t id)
 
                 element->_capturedPointers.erase(element->findCapturedPointerById(id));
 
-                PointerCaptureEvent evt(id, false, this, element);
-                element->dispatchEvent(evt);
+                PointerCaptureUIEventArgs e(id, false, this, element);
+                element->dispatchEvent(e);
             }
         }
         else
@@ -372,14 +371,14 @@ void Document::synthesizePointerOutAndLeave(Element* target,
     PointerEventArgs pointerOut(PointerEventArgs::POINTER_OUT, e);
 
     // Call pointerout ONLY on old target
-    PointerEvent pointerOutEvent(pointerOut, this, target);
-    pointerOutEvent.setPhase(Event::Phase::AT_TARGET);
+    PointerUIEventArgs pointerOutEvent(pointerOut, this, target);
+    pointerOutEvent.setPhase(EventArgs::Phase::AT_TARGET);
     target->handleEvent(pointerOutEvent);
 
     PointerEventArgs pointerLeave(PointerEventArgs::POINTER_LEAVE, e);
 
     // Call pointerleave on old target AND ancestors.
-    PointerEvent pointerLeaveEvent(pointerLeave, this, target);
+    PointerUIEventArgs pointerLeaveEvent(pointerLeave, this, target);
     target->dispatchEvent(pointerLeaveEvent);
 }
 
@@ -390,8 +389,8 @@ void Document::synthesizePointerOverAndEnter(Element* target,
     PointerEventArgs pointerOver(PointerEventArgs::POINTER_OVER, e);
 
     // Call pointerout ONLY on old target
-    PointerEvent pointerOverEvent(pointerOver, this, target);
-    pointerOverEvent.setPhase(Event::Phase::AT_TARGET);
+    PointerUIEventArgs pointerOverEvent(pointerOver, this, target);
+    pointerOverEvent.setPhase(EventArgs::Phase::AT_TARGET);
     target->handleEvent(pointerOverEvent);
 
     PointerEventArgs pointerEnter(PointerEventArgs::POINTER_ENTER, e);
@@ -399,7 +398,7 @@ void Document::synthesizePointerOverAndEnter(Element* target,
     // Call pointerover ONLY on the target.
     // Call pointerenter on target and ancestors.
     // Call pointerleave on old target and ancestors
-    PointerEvent pointerEnterEvent(pointerEnter, this, target);
+    PointerUIEventArgs pointerEnterEvent(pointerEnter, this, target);
     target->dispatchEvent(pointerEnterEvent);
 }
 

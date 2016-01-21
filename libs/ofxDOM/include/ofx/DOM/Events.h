@@ -46,25 +46,25 @@ class Element;
 /// \brief The base type describing a named Element Event.
 ///
 /// \sa http://www.w3.org/TR/DOM-Level-3-Events/
-class Event
+class EventArgs
 {
 public:
-    /// \brief Create an Event with a type.
+    /// \brief Create EventArgs with a type.
     /// \param type The event type string (case-insensitive).
     /// \param source The source of the event.
     /// \param target The target element.
     /// \param bubbles True iff the argument bubbles after AT_TARGET phase.
     /// \param cancelable True iff the event can be cancelled by a listener.
     /// \param timestamp The timestamp of the event.
-    Event(const std::string& type,
-          Element* source,
-          Element* target,
-          bool bubbles,
-          bool cancelable,
-          uint64_t timestamp);
+    EventArgs(const std::string& type,
+              Element* source,
+              Element* target,
+              bool bubbles,
+              bool cancelable,
+              uint64_t timestamp);
 
-    /// \brief Destroy the Event.
-    virtual ~Event();
+    /// \brief Destroy the EventArgs.
+    virtual ~EventArgs();
 
     /// \brief Get the event type.
     /// \returns the event type string.
@@ -204,37 +204,46 @@ protected:
 
 
 /// can we handle this named ui event at this coordinate?
-class UIEvent: public Event
+class UIEventArgs: public EventArgs
 {
 public:
-    using Event::Event;
+    using EventArgs::EventArgs;
 
-    virtual ~UIEvent()
+    virtual ~UIEventArgs()
     {
     }
 
 };
 
 
-class PointerCaptureEvent: public UIEvent
+class PointerCaptureUIEventArgs: public UIEventArgs
 {
 public:
-    PointerCaptureEvent(std::size_t id, bool wasCaptured, Element* source, Element* target);
-    virtual ~PointerCaptureEvent();
+    PointerCaptureUIEventArgs(std::size_t id,
+                              bool wasCaptured,
+                              Element* source,
+                              Element* target);
 
+    virtual ~PointerCaptureUIEventArgs();
+
+    /// \returns the pointer id.
     std::size_t id() const;
 
 private:
+    /// \brief The pointer id.
     std::size_t _id;
 
 };
 
 
-class PointerEvent: public UIEvent
+class PointerUIEventArgs: public UIEventArgs
 {
 public:
-    PointerEvent(const PointerEventArgs& args, Element* source, Element* target);
-    virtual ~PointerEvent();
+    PointerUIEventArgs(const PointerEventArgs& args,
+                     Element* source,
+                     Element* target);
+
+    virtual ~PointerUIEventArgs();
 
     const PointerEventArgs& pointer() const;
 
@@ -251,11 +260,14 @@ protected:
 };
 
 
-class KeyboardEvent: public UIEvent
+class KeyboardUIEventArgs: public UIEventArgs
 {
 public:
-    KeyboardEvent(const ofKeyEventArgs& args, Element* source, Element* target);
-    virtual ~KeyboardEvent();
+    KeyboardUIEventArgs(const ofKeyEventArgs& args,
+                        Element* source,
+                        Element* target);
+
+    virtual ~KeyboardUIEventArgs();
 
     const ofKeyEventArgs& key() const;
 
@@ -269,15 +281,15 @@ protected:
 
 
 /// \sa http://www.w3.org/TR/DOM-Level-3-Events/#event-type-focus
-class FocusEvent: public Event
+class FocusEventArgs: public EventArgs
 {
 public:
-    FocusEvent(const std::string& type,
-               Element* source,
-               Element* target,
-               Element* relatedTarget = nullptr);
+    FocusEventArgs(const std::string& type,
+                   Element* source,
+                   Element* target,
+                   Element* relatedTarget = nullptr);
 
-    virtual ~FocusEvent();
+    virtual ~FocusEventArgs();
 
     static const std::string FOCUS_IN;
     static const std::string FOCUS;
@@ -287,7 +299,7 @@ public:
 };
 
 
-class DragDropEvent: public Event
+class DragDropEventArgs: public EventArgs
 {
 public:
 
@@ -300,6 +312,7 @@ public:
     virtual ~AbstractDOMEvent()
     {
     }
+
 };
 
 
@@ -315,7 +328,7 @@ public:
 };
 
 
-template<typename EventArgs>
+template<typename EventArgsType>
 class DOMEvent: public BaseDOMEvent
 {
 public:
@@ -323,7 +336,7 @@ public:
     {
     }
 
-    ofEvent<EventArgs>& event(bool useCapture = false)
+    ofEvent<EventArgsType>& event(bool useCapture = false)
     {
         return useCapture ? capture : bubble;
     }
@@ -333,37 +346,37 @@ public:
         return bubble.size() > 0 || capture.size() > 0;
     }
 
-    void notify(EventArgs& e)
+    void notify(EventArgsType& e)
     {
         switch (e.getPhase())
         {
-            case Event::Phase::NONE:
+            case EventArgs::Phase::NONE:
                 throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "DOMEvent::notify");
-            case Event::Phase::CAPTURING_PHASE:
+            case EventArgs::Phase::CAPTURING_PHASE:
                 capture.notify(e.source(), e);
                 return;
-            case Event::Phase::AT_TARGET:
+            case EventArgs::Phase::AT_TARGET:
                 capture.notify(e.source(), e);
                 bubble.notify(e.source(), e);
                 return;
-            case Event::Phase::BUBBLING_PHASE:
+            case EventArgs::Phase::BUBBLING_PHASE:
                 capture.notify(e.source(), e);
                 return;
         }
     }
 
 private:
-    ofEvent<EventArgs> bubble;
-    ofEvent<EventArgs> capture;
+    ofEvent<EventArgsType> bubble;
+    ofEvent<EventArgsType> capture;
 
 };
 
 
-class MoveEvent: public ofEventArgs
+class MoveEventArgs
 {
 public:
-    MoveEvent(const Position& position);
-    virtual ~MoveEvent();
+    MoveEventArgs(const Position& position);
+    virtual ~MoveEventArgs();
 
     const Position& position() const;
 
@@ -373,11 +386,11 @@ protected:
 };
 
 
-class ResizeEvent: public ofEventArgs
+class ResizeEventArgs
 {
 public:
-    ResizeEvent(const Geometry& geometry);
-    virtual ~ResizeEvent();
+    ResizeEventArgs(const Geometry& geometry);
+    virtual ~ResizeEventArgs();
 
     const Geometry& geometry() const;
 
@@ -387,11 +400,12 @@ protected:
 };
 
 
-class AttributeEvent: public ofEventArgs
+class AttributeEventArgs
 {
 public:
-    AttributeEvent(const std::string& key, const Any& value = Any());
-    virtual ~AttributeEvent();
+    AttributeEventArgs(const std::string& key, const Any& value = Any());
+
+    virtual ~AttributeEventArgs();
 
     const std::string& key() const;
 
@@ -404,11 +418,11 @@ protected:
 };
 
 
-class EnablerEvent: public ofEventArgs
+class EnablerEventArgs
 {
 public:
-    EnablerEvent(bool value);
-    virtual ~EnablerEvent();
+    EnablerEventArgs(bool value);
+    virtual ~EnablerEventArgs();
 
     bool value() const;
 
@@ -418,11 +432,12 @@ protected:
 };
 
 
-class ElementEvent: public ofEventArgs
+class ElementEventArgs
 {
 public:
-    ElementEvent(Element* element);
-    virtual ~ElementEvent();
+    ElementEventArgs(Element* element);
+
+    virtual ~ElementEventArgs();
 
     Element* element();
 
@@ -432,25 +447,30 @@ protected:
 };
 
 
-class ElementOrderEvent: public ElementEvent
+class ElementOrderEventArgs: public ElementEventArgs
 {
 public:
-    enum Type
-    {
-        FORWARD,
-        BACKWARD,
-        TO_FRONT,
-        TO_BACK
-    };
+    ElementOrderEventArgs(Element* element,
+                          std::size_t oldIndex,
+                          std::size_t newIndex);
 
-    ElementOrderEvent(Element* element, Type type);
+    virtual ~ElementOrderEventArgs();
 
-    virtual ~ElementOrderEvent();
+    std::size_t newIndex() const;
 
-    Type type() const;
+    std::size_t oldIndex() const;
+
+    bool wasMovedForward() const;
+
+    bool wasMovedBackward() const;
+
+    bool isAtFront() const;
+
+    bool isAtBack() const;
 
 protected:
-    Type _type;
+    std::size_t _oldIndex;
+    std::size_t _newIndex;
 
 };
 

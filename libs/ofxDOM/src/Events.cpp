@@ -31,12 +31,12 @@ namespace ofx {
 namespace DOM {
 
 
-Event::Event(const std::string& type,
-             Element* source,
-             Element* target,
-             bool bubbles,
-             bool cancelable,
-             uint64_t timestamp):
+EventArgs::EventArgs(const std::string& type,
+                     Element* source,
+                     Element* target,
+                     bool bubbles,
+                     bool cancelable,
+                     uint64_t timestamp):
     _type(type),
     _source(source),
     _target(target),
@@ -47,18 +47,18 @@ Event::Event(const std::string& type,
 }
 
 
-Event::~Event()
+EventArgs::~EventArgs()
 {
 }
 
 
-const std::string& Event::type() const
+const std::string& EventArgs::type() const
 {
     return _type;
 }
 
 
-void Event::stopPropagation()
+void EventArgs::stopPropagation()
 {
     if (_cancelable)
     {
@@ -67,7 +67,7 @@ void Event::stopPropagation()
 }
 
 
-void Event::stopImmediatePropagation()
+void EventArgs::stopImmediatePropagation()
 {
     if (_cancelable)
     {
@@ -77,79 +77,79 @@ void Event::stopImmediatePropagation()
 }
 
 
-void Event::preventDefault()
+void EventArgs::preventDefault()
 {
     _defaultPrevented = true;
 }
 
 
-bool Event::isCancelled() const
+bool EventArgs::isCancelled() const
 {
     return _canceled;
 }
 
 
-bool Event::isDefaultPrevented() const
+bool EventArgs::isDefaultPrevented() const
 {
     return _defaultPrevented;
 }
 
 
-void Event::setPhase(Phase phase)
+void EventArgs::setPhase(Phase phase)
 {
     _phase = phase;
 }
 
 
-Event::Phase Event::getPhase() const
+EventArgs::Phase EventArgs::getPhase() const
 {
     return _phase;
 }
 
 
-bool Event::bubbles() const
+bool EventArgs::bubbles() const
 {
     return _bubbles;
 }
 
 
-bool Event::isCancelable() const
+bool EventArgs::isCancelable() const
 {
     return _cancelable;
 }
 
 
-Element* Event::source() const
+Element* EventArgs::source() const
 {
     return _source;
 }
 
 
-Element* Event::target() const
+Element* EventArgs::target() const
 {
     return _target;
 }
 
 
-Element* Event::relatedTarget() const
+Element* EventArgs::relatedTarget() const
 {
     return _relatedTarget;
 }
 
 
-Element* Event::getCurrentTarget() const
+Element* EventArgs::getCurrentTarget() const
 {
     return _currentTaget;
 }
 
 
-void Event::setCurrentTarget(Element* target)
+void EventArgs::setCurrentTarget(Element* target)
 {
     _currentTaget = target;
 }
 
 
-std::string Event::toString() const
+std::string EventArgs::toString() const
 {
     std::stringstream ss;
 
@@ -186,11 +186,11 @@ std::string Event::toString() const
 }
 
 
-PointerCaptureEvent::PointerCaptureEvent(std::size_t id,
-                                         bool wasCaptured,
-                                         Element* source,
-                                         Element* target):
-    UIEvent((wasCaptured ? PointerEventArgs::GOT_POINTER_CAPTURE : PointerEventArgs::LOST_POINTER_CAPTURE),
+PointerCaptureUIEventArgs::PointerCaptureUIEventArgs(std::size_t id,
+                                                     bool wasCaptured,
+                                                     Element* source,
+                                                     Element* target):
+    UIEventArgs((wasCaptured ? PointerEventArgs::GOT_POINTER_CAPTURE : PointerEventArgs::LOST_POINTER_CAPTURE),
             source,
             target,
             true,
@@ -202,49 +202,49 @@ PointerCaptureEvent::PointerCaptureEvent(std::size_t id,
 
 
 
-PointerCaptureEvent::~PointerCaptureEvent()
+PointerCaptureUIEventArgs::~PointerCaptureUIEventArgs()
 {
 }
 
 
-std::size_t PointerCaptureEvent::id() const
+std::size_t PointerCaptureUIEventArgs::id() const
 {
     return _id;
 }
 
 
-PointerEvent::PointerEvent(const PointerEventArgs& pointer,
-                           Element* source,
-                           Element* target):
-    UIEvent(pointer.eventType(),
-            source,
-            target,
-            eventBubbles(pointer.eventType()),
-            eventCancelable(pointer.eventType()),
-            pointer.timestamp()),
+PointerUIEventArgs::PointerUIEventArgs(const PointerEventArgs& pointer,
+                                       Element* source,
+                                       Element* target):
+    UIEventArgs(pointer.eventType(),
+                source,
+                target,
+            	eventBubbles(pointer.eventType()),
+                eventCancelable(pointer.eventType()),
+                pointer.timestamp()),
     _pointer(pointer)
 {
 }
 
 
-PointerEvent::~PointerEvent()
+PointerUIEventArgs::~PointerUIEventArgs()
 {
 }
 
 
-const PointerEventArgs& PointerEvent::pointer() const
+const PointerEventArgs& PointerUIEventArgs::pointer() const
 {
     return _pointer;
 }
 
 
-Position PointerEvent::screenPosition() const
+Position PointerUIEventArgs::screenPosition() const
 {
     return pointer().point();
 }
 
 
-Position PointerEvent::localPosition() const
+Position PointerUIEventArgs::localPosition() const
 {
     if (nullptr != getCurrentTarget())
     {
@@ -257,14 +257,14 @@ Position PointerEvent::localPosition() const
 }
 
 
-bool PointerEvent::eventBubbles(const std::string& event)
+bool PointerUIEventArgs::eventBubbles(const std::string& event)
 {
     return !(event == PointerEventArgs::POINTER_ENTER
           || event == PointerEventArgs::POINTER_LEAVE);
 }
 
 
-bool PointerEvent::eventCancelable(const std::string& event)
+bool PointerUIEventArgs::eventCancelable(const std::string& event)
 {
     return !(event == PointerEventArgs::POINTER_ENTER
           || event == PointerEventArgs::POINTER_CANCEL
@@ -274,168 +274,202 @@ bool PointerEvent::eventCancelable(const std::string& event)
 }
 
 
-const std::string KeyboardEvent::KEY_DOWN = "keydown";
-const std::string KeyboardEvent::KEY_UP = "keyup";
+const std::string KeyboardUIEventArgs::KEY_DOWN = "keydown";
+const std::string KeyboardUIEventArgs::KEY_UP = "keyup";
 
 
-KeyboardEvent::KeyboardEvent(const ofKeyEventArgs& args,
-                             Element* source,
-                             Element* target):
-    UIEvent(args.type == ofKeyEventArgs::Pressed ? KEY_DOWN : KEY_UP,
-            source,
-            target,
-            true,
-            true,
-            ofGetElapsedTimeMillis())
+KeyboardUIEventArgs::KeyboardUIEventArgs(const ofKeyEventArgs& args,
+                                         Element* source,
+                                         Element* target):
+    UIEventArgs(args.type == ofKeyEventArgs::Pressed ? KEY_DOWN : KEY_UP,
+                source,
+                target,
+                true,
+                true,
+                ofGetElapsedTimeMillis())
 {
 }
 
 
-KeyboardEvent::~KeyboardEvent()
+KeyboardUIEventArgs::~KeyboardUIEventArgs()
 {
 }
 
 
-const ofKeyEventArgs& KeyboardEvent::key() const
+const ofKeyEventArgs& KeyboardUIEventArgs::key() const
 {
     return _key;
 }
 
 
-const std::string FocusEvent::FOCUS_IN = "focusin";
-const std::string FocusEvent::FOCUS = "focus";
-const std::string FocusEvent::FOCUS_OUT = "focusout";
-const std::string FocusEvent::BLUR = "blur";
+const std::string FocusEventArgs::FOCUS_IN = "focusin";
+const std::string FocusEventArgs::FOCUS = "focus";
+const std::string FocusEventArgs::FOCUS_OUT = "focusout";
+const std::string FocusEventArgs::BLUR = "blur";
 
 
-FocusEvent::FocusEvent(const std::string& type,
-                       Element* source,
-                       Element* target,
-                       Element* relatedTarget):
-    Event(type,
-          source,
-          target,
-          (type != FOCUS),
-          false,
-          ofGetElapsedTimeMillis())
+FocusEventArgs::FocusEventArgs(const std::string& type,
+                               Element* source,
+                               Element* target,
+                               Element* relatedTarget):
+    EventArgs(type,
+              source,
+              target,
+              (type != FOCUS), // In the spec.
+              false,
+              ofGetElapsedTimeMillis())
 {
     // TODO: better Event constructor.
     _relatedTarget = relatedTarget;
 }
 
 
-FocusEvent::~FocusEvent()
+FocusEventArgs::~FocusEventArgs()
 {
 }
 
 
-MoveEvent::MoveEvent(const Position& position):
+MoveEventArgs::MoveEventArgs(const Position& position):
     _position(position)
 {
 }
 
 
-MoveEvent::~MoveEvent()
+MoveEventArgs::~MoveEventArgs()
 {
 }
 
 
-const Position& MoveEvent::position() const
+const Position& MoveEventArgs::position() const
 {
     return _position;
 }
 
 
-ResizeEvent::ResizeEvent(const Geometry& geometry):
+ResizeEventArgs::ResizeEventArgs(const Geometry& geometry):
     _geometry(geometry)
 {
 }
 
 
-ResizeEvent::~ResizeEvent()
+ResizeEventArgs::~ResizeEventArgs()
 {
 }
 
 
-const Geometry& ResizeEvent::geometry() const
+const Geometry& ResizeEventArgs::geometry() const
 {
     return _geometry;
 }
 
 
-AttributeEvent::AttributeEvent(const std::string& key, const Any& value):
+AttributeEventArgs::AttributeEventArgs(const std::string& key,
+                                       const Any& value):
     _key(key),
     _value(value)
 {
 }
 
 
-AttributeEvent::~AttributeEvent()
+AttributeEventArgs::~AttributeEventArgs()
 {
 }
 
 
-const std::string& AttributeEvent::key() const
+const std::string& AttributeEventArgs::key() const
 {
     return _key;
 }
 
 
-const Any& AttributeEvent::value() const
+const Any& AttributeEventArgs::value() const
 {
     return _value;
 }
 
 
-EnablerEvent::EnablerEvent(bool value):
+EnablerEventArgs::EnablerEventArgs(bool value):
     _value(value)
 {
 }
 
 
-EnablerEvent::~EnablerEvent()
+EnablerEventArgs::~EnablerEventArgs()
 {
 }
 
 
-bool EnablerEvent::value() const
+bool EnablerEventArgs::value() const
 {
     return _value;
 }
 
 
-ElementEvent::ElementEvent(Element* element):
+ElementEventArgs::ElementEventArgs(Element* element):
     _element(element)
 {
 }
 
 
-ElementEvent::~ElementEvent()
+ElementEventArgs::~ElementEventArgs()
 {
 }
 
 
-Element* ElementEvent::element()
+Element* ElementEventArgs::element()
 {
     return _element;
 }
 
 
-ElementOrderEvent::ElementOrderEvent(Element* element, Type type):
-    ElementEvent(element),
-    _type(type)
+ElementOrderEventArgs::ElementOrderEventArgs(Element* element,
+                                             std::size_t newIndex,
+                                             std::size_t oldIndex):
+    ElementEventArgs(element),
+    _newIndex(newIndex),
+    _oldIndex(oldIndex)
 {
 }
 
 
-ElementOrderEvent::~ElementOrderEvent()
+ElementOrderEventArgs::~ElementOrderEventArgs()
 {
 }
 
 
-ElementOrderEvent::Type ElementOrderEvent::type() const
+std::size_t ElementOrderEventArgs::newIndex() const
 {
-    return _type;
+    return _newIndex;
+}
+
+
+std::size_t ElementOrderEventArgs::oldIndex() const
+{
+    return _oldIndex;
+}
+
+
+bool ElementOrderEventArgs::wasMovedForward() const
+{
+    return _oldIndex > _newIndex;
+}
+
+
+bool ElementOrderEventArgs::wasMovedBackward() const
+{
+    return _newIndex > _oldIndex;
+}
+
+
+bool ElementOrderEventArgs::isAtFront() const
+{
+    return _newIndex == 0;
+}
+
+
+bool ElementOrderEventArgs::isAtBack() const
+{
+    return _element->numSiblings() == _newIndex;
 }
 
 

@@ -153,7 +153,7 @@ public:
 
         while (riter != targets.rend())
         {
-            event.setPhase(event.target() == *riter ? Event::Phase::AT_TARGET : Event::Phase::CAPTURING_PHASE);
+            event.setPhase(event.target() == *riter ? EventArgs::Phase::AT_TARGET : EventArgs::Phase::CAPTURING_PHASE);
             event.setCurrentTarget(*riter);
 
             (*riter)->handleEvent(event);
@@ -174,7 +174,7 @@ public:
 
             while (bubbleIter != targets.end())
             {
-                event.setPhase(Event::Phase::BUBBLING_PHASE);
+                event.setPhase(EventArgs::Phase::BUBBLING_PHASE);
 
                 event.setCurrentTarget(*bubbleIter);
                 (*bubbleIter)->handleEvent(event);
@@ -198,16 +198,16 @@ public:
     /// prevented.
     ///
     /// \param event The Event to dispatch.
-    /// \tparam EventType The Event type to dispatch.
+    /// \tparam EventArgsType The EventArgs type to dispatch.
     /// \returns true iff one of the responders called Event::preventDefault().
-    template <class EventType>
-    void handleEvent(EventType& e)
+    template <class EventArgsType>
+    void handleEvent(EventArgsType& e)
     {
         auto iter = _eventRegistry.find(e.type());
 
         if (iter != _eventRegistry.end())
         {
-            DOMEvent<EventType>* _event = dynamic_cast<DOMEvent<EventType>*>(iter->second);
+            DOMEvent<EventArgsType>* _event = dynamic_cast<DOMEvent<EventArgsType>*>(iter->second);
 
             if (nullptr != _event)
             {
@@ -246,48 +246,48 @@ public:
     {
     }
 
-    DOMEvent<PointerEvent> pointerOver;
-    DOMEvent<PointerEvent> pointerEnter;
-    DOMEvent<PointerEvent> pointerDown;
-    DOMEvent<PointerEvent> pointerMove;
-    DOMEvent<PointerEvent> pointerUp;
-    DOMEvent<PointerEvent> pointerCancel;
-    DOMEvent<PointerEvent> pointerOut;
-    DOMEvent<PointerEvent> pointerLeave;
-    DOMEvent<PointerEvent> pointerScroll;
+    DOMEvent<PointerUIEventArgs> pointerOver;
+    DOMEvent<PointerUIEventArgs> pointerEnter;
+    DOMEvent<PointerUIEventArgs> pointerDown;
+    DOMEvent<PointerUIEventArgs> pointerMove;
+    DOMEvent<PointerUIEventArgs> pointerUp;
+    DOMEvent<PointerUIEventArgs> pointerCancel;
+    DOMEvent<PointerUIEventArgs> pointerOut;
+    DOMEvent<PointerUIEventArgs> pointerLeave;
+    DOMEvent<PointerUIEventArgs> pointerScroll;
 
-    DOMEvent<PointerCaptureEvent> gotPointerCapture;
-    DOMEvent<PointerCaptureEvent> lostPointerCapture;
+    DOMEvent<PointerCaptureUIEventArgs> gotPointerCapture;
+    DOMEvent<PointerCaptureUIEventArgs> lostPointerCapture;
 
-    DOMEvent<KeyboardEvent> keyDown;
-    DOMEvent<KeyboardEvent> keyUp;
+    DOMEvent<KeyboardUIEventArgs> keyDown;
+    DOMEvent<KeyboardUIEventArgs> keyUp;
 
-    DOMEvent<FocusEvent> blur;
-    DOMEvent<FocusEvent> focusIn;
-    DOMEvent<FocusEvent> focus;
-    DOMEvent<FocusEvent> focusOut;
+    DOMEvent<FocusEventArgs> blur;
+    DOMEvent<FocusEventArgs> focusIn;
+    DOMEvent<FocusEventArgs> focus;
+    DOMEvent<FocusEventArgs> focusOut;
 
-    ofEvent<ElementEvent> addedTo;
-    ofEvent<ElementEvent> removedFrom;
-    ofEvent<ElementOrderEvent> reordered;
+    ofEvent<ElementEventArgs> addedTo;
+    ofEvent<ElementEventArgs> removedFrom;
+    ofEvent<ElementOrderEventArgs> reordered;
 
-    ofEvent<ElementEvent> siblingAdded;
-    ofEvent<ElementEvent> siblingRemoved;
-    ofEvent<ElementOrderEvent> siblingReordered;
+    ofEvent<ElementEventArgs> siblingAdded;
+    ofEvent<ElementEventArgs> siblingRemoved;
+    ofEvent<ElementOrderEventArgs> siblingReordered;
 
-    ofEvent<ElementEvent> childAdded;
-    ofEvent<ElementEvent> childRemoved;
-    ofEvent<ElementOrderEvent> childReordered;
+    ofEvent<ElementEventArgs> childAdded;
+    ofEvent<ElementEventArgs> childRemoved;
+    ofEvent<ElementOrderEventArgs> childReordered;
 
-    ofEvent<MoveEvent> move;
-    ofEvent<ResizeEvent> resize;
+    ofEvent<MoveEventArgs> move;
+    ofEvent<ResizeEventArgs> resize;
 
-    ofEvent<AttributeEvent> attributeSet;
-    ofEvent<AttributeEvent> attributeCleared;
+    ofEvent<AttributeEventArgs> attributeSet;
+    ofEvent<AttributeEventArgs> attributeCleared;
 
-    ofEvent<EnablerEvent> enabled;
-    ofEvent<EnablerEvent> locked;
-    ofEvent<EnablerEvent> hidden;
+    ofEvent<EnablerEventArgs> enabled;
+    ofEvent<EnablerEventArgs> locked;
+    ofEvent<EnablerEventArgs> hidden;
 
 protected:
     std::unordered_map<std::string, BaseDOMEvent*> _eventRegistry;
@@ -312,8 +312,8 @@ EventTarget<EventTargetType>::EventTarget()
         { PointerEventArgs::GOT_POINTER_CAPTURE, &gotPointerCapture },
         { PointerEventArgs::LOST_POINTER_CAPTURE, &lostPointerCapture },
 
-        { KeyboardEvent::KEY_DOWN, &keyDown },
-        { KeyboardEvent::KEY_UP, &keyUp }
+        { KeyboardUIEventArgs::KEY_DOWN, &keyDown },
+        { KeyboardUIEventArgs::KEY_UP, &keyUp }
     };
 }
 

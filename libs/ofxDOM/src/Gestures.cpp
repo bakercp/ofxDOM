@@ -55,7 +55,7 @@ void GestureRecognizer::reset()
 }
 
 
-void GestureRecognizer::onPointerEvent(PointerEvent& e)
+void GestureRecognizer::onPointerEvent(PointerUIEventArgs& e)
 {
 
 }

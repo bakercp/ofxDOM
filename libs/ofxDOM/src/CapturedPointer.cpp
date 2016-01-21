@@ -48,7 +48,7 @@ CapturedPointer::~CapturedPointer()
 }
 
 
-void CapturedPointer::update(Element* element, const PointerEvent& e)
+void CapturedPointer::update(Element* element, const PointerUIEventArgs& e)
 {
     uint64_t now = ofGetElapsedTimeMillis();
 
