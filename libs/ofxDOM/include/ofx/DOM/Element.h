@@ -93,7 +93,7 @@ public:
     /// \returns A pointer to the added Element. The parent Element retains
     /// ownership of the pointer via a std::unique_ptr.
     /// \tparam ElementType The Element Type.
-    template<typename ElementType>
+    template <typename ElementType>
     ElementType* addChild(std::unique_ptr<ElementType> element);
 
     /// \brief Create a child using a templated Element type.
@@ -362,7 +362,7 @@ public:
     /// \param key The name of the attribute.
     /// \param inherit True if the Element should query its ancestors for the attribute.
     /// \returns The value corresponding to the key, or throws an exception.
-    template<typename AnyType>
+    template <typename AnyType>
     AnyType getAttribute(const std::string& key, bool inherit = false) const;
 
     /// \brief Set a value for a named attribute.
@@ -548,12 +548,12 @@ ElementType* Element::addChild(Args&&... args)
 }
 
 
-template<typename ElementType>
+template <typename ElementType>
 ElementType* Element::addChild(std::unique_ptr<ElementType> element)
 {
     static_assert(std::is_base_of<Element, ElementType>(), "ElementType must be a subclass of Element.");
 
-    if (nullptr != element)
+    if (element)
     {
         // Get a raw pointer to the node for later.
         ElementType* pNode = element.get();
@@ -598,7 +598,7 @@ ElementType* Element::addChild(std::unique_ptr<ElementType> element)
 }
 
 
-template<typename AnyType>
+template <typename AnyType>
 AnyType Element::getAttribute(const std::string& key, bool inherit) const
 {
     auto iter = _attributes.find(key);

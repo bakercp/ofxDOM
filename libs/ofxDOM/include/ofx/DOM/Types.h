@@ -60,12 +60,12 @@ struct Any
     bool is_null() const { return !ptr; }
     bool not_null() const { return ptr; }
 
-    template<typename U> Any(U&& value)
+    template <typename U> Any(U&& value)
     : ptr(new Derived<StorageType<U>>(std::forward<U>(value)))
     {
     }
 
-    template<class U> bool is() const
+    template <class U> bool is() const
     {
         typedef StorageType<U> T;
 
@@ -74,7 +74,7 @@ struct Any
         return derived;
     }
 
-    template<class U>
+    template <class U>
     StorageType<U>& as()
     {
         typedef StorageType<U> T;
@@ -87,7 +87,7 @@ struct Any
         return derived->value;
     }
 
-    template<class U>
+    template <class U>
     operator U()
     {
         return as<StorageType<U>>();
@@ -156,10 +156,10 @@ private:
         virtual Base* clone() const = 0;
     };
 
-    template<typename T>
+    template <typename T>
     struct Derived: Base
     {
-        template<typename U> Derived(U&& value) : value(forward<U>(value)) { }
+        template <typename U> Derived(U&& value) : value(forward<U>(value)) { }
 
         T value;
 

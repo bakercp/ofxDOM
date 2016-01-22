@@ -273,9 +273,9 @@ Position PointerUIEventArgs::screenPosition() const
 
 Position PointerUIEventArgs::localPosition() const
 {
-    if (nullptr != getCurrentTarget())
+    if (_currentTaget)
     {
-        return getCurrentTarget()->screenToLocal(pointer().point());
+        return _currentTaget->screenToLocal(pointer().point());
     }
     else
     {

@@ -270,16 +270,16 @@ void Element::moveChildBackward(Element* element)
 
 bool Element::isChild(Element* element) const
 {
-    return (nullptr != element)
-        && (this == element->_parent);
+    return element
+        && element->_parent == this;
 }
 
 
 bool Element::isSibling(Element* element) const
 {
-    return (nullptr != element)
-        && (nullptr != element->_parent)
-        && (_parent == element->_parent);
+    return element
+        && element->_parent
+        && element->_parent == _parent;
 }
 
 
@@ -292,8 +292,8 @@ std::size_t Element::numSiblings() const
 
 bool Element::isParent(Element* element) const
 {
-    return (nullptr != element)
-        && (this == element->_parent);
+    return element
+        && element == this->_parent;
 }
 
 
@@ -311,7 +311,7 @@ std::size_t Element::numChildren() const
 
 bool Element::hasParent() const
 {
-    return nullptr != _parent;
+    return _parent;
 }
 
 
@@ -382,7 +382,7 @@ Document* Element::document()
 
 const Document* Element::document() const
 {
-    if (hasParent())
+    if (_parent)
     {
         // If a parent exists, return it recursively.
         return _parent->document();
@@ -697,7 +697,7 @@ Element* Element::recursiveHitTest(const Position& parentPosition)
             {
                 Element* target = child->recursiveHitTest(childLocal);
 
-                if (nullptr != target)
+                if (target)
                 {
                     return target;
                 }
@@ -725,7 +725,7 @@ void Element::setPointerCapture(std::size_t id)
 {
     Document* _document = document();
 
-    if (nullptr != _document)
+    if (_document)
     {
         _document->setPointerCaptureForElement(this, id);
     }
@@ -740,7 +740,7 @@ void Element::releasePointerCapture(std::size_t id)
 {
     Document* _document = document();
 
-    if (nullptr != _document)
+    if (_document)
     {
         _document->releasePointerCaptureForElement(this, id);
     }
