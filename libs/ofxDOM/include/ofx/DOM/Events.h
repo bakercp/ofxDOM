@@ -168,6 +168,9 @@ public:
     /// \param target The current target Element.
     void setCurrentTarget(Element* target);
 
+    /// \returns the timestamp (in milliseconds relative to the epoch).
+    uint64_t timestamp() const;
+
     /// \brief A utility method to print get the Event as a std::string.
     /// \returns The Event as a std::string.
     /// \note Not for serialization.
@@ -347,7 +350,10 @@ public:
 };
 
 
-template<typename EventArgsType>
+/// \brief DOM Events follow the DOM capture, target, bubble propagation scheme.
+///
+///
+template <typename EventArgsType>
 class DOMEvent: public BaseDOMEvent
 {
 public:

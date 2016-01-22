@@ -168,6 +168,12 @@ void EventArgs::setCurrentTarget(Element* target)
 }
 
 
+uint64_t EventArgs::timestamp() const
+{
+    return _timestamp;
+}
+
+
 std::string EventArgs::toString() const
 {
     std::stringstream ss;
