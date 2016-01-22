@@ -297,12 +297,6 @@ bool Element::isParent(Element* element) const
 }
 
 
-bool Element::hasChildren() const
-{
-    return !_children.empty();
-}
-
-
 std::size_t Element::numChildren() const
 {
     return _children.size();
@@ -578,7 +572,7 @@ Geometry Element::getTotalGeometry() const
 {
     Geometry totalGeometry(_geometry);
 
-    if (hasChildren())
+    if (!_children.empty())
     {
         totalGeometry.growToInclude(getChildGeometry() + getPosition());
     }
@@ -691,7 +685,7 @@ Element* Element::recursiveHitTest(const Position& parentPosition)
     {
         Position childLocal = parentPosition - this->getPosition();
 
-        if (hasChildren() && childHitTest(childLocal))
+        if (!_children.empty() && childHitTest(childLocal))
         {
             for (auto& child : _children)
             {

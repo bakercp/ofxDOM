@@ -334,18 +334,26 @@ public:
     virtual ~AbstractDOMEvent()
     {
     }
-
 };
 
 
-class BaseDOMEvent: public AbstractDOMEvent
+
+class BaseDOMEvent
 {
 public:
     virtual ~BaseDOMEvent()
     {
     }
 
-    virtual bool hasListeners() const = 0;
+    //virtual std::string type() const = 0;
+
+    virtual bool hasBubblePhaseListeners() const = 0;
+    virtual bool hasCapturePhaseListeners() const = 0;
+
+    bool hasListeners() const
+    {
+        return hasBubblePhaseListeners() || hasCapturePhaseListeners();
+    }
 
 };
 
@@ -361,14 +369,19 @@ public:
     {
     }
 
-    ofEvent<EventArgsType>& event(bool useCapture = false)
+    bool hasBubblePhaseListeners() const override
     {
-        return useCapture ? capture : bubble;
+        return _bubbleEvent.size() > 0;
     }
 
-    bool hasListeners() const
+    bool hasCapturePhaseListeners() const override
     {
-        return bubble.size() > 0 || capture.size() > 0;
+        return _captureEvent.size() > 0;
+    }
+
+    ofEvent<EventArgsType>& event(bool useCapture = false)
+    {
+        return useCapture ? _captureEvent : _bubbleEvent;
     }
 
     void notify(EventArgsType& e)
@@ -378,21 +391,21 @@ public:
             case EventArgs::Phase::NONE:
                 throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "DOMEvent::notify");
             case EventArgs::Phase::CAPTURING_PHASE:
-                capture.notify(e.source(), e);
+                _captureEvent.notify(e.source(), e);
                 return;
             case EventArgs::Phase::AT_TARGET:
-                capture.notify(e.source(), e);
-                bubble.notify(e.source(), e);
+                _captureEvent.notify(e.source(), e);
+                _bubbleEvent.notify(e.source(), e);
                 return;
             case EventArgs::Phase::BUBBLING_PHASE:
-                capture.notify(e.source(), e);
+                _bubbleEvent.notify(e.source(), e);
                 return;
         }
     }
 
 private:
-    ofEvent<EventArgsType> bubble;
-    ofEvent<EventArgsType> capture;
+    ofEvent<EventArgsType> _bubbleEvent;
+    ofEvent<EventArgsType> _captureEvent;
 
 };
 

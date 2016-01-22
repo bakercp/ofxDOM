@@ -176,17 +176,88 @@ public:
     /// \returns the number of siblings.
     std::size_t numSiblings() const;
 
+    /// \returns a list of pointer to child elements.
+    std::vector<Element*> siblings()
+    {
+        std::vector<Element*> results;
+
+        if (_parent)
+        {
+            for (auto& child : _parent->_children)
+            {
+                Element* sibling = child.get();
+
+                if (this != sibling)
+                {
+                    results.push_back(sibling);
+                }
+            }
+        }
+
+        return results;
+    }
+
+
+    template <typename ElementType>
+    std::vector<ElementType*> siblings()
+    {
+        std::vector<ElementType*> results;
+
+        if (_parent)
+        {
+            for (auto& child : _parent->_children)
+            {
+                ElementType* pChild = dynamic_cast<ElementType*>(child.get());
+
+                if (this != pChild)
+                {
+                    results.push_back(pChild);
+                }
+            }
+        }
+
+        return results;
+    }
+
+
     /// \brief Determine if the given Element is the parent of this Element.
     /// \param element A pointer the the Element to test.
     /// \returns true iff the given element is the parent of this Element.
     bool isParent(Element* element) const;
 
-    /// \brief Determine if this Element has any children.
-    /// \returns true iff this Element has any children.
-    bool hasChildren() const;
-
     /// \returns the number of children.
     std::size_t numChildren() const;
+
+    /// \returns a list of pointer to child elements.
+    std::vector<Element*> children()
+    {
+        std::vector<Element*> results;
+
+        for (auto& child : _children)
+        {
+            results.push_back(child.get());
+        }
+
+        return results;
+    }
+
+    template <typename ElementType>
+    std::vector<ElementType*> children()
+    {
+        std::vector<ElementType*> results;
+
+        for (auto& child : _children)
+        {
+            ElementType* pChild = dynamic_cast<ElementType*>(child.get());
+
+            if (pChild)
+            {
+                results.push_back(pChild);
+            }
+        }
+
+        return results;
+    }
 
     /// \brief Determine if this Element has a parent Element.
     /// \returns true if this Element has a parent Element.

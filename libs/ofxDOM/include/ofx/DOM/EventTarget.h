@@ -376,6 +376,9 @@ template <class EventTargetType>
 template <class EventArgsType>
 bool EventTarget<EventTargetType>::handleEvent(EventArgsType& e)
 {
+
+
+
     auto iter = _eventRegistry.find(e.type());
 
     if (iter != _eventRegistry.end())
@@ -384,6 +387,12 @@ bool EventTarget<EventTargetType>::handleEvent(EventArgsType& e)
 
         if (_event)
         {
+//            if (e.type() == "buttonpressed")
+//            {
+//                cout << "event: " << e.type() << " being handled by : " << (e.getCurrentTarget() ? e.getCurrentTarget()->getId() : "nullptr") << endl;
+//                cout << " hasListeners -> " << _event->hasListeners() << std::endl;
+//                cout << " e -> " << e.toString() << std::endl;
+//            }
             _event->notify(e);
             return true;
         }
