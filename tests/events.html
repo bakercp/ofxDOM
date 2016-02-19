@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<style>
+div {
+    padding: 10px;
+    width: 55px;
+}
+
+#child_0 {
+    position: absolute;
+    top: 160px;
+    left: 720px;
+}
+
+#child_1_0 {
+    position: absolute;
+    top: 250px;
+    left: 250px;
+}
+
+#child_1_0_0 {
+    position: absolute;
+    top: -100px;
+    left: 500px;
+    /*z-index: -100;*/
+    background: cyan;
+    width: 200px;
+}
+
+#child_1_0_1 {
+    position: absolute;
+    top: -120px;
+    left: 550px;
+    /*z-index: -100;*/
+    background: cyan;
+    width: 200px;
+}
+
+#_child_0 {
+    position: absolute;
+    top: 170px;
+    left: 820px;
+}
+
+#_child_1_0 {
+    position: absolute;
+    top: 280px;
+    left: 280px;
+}
+
+#_child_1_0_0 {
+    position: absolute;
+    top: -150px;
+    left: 450px;
+    /*z-index: -100;*/
+    background: cyan;
+    width: 200px;
+}
+
+
+</style>
+
+
+<!-- <div id="root0">
+    <div id="_child_0" style="background: green">
+        _Child_0
+    </div>
+    <div id="_child_1" style="background: blue">
+        _Child_1
+        <div id="_child_1_0" style="background: yellow">
+            _Child_1_0
+            <div id="_child_1_0_0" style="background: gray">
+                _Child_1_0_0
+            </div>
+        <div id="_child_1_0_1" style="background: gray">
+            _Child_1_0_1
+        </div>
+        </div>
+    </div>
+    <div id="_child_2" style="background: orange">
+        _Child_2
+    </div>
+</div> -->
+
+
+
+<div id="root">
+    <div id="child_0" style="background: green">
+        Child_0
+    </div>
+    <div id="child_1" style="background: blue">
+        Child_1
+        <div id="child_1_0" style="background: yellow">
+            Child_1_0
+            <div id="child_1_0_0" style="background: gray">
+                Child_1_0_0
+            </div>
+        <div id="child_1_0_1" style="background: gray">
+            Child_1_0_1
+        </div>
+        </div>
+    </div>
+    <div id="child_2" style="background: orange">
+        Child_2
+    </div>
+</div>
+
+<script>
+reg("root", "mouseenter", "mouseleave", "green", "red");
+reg("child_0", "mouseenter", "mouseleave", "green", "red");
+reg("child_1", "mouseenter", "mouseleave", "green", "red");
+reg("child_1_0", "mouseenter", "mouseleave", "green", "red");
+reg("child_1_0_0", "mouseenter", "mouseleave", "purple", "cyan");
+reg("child_1_0_1", "mouseenter", "mouseleave", "purple", "cyan");
+
+
+    // reg("root0", "mouseenter", "mouseleave", "green", "red");
+    // reg("_child_0", "mouseenter", "mouseleave", "green", "red");
+    // reg("_child_1", "mouseenter", "mouseleave", "green", "red");
+    // reg("_child_1_0", "mouseenter", "mouseleave", "green", "red");
+    //     reg("_child_1_0_0", "mouseenter", "mouseleave", "yellow", "blue");
+    //
+
+    function reg(element, event0, event1, color0, color1) {
+        document.getElementById(element).addEventListener(event0, function(evt) {
+            this.style.background = color0;
+            console.log(element + " : " + event0);
+        });
+
+        document.getElementById(element).addEventListener(event1, function(evt) {
+            this.style.background = color1;
+            console.log(element + " : " + event1);
+        // console.log(evt.path);
+        });
+    }
+
+</script>
+</body>
+</html>
