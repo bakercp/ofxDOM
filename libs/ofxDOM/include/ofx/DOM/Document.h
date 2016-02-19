@@ -163,5 +163,4 @@ private:
 };
 
 
-
 } } // namespace ofx::DOM

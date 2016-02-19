@@ -109,7 +109,7 @@ std::unique_ptr<Element> Element::removeChild(Element* element)
 
 void Element::moveToFront()
 {
-    if (hasParent())
+    if (_parent)
     {
         _parent->moveChildToFront(this);
     }
@@ -118,7 +118,7 @@ void Element::moveToFront()
 
 void Element::moveForward()
 {
-    if (hasParent())
+    if (_parent)
     {
         _parent->moveChildForward(this);
     }
@@ -127,7 +127,7 @@ void Element::moveForward()
 
 void Element::moveToBack()
 {
-    if (hasParent())
+    if (_parent)
     {
         _parent->moveChildToBack(this);
     }
@@ -136,7 +136,7 @@ void Element::moveToBack()
 
 void Element::moveBackward()
 {
-    if (hasParent())
+    if (_parent)
     {
         _parent->moveChildBackward(this);
     }
@@ -290,6 +290,36 @@ std::size_t Element::numSiblings() const
 }
 
 
+std::vector<Element*> Element::siblings()
+{
+    std::vector<Element*> results;
+
+    if (_parent)
+    {
+        results.reserve(_parent->_children.size());
+
+        for (auto& child : _parent->_children)
+        {
+            Element* sibling = child.get();
+
+            if (sibling)
+            {
+                if (this != sibling)
+                {
+                    results.push_back(sibling);
+                }
+            }
+            else
+            {
+                throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Element::siblings(): Child element is nullptr.");
+            }
+        }
+    }
+
+    return results;
+}
+
+
 bool Element::isParent(Element* element) const
 {
     return element
@@ -300,6 +330,30 @@ bool Element::isParent(Element* element) const
 std::size_t Element::numChildren() const
 {
     return _children.size();
+}
+
+
+std::vector<Element*> Element::children()
+{
+    std::vector<Element*> results;
+
+    results.reserve(_children.size());
+
+    for (auto& child : _children)
+    {
+        Element* pChild = child.get();
+
+        if (pChild)
+        {
+            results.push_back(pChild);
+        }
+        else
+        {
+            throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Element::children(): Child element is nullptr.");
+        }
+    }
+
+    return results;
 }
 
 
@@ -325,11 +379,22 @@ std::vector<Element*> Element::findChildrenById(const std::string& id)
 {
     std::vector<Element*> matches;
 
+    matches.reserve(_children.size());
+
     for (auto& child : _children)
     {
-        if (child->getId() == id)
+        Element* pChild = child.get();
+
+        if (pChild)
         {
-            matches.push_back(child.get());
+            if (child->getId() == id)
+            {
+                matches.push_back(child.get());
+            }
+        }
+        else
+        {
+            throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Element::findChildrenById(): Child element is nullptr.");
         }
     }
 
@@ -361,7 +426,7 @@ const Element* Element::parent() const
 
 Document* Element::document()
 {
-    if (hasParent())
+    if (_parent)
     {
         // If a parent exists, return it recursively.
         return _parent->document();
@@ -415,7 +480,7 @@ Position Element::screenToLocal(const Position& screenPosition) const
 
 Position Element::parentToScreen(const Position& parentPosition) const
 {
-    if (hasParent())
+    if (_parent)
     {
         return parentPosition + _parent->getScreenPosition();
     }
@@ -428,7 +493,7 @@ Position Element::parentToScreen(const Position& parentPosition) const
 
 Position Element::screenToParent(const Position& screenPosition) const
 {
-    if (hasParent())
+    if (_parent)
     {
         return screenPosition - _parent->getScreenPosition();
     }
@@ -473,7 +538,7 @@ float Element::getY() const
 
 Position Element::getScreenPosition() const
 {
-    if (hasParent())
+    if (_parent)
     {
         return getPosition() + _parent->getScreenPosition();
     }
@@ -547,15 +612,22 @@ Geometry Element::getChildGeometry() const
 
         while (iter != _children.end())
         {
-            const Element& child = *(iter->get());
+            const Element* child = iter->get();
 
-            if (iter == _children.begin())
+            if (child)
             {
-                _childGeometry = child.getTotalGeometry();
+                if (iter == _children.begin())
+                {
+                    _childGeometry = child->getTotalGeometry();
+                }
+                else
+                {
+                    _childGeometry.growToInclude(child->getTotalGeometry());
+                }
             }
             else
             {
-                _childGeometry.growToInclude(child.getTotalGeometry());
+                throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Element::getChildGeometry(): Child element is nullptr.");
             }
 
             ++iter;
@@ -791,9 +863,14 @@ void Element::invalidateChildGeometry() const
 {
     _childGeometryInvalid = true;
 
-    if (hasParent())
+    if (_parent)
     {
         _parent->invalidateChildGeometry();
+    }
+
+    if (_layout)
+    {
+        _layout->doLayout();
     }
 }
 

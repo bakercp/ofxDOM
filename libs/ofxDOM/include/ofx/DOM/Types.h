@@ -48,6 +48,24 @@ typedef ofPoint Position;
 typedef ofPoint Size;
 typedef ofRectangle Geometry;
 
+/// \brief The orientation of a Widget.
+/// \todo Replace this with ofOrientation.
+
+//    OF_ORIENTATION_DEFAULT = 1,
+//    OF_ORIENTATION_180 = 2,
+//    OF_ORIENTATION_90_LEFT = 3,
+//    OF_ORIENTATION_90_RIGHT = 4,
+//    OF_ORIENTATION_UNKNOWN = 5
+
+enum class Orientation
+{
+    /// \brief Locks the Orientation to landscape.
+    HORIZONTAL,
+    /// \brief Locks the Orientation to portrait.
+    VERTICAL,
+    /// \brief Sets the Orientation based on the aspect ratio.
+    DEFAULT
+};
 
 template <class T>
 using StorageType = typename decay<T>::type;

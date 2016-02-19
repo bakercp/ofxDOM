@@ -32,6 +32,7 @@
 #include "ofx/DOM/Events.h"
 #include "ofx/DOM/EventTarget.h"
 #include "ofx/DOM/Exceptions.h"
+#include "ofx/DOM/Layout.h"
 #include "ofx/DOM/Types.h"
 
 
@@ -176,49 +177,16 @@ public:
     /// \returns the number of siblings.
     std::size_t numSiblings() const;
 
-    /// \returns a list of pointer to child elements.
-    std::vector<Element*> siblings()
-    {
-        std::vector<Element*> results;
+    /// \returns a list of pointers to sibling elements.
+    std::vector<Element*> siblings();
 
-        if (_parent)
-        {
-            for (auto& child : _parent->_children)
-            {
-                Element* sibling = child.get();
-
-                if (this != sibling)
-                {
-                    results.push_back(sibling);
-                }
-            }
-        }
-
-        return results;
-    }
-
-
+    /// \brief Get a list of siblings of a given Element or Element subclass.
+    ///
+    /// If the there are no siblings of the given type,
+    ///
+    /// \returns a list of pointers to sibling elements of a given type.
     template <typename ElementType>
-    std::vector<ElementType*> siblings()
-    {
-        std::vector<ElementType*> results;
-
-        if (_parent)
-        {
-            for (auto& child : _parent->_children)
-            {
-                ElementType* pChild = dynamic_cast<ElementType*>(child.get());
-
-                if (this != pChild)
-                {
-                    results.push_back(pChild);
-                }
-            }
-        }
-
-        return results;
-    }
-
+    std::vector<ElementType*> siblings();
 
     /// \brief Determine if the given Element is the parent of this Element.
     /// \param element A pointer the the Element to test.
@@ -228,36 +196,20 @@ public:
     /// \returns the number of children.
     std::size_t numChildren() const;
 
-    /// \returns a list of pointer to child elements.
-    std::vector<Element*> children()
-    {
-        std::vector<Element*> results;
+    /// \brief Get a list of pointers to the child elements.
+    ///
+    /// The parent Element retains ownership.
+    ///
+    /// \returns a list of pointers to child elements.
+    std::vector<Element*> children();
 
-        for (auto& child : _children)
-        {
-            results.push_back(child.get());
-        }
-
-        return results;
-    }
-
+    /// \brief Get a list of pointers to the child elements.
+    ///
+    /// The parent Element retains ownership.
+    ///
+    /// \returns a list of pointers to child elements.
     template <typename ElementType>
-    std::vector<ElementType*> children()
-    {
-        std::vector<ElementType*> results;
-
-        for (auto& child : _children)
-        {
-            ElementType* pChild = dynamic_cast<ElementType*>(child.get());
-
-            if (pChild)
-            {
-                results.push_back(pChild);
-            }
-        }
-
-        return results;
-    }
+    std::vector<ElementType*> children();
 
     /// \brief Determine if this Element has a parent Element.
     /// \returns true if this Element has a parent Element.
@@ -288,6 +240,45 @@ public:
     /// \brief Get a pointer to the parent Document.
     /// \returns a pointer to the parent Document, self if a Document or a nullptr.
     const Document* document() const;
+
+    /// \brief Create a Layout using a templated Layout type.
+    ///
+    /// To create a Layout you can use this method like:
+    ///
+    /// LayoutType* layout = parentElement->createLayout<LayoutType>(arguments ...);
+    ///
+    /// \tparam ElementType The subclass of Element that will be added.
+    /// \tparam Args The variable constructor arguments for the ElementType.
+    /// \param args The variable constructor arguments for the ElementType.
+    /// \returns A pointer to the added Element. The parent Element retains
+    /// ownership of the pointer via a std::unique_ptr.
+    /// \tparam ElementType The Element Type.
+    /// \tparam Args the ElementType constructor arguments.
+    template <typename LayoutType, typename... Args>
+    LayoutType* createLayout(Args&&... args);
+
+    /// \brief Take ownership of the passed std::unique_ptr<Layout>.
+    ///
+    /// This this is "sink" meaning that any Layout passed to this will be
+    /// owned by this Element.
+    ///
+    /// \param layout the rvalue reference to the Layout.
+    /// \returns A pointer to the set Layout. The parent Element retains
+    /// ownership of the pointer via a std::unique_ptr.
+    /// \tparam LayoutType The Layout Type.
+    template <typename LayoutType>
+    LayoutType* setLayout(std::unique_ptr<LayoutType> layout);
+
+    /// \brief Release ownership of the Layout.
+    /// \returns a std::unique_ptr<Layout> to the Layout or nullptr if none.
+    std::unique_ptr<Layout> removeLayout();
+
+    /// \brief Get a pointer to the associated Layout.
+    ///
+    /// The Element retains ownership of the pointer via a std::unique_ptr.
+    ///
+    /// \returns a pointer to the associated Layout or nullptr if there is none.
+    Layout* layout();
 
     /// \brief Perform a hit test on the Element.
     ///
@@ -553,15 +544,6 @@ protected:
     /// \returns true iff implicit pointer capture is enabled.
     bool getImplicitPointerCapture() const;
 
-    /// \brief An optional pointer to a parent Node.
-    Element* _parent = nullptr;
-
-    /// \brief A vector to Elements.
-    std::vector<std::unique_ptr<Element>> _children;
-
-    /// \brief The id for this element.
-    std::string _id;
-
 private:
     /// \brief Not construction-copyable.
     Element(const Element& other) = delete; // non-construction-copyable
@@ -574,6 +556,9 @@ private:
 
     /// \brief A callback for child Elements to notify their parent size changes.
     void _onChildResized(ResizeEventArgs&);
+
+    /// \brief The id for this element.
+    std::string _id;
 
     /// \brief The basic geometry of this element.
     Geometry _geometry;
@@ -596,6 +581,7 @@ private:
     bool _locked = false;
 
     /// \brief A collection of named attributes.
+    /// \todo This may not be permanent.
     std::unordered_map<std::string, Any> _attributes;
 
     /// \brief Automatically capture the pointer on pointer down.
@@ -606,7 +592,19 @@ private:
     /// first pointer captured, and thus the primary pointer.
     std::vector<CapturedPointer> _capturedPointers;
 
-    /// \brief Make Document a friend class.
+    /// \brief The Layout associated with this
+    std::unique_ptr<Layout> _layout = nullptr;
+
+    /// \brief An optional pointer to a parent Node.
+    Element* _parent = nullptr;
+
+    /// \brief A vector to Elements.
+    std::vector<std::unique_ptr<Element>> _children;
+
+    /// \brief The Layout class has access to all private variables.
+    friend class Layout;
+
+    /// \brief The Document class has access to all private variables.
     friend class Document;
 
 };
@@ -622,7 +620,7 @@ ElementType* Element::addChild(Args&&... args)
 template <typename ElementType>
 ElementType* Element::addChild(std::unique_ptr<ElementType> element)
 {
-    static_assert(std::is_base_of<Element, ElementType>(), "ElementType must be a subclass of Element.");
+    static_assert(std::is_base_of<Element, ElementType>(), "ElementType must be an Element or derived from Element.");
 
     if (element)
     {
@@ -661,6 +659,84 @@ ElementType* Element::addChild(std::unique_ptr<ElementType> element)
         }
 
         return pNode;
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+
+template <typename ElementType>
+std::vector<ElementType*> Element::siblings()
+{
+    static_assert(std::is_base_of<Element, ElementType>(), "ElementType must be an Element or derived from Element.");
+
+    std::vector<ElementType*> results;
+
+    if (_parent)
+    {
+        for (auto& child : _parent->_children)
+        {
+            ElementType* pChild = dynamic_cast<ElementType*>(child.get());
+
+            if (pChild != this)
+            {
+                results.push_back(pChild);
+            }
+        }
+    }
+    
+    return results;
+}
+
+
+template <typename ElementType>
+std::vector<ElementType*> Element::children()
+{
+    static_assert(std::is_base_of<Element, ElementType>(), "ElementType must be an Element or derived from Element.");
+
+    std::vector<ElementType*> results;
+
+    for (auto& child : _children)
+    {
+        ElementType* pChild = dynamic_cast<ElementType*>(child.get());
+
+        if (pChild)
+        {
+            results.push_back(pChild);
+        }
+    }
+
+    return results;
+}
+
+
+template <typename LayoutType, typename... Args>
+LayoutType* Element::createLayout(Args&&... args)
+{
+    return setLayout(std::make_unique<LayoutType>(std::forward<Args>(args)...));
+}
+
+
+template <typename LayoutType>
+LayoutType* Element::setLayout(std::unique_ptr<LayoutType> layout)
+{
+    if (layout)
+    {
+        // Get a raw pointer to the node for later.
+        LayoutType* pLayout = layout.get();
+
+        // Assign the parent to the node via the raw pointer.
+        pLayout->_parent = this;
+
+        // Take ownership of the layout.
+        _layout = std::move(layout);
+
+        // Invalidate all cached child geometry.
+        invalidateChildGeometry();
+
+        return pLayout;
     }
     else
     {
