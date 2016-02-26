@@ -37,7 +37,7 @@ Document::Document():
 {
     ofAddListener(ofEvents().setup, this, &Document::setup);
     ofAddListener(ofEvents().update, this, &Document::update);
-    ofAddListener(ofEvents().draw, this, &Document::draw, OF_EVENT_ORDER_BEFORE_APP);
+    ofAddListener(ofEvents().draw, this, &Document::draw, std::numeric_limits<int>::max());
     ofAddListener(ofEvents().exit, this, &Document::exit);
     ofAddListener(ofEvents().windowResized, this, &Document::windowResized, std::numeric_limits<int>::lowest());
 
@@ -57,7 +57,7 @@ Document::~Document()
 {
     ofRemoveListener(ofEvents().setup, this, &Document::setup);
     ofRemoveListener(ofEvents().update, this, &Document::update);
-    ofRemoveListener(ofEvents().draw, this, &Document::draw, OF_EVENT_ORDER_BEFORE_APP);
+    ofRemoveListener(ofEvents().draw, this, &Document::draw, std::numeric_limits<int>::max());
     ofRemoveListener(ofEvents().exit, this, &Document::exit);
     ofRemoveListener(ofEvents().windowResized, this, &Document::windowResized, std::numeric_limits<int>::lowest());
 
