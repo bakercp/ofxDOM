@@ -427,13 +427,13 @@ protected:
 class ResizeEventArgs
 {
 public:
-    ResizeEventArgs(const Geometry& geometry);
+    ResizeEventArgs(const Shape& shape);
     virtual ~ResizeEventArgs();
 
-    const Geometry& geometry() const;
+    const Shape& shape() const;
 
 protected:
-    Geometry _geometry;
+    Shape _shape;
 
 };
 

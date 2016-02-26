@@ -373,8 +373,8 @@ const Position& MoveEventArgs::position() const
 }
 
 
-ResizeEventArgs::ResizeEventArgs(const Geometry& geometry):
-    _geometry(geometry)
+ResizeEventArgs::ResizeEventArgs(const Shape& shape):
+    _shape(shape)
 {
 }
 
@@ -384,9 +384,9 @@ ResizeEventArgs::~ResizeEventArgs()
 }
 
 
-const Geometry& ResizeEventArgs::geometry() const
+const Shape& ResizeEventArgs::shape() const
 {
-    return _geometry;
+    return _shape;
 }
 
 

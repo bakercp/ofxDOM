@@ -45,7 +45,7 @@ Element::Element(const std::string& id,
                  float width,
                  float height):
     _id(id),
-    _geometry(x, y, width, height)
+    _shape(x, y, width, height)
 {
 }
 
@@ -71,7 +71,7 @@ std::unique_ptr<Element> Element::removeChild(Element* element)
         detachedChild->_parent = nullptr;
 
         // Invalidate all cached child geometry.
-        invalidateChildGeometry();
+        invalidateChildShape();
 
         // Alert the node that its parent was set.
         ElementEventArgs removedFromEvent(this);
@@ -456,13 +456,13 @@ const Document* Element::document() const
 
 bool Element::hitTest(const Position& parentPosition) const
 {
-    return getGeometry().inside(parentPosition);
+    return getShape().inside(parentPosition);
 }
 
 
 bool Element::childHitTest(const Position& localPosition) const
 {
-    return getChildGeometry().inside(localPosition);
+    return getChildShape().inside(localPosition);
 }
 
 
@@ -506,7 +506,7 @@ Position Element::screenToParent(const Position& screenPosition) const
 
 void Element::setPosition(float x, float y)
 {
-    _geometry.setPosition(x, y);
+    _shape.setPosition(x, y);
     MoveEventArgs e(getPosition());
     ofNotifyEvent(move, e, this);
 }
@@ -520,19 +520,19 @@ void Element::setPosition(const Position& position)
 
 Position Element::getPosition() const
 {
-    return _geometry.getPosition();
+    return _shape.getPosition();
 }
 
 
 float Element::getX() const
 {
-    return _geometry.getX();
+    return _shape.getX();
 }
 
 
 float Element::getY() const
 {
-    return _geometry.getY();
+    return _shape.getY();
 }
 
 
@@ -563,50 +563,50 @@ float Element::getScreenY() const
 
 void Element::setSize(float width, float height)
 {
-    _geometry.setWidth(width);
-    _geometry.setHeight(height);
-    _geometry.standardize();
-    ResizeEventArgs e(_geometry);
+    _shape.setWidth(width);
+    _shape.setHeight(height);
+    _shape.standardize();
+    ResizeEventArgs e(_shape);
     ofNotifyEvent(resize, e, this);
 }
 
 
 Size Element::getSize() const
 {
-    return Size(_geometry.width, _geometry.height);
+    return Size(_shape.width, _shape.height);
 }
 
 
 float Element::getWidth() const
 {
-    return _geometry.getWidth();
+    return _shape.getWidth();
 }
 
 
 float Element::getHeight() const
 {
-    return _geometry.getHeight();
+    return _shape.getHeight();
 }
 
 
-Geometry Element::getGeometry() const
+Shape Element::getShape() const
 {
-    return _geometry;
+    return _shape;
 }
 
 
-void Element::setGeometry(const Geometry& geometry)
+void Element::setShape(const Shape& shape)
 {
-    setPosition(geometry.x, geometry.y);
-    setSize(geometry.width, geometry.height);
+    setPosition(shape.x, shape.y);
+    setSize(shape.width, shape.height);
 }
 
 
-Geometry Element::getChildGeometry() const
+Shape Element::getChildShape() const
 {
-    if (_childGeometryInvalid)
+    if (_childShapeInvalid)
     {
-        _childGeometry = Geometry(); // Clear.
+        _childShape = Shape(); // Clear.
 
         auto iter = _children.begin();
 
@@ -618,11 +618,11 @@ Geometry Element::getChildGeometry() const
             {
                 if (iter == _children.begin())
                 {
-                    _childGeometry = child->getTotalGeometry();
+                    _childShape = child->getTotalShape();
                 }
                 else
                 {
-                    _childGeometry.growToInclude(child->getTotalGeometry());
+                    _childShape.growToInclude(child->getTotalShape());
                 }
             }
             else
@@ -633,23 +633,23 @@ Geometry Element::getChildGeometry() const
             ++iter;
         }
 
-        _childGeometryInvalid = false;
+        _childShapeInvalid = false;
     }
 
-    return _childGeometry;
+    return _childShape;
 }
 
 
-Geometry Element::getTotalGeometry() const
+Shape Element::getTotalShape() const
 {
-    Geometry totalGeometry(_geometry);
+    Shape totalShape(_shape);
 
     if (!_children.empty())
     {
-        totalGeometry.growToInclude(getChildGeometry() + getPosition());
+        totalShape.growToInclude(getChildShape() + getPosition());
     }
 
-    return totalGeometry;
+    return totalShape;
 }
 
 
@@ -720,7 +720,7 @@ void Element::_draw(ofEventArgs& e)
     {
         ofPushStyle();
         ofPushMatrix();
-        ofTranslate(_geometry.getPosition());
+        ofTranslate(_shape.getPosition());
 
         // Draw parent behind children.
         onDraw();
@@ -859,13 +859,13 @@ void Element::setLocked(bool locked_)
 }
 
 
-void Element::invalidateChildGeometry() const
+void Element::invalidateChildShape() const
 {
-    _childGeometryInvalid = true;
+    _childShapeInvalid = true;
 
     if (_parent)
     {
-        _parent->invalidateChildGeometry();
+        _parent->invalidateChildShape();
     }
 
     if (_layout)
@@ -925,13 +925,13 @@ bool Element::getImplicitPointerCapture() const
 
 void Element::_onChildMoved(MoveEventArgs&)
 {
-    invalidateChildGeometry();
+    invalidateChildShape();
 }
 
 
 void Element::_onChildResized(ResizeEventArgs&)
 {
-    invalidateChildGeometry();
+    invalidateChildShape();
 }
 
 

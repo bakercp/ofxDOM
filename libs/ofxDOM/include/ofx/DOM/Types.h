@@ -46,7 +46,7 @@ class PointerEvent;
 
 typedef ofPoint Position;
 typedef ofPoint Size;
-typedef ofRectangle Geometry;
+typedef ofRectangle Shape;
 
 /// \brief The orientation of a Widget.
 /// \todo Replace this with ofOrientation.

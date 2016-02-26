@@ -30,4 +30,3 @@
 #include "ofx/DOM/Document.h"
 #include "ofx/DOM/Element.h"
 #include "ofx/DOM/Types.h"
-

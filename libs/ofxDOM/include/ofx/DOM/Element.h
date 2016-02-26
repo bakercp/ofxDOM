@@ -49,11 +49,11 @@ class AbstractLayout;
 /// There are several DOM coordiante systems with respect to an Element.
 ///
 /// 1. Local Coordinates: The origin of the local coordiantes are at 0, 0 of the
-/// Element Geometry.  The coordiantes of the local Geometry range from (0, 0)
+/// Element Shape.  The coordiantes of the local shape range from (0, 0)
 /// - the upper left corner to (width, height) - the lower right corner of the
 /// Element.
 ///
-/// 2. Parent Coordinates: The (x, y) position of the Element geometry are in
+/// 2. Parent Coordinates: The (x, y) position of the Element shape are in
 /// "Parent" Coordinates, meaning they are oriented with respect to the
 /// parent's Local Coordinates.
 ///
@@ -282,11 +282,11 @@ public:
 
     /// \brief Perform a hit test on the Element.
     ///
-    /// For a normal Element, the hit test will test the rectangular geometry
+    /// For a normal Element, the hit test will test the rectangular shape
     /// of the Element. Subclasses can override this method for custom hit test
     /// geometry.
     ///
-    /// Parent coordinates are used because the geometry / position of the
+    /// Parent coordinates are used because the shape / position of the
     /// Element are in parent coordinates.
     ///
     /// \param parentPosition The Position to test in parent coordinates.
@@ -353,7 +353,7 @@ public:
 
     /// \brief Get the Position of the Element in screen coordinates.
     /// \returns the Position of the Element in screen coordinates.
-    /// \todo Cache screen position w/ geometry.
+    /// \todo Cache screen position w/ shape.
     Position getScreenPosition() const;
 
     /// \brief Get the X position of the Element in screen coordinates.
@@ -381,22 +381,22 @@ public:
     /// \returns The height of the Element.
     float getHeight() const;
 
-    /// \brief Get the geometry of the Element in its parent coordinates.
-    /// \returns the Geometry of the Element in its parent coordinates.
-    Geometry getGeometry() const;
+    /// \brief Get the shape of the Element in its parent coordinates.
+    /// \returns the shape of the Element in its parent coordinates.
+    Shape getShape() const;
 
-    /// \brief Set the geometry of the Element in its parent coordinates.
-    /// \param geometry The new geometry of the Element in its parent coordinates.
-    void setGeometry(const Geometry& geometry);
+    /// \brief Set the shape of the Element in its parent coordinates.
+    /// \param shape The new shape of the Element in its parent coordinates.
+    void setShape(const Shape& shape);
 
     /// \brief Get the bounding box representing all child elements.
     /// \returns the bounding box representing all child elements, or
     /// a rectangle of zero width and height at the origin if no children.
-    Geometry getChildGeometry() const;
+    Shape getChildShape() const;
 
-    /// \brief Get the bounding box representing the union of the child geometry and the element geometry.
-    /// \returns the bounding box representing the union of the child geometry and the element geometry.
-    Geometry getTotalGeometry() const;
+    /// \brief Get the bounding box representing the union of the child shape and the element shape.
+    /// \returns the bounding box representing the union of the child shape and the element shape.
+    Shape getTotalShape() const;
 
     /// \brief Get the id of this Element.
     ///
@@ -530,7 +530,7 @@ protected:
     const std::vector<CapturedPointer>& capturedPointers() const;
 
     /// \brief Called internally to invalidate the child geometry tree.
-    virtual void invalidateChildGeometry() const;
+    virtual void invalidateChildShape() const;
 
     /// \brief Set if the pointer is implicitly captured on pointer down.
     ///
@@ -560,16 +560,16 @@ private:
     /// \brief The id for this element.
     std::string _id;
 
-    /// \brief The basic geometry of this element.
-    Geometry _geometry;
+    /// \brief The basic shape of this element.
+    Shape _shape;
 
-    /// \brief The union of all child geometries.
-    mutable Geometry _childGeometry;
+    /// \brief The union of all child bounding boxes.
+    mutable Shape _childShape;
 
-    /// \brief True if the child geometry is invalid.
+    /// \brief True if the child shape is invalid.
     ///
     /// This variable usually set by callbacks from the child elements.
-    mutable bool _childGeometryInvalid = true;
+    mutable bool _childShapeInvalid = true;
 
     /// \brief The enabled state of this Element.
     bool _enabled = true;
@@ -633,8 +633,8 @@ ElementType* Element::addChild(std::unique_ptr<ElementType> element)
         // Take ownership of the node.
         _children.push_back(std::move(element));
 
-        // Invalidate all cached child geometry.
-        invalidateChildGeometry();
+        // Invalidate all cached child shape.
+        invalidateChildShape();
 
         // Alert the node that its parent was set.
         ElementEventArgs addedEvent(this);
@@ -733,8 +733,8 @@ LayoutType* Element::setLayout(std::unique_ptr<LayoutType> layout)
         // Take ownership of the layout.
         _layout = std::move(layout);
 
-        // Invalidate all cached child geometry.
-        invalidateChildGeometry();
+        // Invalidate all cached child shape.
+        invalidateChildShape();
 
         return pLayout;
     }
