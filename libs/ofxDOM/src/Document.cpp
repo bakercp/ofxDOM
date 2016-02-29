@@ -35,41 +35,25 @@ namespace DOM {
 Document::Document():
     Element("document", 0, 0, 1024, 768)
 {
-    ofAddListener(ofEvents().setup, this, &Document::setup);
-    ofAddListener(ofEvents().update, this, &Document::update);
-    ofAddListener(ofEvents().draw, this, &Document::draw, std::numeric_limits<int>::max());
-    ofAddListener(ofEvents().exit, this, &Document::exit);
-    ofAddListener(ofEvents().windowResized, this, &Document::windowResized, std::numeric_limits<int>::lowest());
+    _setupListener = ofEvents().setup.newListener(this, &Document::setup);
+    _updateListener = ofEvents().update.newListener(this, &Document::update);
+    _drawListener = ofEvents().draw.newListener(this, &Document::draw, std::numeric_limits<int>::max());
+    _exitListener = ofEvents().exit.newListener(this, &Document::exit);
 
-    ofAddListener(ofEvents().fileDragEvent, this, &Document::fileDragEvent, std::numeric_limits<int>::lowest());
+    _windowResizedListener = ofEvents().windowResized.newListener(this, &Document::windowResized, std::numeric_limits<int>::lowest());
+    _fileDroppedListener = ofEvents().fileDragEvent.newListener(this, &Document::fileDragEvent, std::numeric_limits<int>::lowest());
+    _keyPressedListener = ofEvents().keyPressed.newListener(this, &Document::onKeyEvent, std::numeric_limits<int>::lowest());
+    _keyReleasedListener = ofEvents().keyReleased.newListener(this, &Document::onKeyEvent, std::numeric_limits<int>::lowest());
 
-    ofAddListener(ofEvents().keyPressed, this, &Document::onKeyEvent, std::numeric_limits<int>::lowest());
-    ofAddListener(ofEvents().keyReleased, this, &Document::onKeyEvent, std::numeric_limits<int>::lowest());
-
-    ofAddListener(PointerEvents::instance().onPointerDown, this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
-    ofAddListener(PointerEvents::instance().onPointerUp, this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
-    ofAddListener(PointerEvents::instance().onPointerMove, this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
-    ofAddListener(PointerEvents::instance().onPointerCancel, this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
+    _pointerDownListener = PointerEvents::instance().onPointerDown.newListener(this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
+    _pointerUpListener = PointerEvents::instance().onPointerUp.newListener(this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
+    _pointerMoveListener = PointerEvents::instance().onPointerMove.newListener(this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
+    _pointerCancelListener = PointerEvents::instance().onPointerCancel.newListener(this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
 }
 
 
 Document::~Document()
 {
-    ofRemoveListener(ofEvents().setup, this, &Document::setup);
-    ofRemoveListener(ofEvents().update, this, &Document::update);
-    ofRemoveListener(ofEvents().draw, this, &Document::draw, std::numeric_limits<int>::max());
-    ofRemoveListener(ofEvents().exit, this, &Document::exit);
-    ofRemoveListener(ofEvents().windowResized, this, &Document::windowResized, std::numeric_limits<int>::lowest());
-
-    ofRemoveListener(ofEvents().fileDragEvent, this, &Document::fileDragEvent, std::numeric_limits<int>::lowest());
-
-    ofRemoveListener(ofEvents().keyPressed, this, &Document::onKeyEvent, std::numeric_limits<int>::lowest());
-    ofRemoveListener(ofEvents().keyReleased, this, &Document::onKeyEvent, std::numeric_limits<int>::lowest());
-
-    ofRemoveListener(PointerEvents::instance().onPointerDown, this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
-    ofRemoveListener(PointerEvents::instance().onPointerUp, this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
-    ofRemoveListener(PointerEvents::instance().onPointerMove, this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
-    ofRemoveListener(PointerEvents::instance().onPointerCancel, this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
 }
 
 

@@ -160,6 +160,43 @@ private:
                                        Element* target,
                                        Element* relatedTarget);
 
+
+    /// \brief Setup event listener.
+    ofEventListener _setupListener;
+
+    /// \brief Update event listener.
+    ofEventListener _updateListener;
+
+    /// \brief Draw event listener.
+    ofEventListener _drawListener;
+
+    /// \brief Exit event listener.
+    ofEventListener _exitListener;
+
+    /// \brief Window resized event listener.
+    ofEventListener _windowResizedListener;
+
+    /// \brief File drop event listener.
+    ofEventListener _fileDroppedListener;
+
+    /// \brief Key pressed event listener.
+    ofEventListener _keyPressedListener;
+
+    /// \brief Key released event listener.
+    ofEventListener _keyReleasedListener;
+
+    /// \brief Pointer down event listener.
+    ofEventListener _pointerDownListener;
+
+    /// \brief Pointer up event listener.
+    ofEventListener _pointerUpListener;
+
+    /// \brief Pointer move event listener.
+    ofEventListener _pointerMoveListener;
+
+    /// \brief Pointer cancel event listener.
+    ofEventListener _pointerCancelListener;
+
 };
 
 
