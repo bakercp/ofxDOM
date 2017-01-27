@@ -4,7 +4,7 @@
 
 A [DOM Level 3 Events / UI Events](http://www.w3.org/TR/DOM-Level-3-Events/) implementation for openFrameworks.
 
-This is useful for 2D layout and event propagation.
+This is useful for 2D layout and event propagation. It is used extensively in ofxMUI.
 
 ## Features
 
@@ -49,4 +49,3 @@ Pull Requests are always welcome, so if you make any improvements please feel fr
 3. Commit your changes (`git commit -am 'Add some feature'`).
 4. Push to the branch (`git push origin my-new-feature`).
 5. Create new Pull Request.
->>>>>>> develop
