@@ -14,8 +14,7 @@ namespace ofx {
 namespace DOM {
 
 
-Document::Document():
-    Element("document", 0, 0, 1024, 768)
+Document::Document(): Element("document", 0, 0, 1024, 768)
 {
     _setupListener = ofEvents().setup.newListener(this, &Document::setup);
     _updateListener = ofEvents().update.newListener(this, &Document::update);
@@ -85,6 +84,12 @@ bool Document::fileDragEvent(ofDragInfo& e)
 
 bool Document::onKeyEvent(ofKeyEventArgs& e)
 {
+    if (_focusedElement != nullptr)
+    {
+        KeyboardUIEventArgs keyboardEvent(e, this, _focusedElement);
+        _focusedElement->dispatchEvent(keyboardEvent);
+    }
+
     return false;
 }
 
@@ -121,6 +126,71 @@ bool Document::onPointerEvent(PointerEventArgs& e)
     // Find the current active target.
     // TODO: Use lastActiveTarget to seed target search?
     Element* activeTarget = recursiveHitTest(screenToParent(e.point()));
+
+    // TODO: Quick and dirty.
+    if (e.eventType() == PointerEventArgs::POINTER_DOWN && activeTarget != nullptr && activeTarget->isFocusable() && capturedPointers().empty())
+    {
+        if (_focusedElement != nullptr && _focusedElement != activeTarget)
+        {
+            Element* _lastFocusedElement = nullptr;
+
+            FocusEventArgs focusOut(FocusEventArgs::FOCUS_OUT,
+                                    this,
+                                    _focusedElement,
+                                    activeTarget);
+
+            _focusedElement->dispatchEvent(focusOut);
+
+            FocusEventArgs focusIn(FocusEventArgs::FOCUS_IN,
+                                    this,
+                                    activeTarget,
+                                    _focusedElement);
+
+            activeTarget->dispatchEvent(focusIn);
+
+            _focusedElement->_focused = false;
+
+            FocusEventArgs blur(FocusEventArgs::BLUR,
+                                   this,
+                                   _focusedElement,
+                                   activeTarget);
+
+            _focusedElement->dispatchEvent(blur);
+
+            _lastFocusedElement = _focusedElement;
+            _focusedElement = activeTarget;
+
+            activeTarget->_focused = true;
+
+            FocusEventArgs focus(FocusEventArgs::FOCUS,
+                                 this,
+                                 _focusedElement,
+                                 _lastFocusedElement);
+
+            _focusedElement->dispatchEvent(focus);
+
+        }
+        else
+        {
+            FocusEventArgs focusIn(FocusEventArgs::FOCUS_IN,
+                                   this,
+                                   activeTarget,
+                                   nullptr);
+
+            activeTarget->dispatchEvent(focusIn);
+
+            _focusedElement = activeTarget;
+
+            activeTarget->_focused = true;
+
+            FocusEventArgs focus(FocusEventArgs::FOCUS,
+                                 this,
+                                 _focusedElement,
+                                 nullptr);
+            
+            _focusedElement->dispatchEvent(focus);
+        }
+    }
 
     // The event target is the target that will receive the event.
     //
@@ -188,7 +258,6 @@ bool Document::onPointerEvent(PointerEventArgs& e)
 
     // Create a DOM pointer event.
     PointerUIEventArgs event(e, this, eventTarget);
-
 
     // Now, dispatch the original event if there is a target.
     // If eventTarget != nullptr, that means the current pointer id is captured.

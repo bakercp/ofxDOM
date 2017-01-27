@@ -85,13 +85,11 @@ public:
     ///
     /// ElementType* element = parentElement->addChild<ElementType>(arguments ...);
     ///
-    /// \tparam ElementType The subclass of Element that will be added.
-    /// \tparam Args The variable constructor arguments for the ElementType.
     /// \param args The variable constructor arguments for the ElementType.
     /// \returns A pointer to the added Element. The parent Element retains
     /// ownership of the pointer via a std::unique_ptr.
-    /// \tparam ElementType The Element Type.
-    /// \tparam Args the ElementType constructor arguments.
+    /// \tparam ElementType The subclass of Element that will be added.
+    /// \tparam Args The variable constructor arguments for the ElementType.
     template <typename ElementType, typename... Args>
     ElementType* addChild(Args&&... args);
 
@@ -229,13 +227,11 @@ public:
     ///
     /// LayoutType* layout = parentElement->createLayout<LayoutType>(arguments ...);
     ///
-    /// \tparam ElementType The subclass of Element that will be added.
-    /// \tparam Args The variable constructor arguments for the ElementType.
     /// \param args The variable constructor arguments for the ElementType.
     /// \returns A pointer to the added Element. The parent Element retains
     /// ownership of the pointer via a std::unique_ptr.
-    /// \tparam ElementType The Element Type.
-    /// \tparam Args the ElementType constructor arguments.
+    /// \tparam ElementType The subclass of Element that will be added.
+    /// \tparam Args The variable constructor arguments for the ElementType.
     template <typename LayoutType, typename... Args>
     LayoutType* createLayout(Args&&... args);
 
@@ -460,6 +456,16 @@ public:
     /// \param locked The locked state to set. True to lock, false to unlock.
     void setLocked(bool locked);
 
+    /// \brief Determine if this element has focus.
+    bool isFocused() const;
+
+    void setFocusable(bool focusable);
+
+    bool isFocusable() const;
+
+    // void setTabIndex(int index);
+    // int getTabIndex() const;
+
 protected:
     /// \brief Setup method called by parent Element.
     /// \param e The event data.
@@ -561,6 +567,15 @@ private:
 
     /// \brief The locked state of this Element.
     bool _locked = false;
+
+    /// \brief The focused state of this Element.
+    bool _focused = false;
+
+    /// \brief True if this Element can be focused.
+    bool _focusable = false;
+
+    /// \brief Specifies the tabbing order in the current Element.
+    // int _tabIndex = 0;
 
     /// \brief A collection of named attributes.
     /// \todo This may not be permanent.

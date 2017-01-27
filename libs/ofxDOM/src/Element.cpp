@@ -841,6 +841,24 @@ void Element::setLocked(bool locked_)
 }
 
 
+void Element::setFocusable(bool focusable)
+{
+    _focusable = focusable;
+}
+
+
+bool Element::isFocusable() const
+{
+    return _focusable;
+}
+
+
+bool Element::isFocused() const
+{
+    return _focused;
+}
+
+
 void Element::invalidateChildShape() const
 {
     _childShapeInvalid = true;

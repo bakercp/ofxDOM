@@ -67,7 +67,8 @@ void EventArgs::stopImmediatePropagation()
     if (_cancelable)
     {
         _canceled = true;
-        throw ofEventAttendedException();
+        // TODO: this is no longer in 0.10.0
+        // throw ofEventAttendedException();
     }
 }
 
@@ -426,6 +427,12 @@ ElementEventArgs::~ElementEventArgs()
 
 
 Element* ElementEventArgs::element()
+{
+    return _element;
+}
+
+
+const Element* ElementEventArgs::element() const
 {
     return _element;
 }

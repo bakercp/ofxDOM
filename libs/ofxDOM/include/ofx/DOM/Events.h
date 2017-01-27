@@ -184,7 +184,7 @@ protected:
 
     /// \brief Used to indicate the EventTarget whose EventListeners are currently being processed.
     /// This is particularly useful during capturing and bubbling.
-    Element* _currentTaget  = nullptr;
+    Element* _currentTaget = nullptr;
 
     /// \brief Used to indicate which phase of event flow is currently being evaluated.
     Phase _phase = Phase::NONE;
@@ -234,7 +234,7 @@ public:
 
 private:
     /// \brief The pointer id.
-    std::size_t _id;
+    std::size_t _id = 0;
 
 };
 
@@ -445,7 +445,7 @@ public:
     bool value() const;
 
 protected:
-    bool _value;
+    bool _value = false;
 
 };
 
@@ -458,9 +458,11 @@ public:
     virtual ~ElementEventArgs();
 
     Element* element();
+    
+    const Element* element() const;
 
 protected:
-    Element* _element;
+    Element* _element = nullptr;
 
 };
 
@@ -487,8 +489,8 @@ public:
     bool isAtBack() const;
 
 protected:
-    std::size_t _oldIndex;
-    std::size_t _newIndex;
+    std::size_t _oldIndex = 0;
+    std::size_t _newIndex = 0;
 
 };
 

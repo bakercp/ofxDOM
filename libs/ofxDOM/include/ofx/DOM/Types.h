@@ -26,8 +26,8 @@ class Element;
 class PointerEvent;
 
 
-typedef ofPoint Position;
-typedef ofPoint Size;
+typedef glm::vec3 Position;
+typedef glm::vec2 Size;
 typedef ofRectangle Shape;
 
 /// \brief The orientation of a Widget.
@@ -50,7 +50,7 @@ enum class Orientation
 };
 
 template <class T>
-using StorageType = typename decay<T>::type;
+using StorageType = typename std::decay<T>::type;
 
 /// \brief C++11 Any class.
 /// \sa https://codereview.stackexchange.com/questions/20058/c11-any-class
@@ -69,7 +69,7 @@ struct Any
     {
         typedef StorageType<U> T;
 
-        auto derived = dynamic_cast<Derived<T>*> (ptr);
+        auto derived = dynamic_cast<Derived<T>*>(ptr);
 
         return derived;
     }
@@ -79,7 +79,7 @@ struct Any
     {
         typedef StorageType<U> T;
 
-        auto derived = dynamic_cast<Derived<T>*> (ptr);
+        auto derived = dynamic_cast<Derived<T>*>(ptr);
 
         if (!derived)
             throw bad_cast();

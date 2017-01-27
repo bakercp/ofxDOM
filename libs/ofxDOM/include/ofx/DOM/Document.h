@@ -119,6 +119,9 @@ protected:
     /// event.
     std::unordered_map<std::size_t, PointerEventArgs> _activePointers;
 
+    /// \brief The Element that currently has focus.
+    Element* _focusedElement = nullptr;
+
 private:
     /// \brief Utility method to find an Element mapped to a pointer id.
     /// \param id The pointer id to search for.
