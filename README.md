@@ -20,7 +20,7 @@ API documentation can be found here.
 
 ## Build Status
 
-Linux, macOS [![Build Status](https://travis-ci.org/bakercp/ofxDOM.svg?branch=stable)](https://travis-ci.org/bakercp/ofxDOM)
+Linux, macOS [![Build Status](https://travis-ci.org/bakercp/ofxDOM.svg?branch=master)](https://travis-ci.org/bakercp/ofxDOM)
 
 Visual Studio, MSYS [![Build status](https://ci.appveyor.com/api/projects/status/eyqmnhjd28728cm5/branch/master?svg=true)](https://ci.appveyor.com/project/bakercp/ofxdom/branch/master)
 
