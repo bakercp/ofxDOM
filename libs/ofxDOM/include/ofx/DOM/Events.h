@@ -476,9 +476,9 @@ public:
 
     virtual ~ElementOrderEventArgs();
 
-    std::size_t newIndex() const;
-
     std::size_t oldIndex() const;
+
+    std::size_t newIndex() const;
 
     bool wasMovedForward() const;
 

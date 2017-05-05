@@ -439,11 +439,11 @@ const Element* ElementEventArgs::element() const
 
 
 ElementOrderEventArgs::ElementOrderEventArgs(Element* element,
-                                             std::size_t newIndex,
-                                             std::size_t oldIndex):
+                                             std::size_t oldIndex,
+                                             std::size_t newIndex):
     ElementEventArgs(element),
-    _newIndex(newIndex),
-    _oldIndex(oldIndex)
+    _oldIndex(oldIndex),
+    _newIndex(newIndex)
 {
 }
 
@@ -453,15 +453,15 @@ ElementOrderEventArgs::~ElementOrderEventArgs()
 }
 
 
-std::size_t ElementOrderEventArgs::newIndex() const
-{
-    return _newIndex;
-}
-
-
 std::size_t ElementOrderEventArgs::oldIndex() const
 {
     return _oldIndex;
+}
+    
+    
+std::size_t ElementOrderEventArgs::newIndex() const
+{
+    return _newIndex;
 }
 
 
