@@ -229,7 +229,7 @@ public:
     ///
     /// \param args The variable constructor arguments for the ElementType.
     /// \returns A pointer to the added Element. The parent Element retains
-    /// ownership of the pointer via a std::unique_ptr.
+    ///          ownership of the pointer via a std::unique_ptr.
     /// \tparam ElementType The subclass of Element that will be added.
     /// \tparam Args The variable constructor arguments for the ElementType.
     template <typename LayoutType, typename... Args>
@@ -459,8 +459,11 @@ public:
     /// \brief Determine if this element has focus.
     bool isFocused() const;
 
+    /// \brief Set whether this Element can achieve focus.
+    /// \param focusable True if the Element can achieve focus.
     void setFocusable(bool focusable);
 
+    /// \returns true if this Element can achieve focus.
     bool isFocusable() const;
 
     // void setTabIndex(int index);
@@ -534,7 +537,7 @@ protected:
 
 private:
     /// \brief Not construction-copyable.
-    Element(const Element& other) = delete; // non-construction-copyable
+    Element(const Element& other) = delete;
 
     /// \brief Non copyable.
     Element& operator = (const Element&) = delete;

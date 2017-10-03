@@ -26,7 +26,7 @@ class Element;
 class PointerEvent;
 
 
-typedef glm::vec3 Position;
+typedef glm::vec2 Position;
 typedef glm::vec2 Size;
 typedef ofRectangle Shape;
 
@@ -82,7 +82,7 @@ struct Any
         auto derived = dynamic_cast<Derived<T>*>(ptr);
 
         if (!derived)
-            throw bad_cast();
+            throw std::bad_cast();
 
         return derived->value;
     }
@@ -159,7 +159,7 @@ private:
     template <typename T>
     struct Derived: Base
     {
-        template <typename U> Derived(U&& value) : value(forward<U>(value)) { }
+        template <typename U> Derived(U&& value) : value(std::forward<U>(value)) { }
 
         T value;
 

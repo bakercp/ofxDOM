@@ -231,7 +231,7 @@ PointerUIEventArgs::PointerUIEventArgs(const PointerEventArgs& pointer,
                 relatedTarget,
             	eventBubbles(pointer.eventType()),
                 eventCancelable(pointer.eventType()),
-                pointer.timestamp()),
+                pointer.timestampMillis()),
     _pointer(pointer)
 {
 }
@@ -250,7 +250,7 @@ const PointerEventArgs& PointerUIEventArgs::pointer() const
 
 Position PointerUIEventArgs::screenPosition() const
 {
-    return pointer().point();
+    return pointer().position();
 }
 
 
@@ -258,11 +258,11 @@ Position PointerUIEventArgs::localPosition() const
 {
     if (_currentTaget)
     {
-        return _currentTaget->screenToLocal(pointer().point());
+        return _currentTaget->screenToLocal(pointer().point().position());
     }
     else
     {
-        return pointer().point();
+        return pointer().point().position();
     }
 }
 

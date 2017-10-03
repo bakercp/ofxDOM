@@ -33,8 +33,8 @@ class EventArgs
 public:
     /// \brief Create EventArgs with a type.
     /// \param type The event type string (case-insensitive).
-    /// \param source The source of the event.
-    /// \param target The target element.
+    /// \param source The source Element.
+    /// \param target The target Element.
     /// \param bubbles True iff the argument bubbles after AT_TARGET phase.
     /// \param cancelable True iff the event can be cancelled by a listener.
     /// \param timestamp The timestamp of the event.
@@ -47,8 +47,8 @@ public:
 
     /// \brief Create EventArgs with a type.
     /// \param type The event type string (case-insensitive).
-    /// \param source The source of the event.
-    /// \param target The target element.
+    /// \param source The source Element.
+    /// \param target The target Element.
     /// \param bubbles True iff the argument bubbles after AT_TARGET phase.
     /// \param cancelable True iff the event can be cancelled by a listener.
     /// \param timestamp The timestamp of the event.
@@ -222,6 +222,8 @@ public:
 class PointerCaptureUIEventArgs: public UIEventArgs
 {
 public:
+    /// \param source The source Element.
+    /// \param target The target Element.
     PointerCaptureUIEventArgs(std::size_t id,
                               bool wasCaptured,
                               Element* source,
@@ -242,6 +244,8 @@ private:
 class PointerUIEventArgs: public UIEventArgs
 {
 public:
+    /// \param source The source Element.
+    /// \param target The target Element.
     PointerUIEventArgs(const PointerEventArgs& args,
                        Element* source,
                        Element* target,
@@ -267,6 +271,8 @@ protected:
 class KeyboardUIEventArgs: public UIEventArgs
 {
 public:
+    /// \param source The source Element.
+    /// \param target The target Element.
     KeyboardUIEventArgs(const ofKeyEventArgs& args,
                         Element* source,
                         Element* target);
@@ -288,6 +294,8 @@ protected:
 class FocusEventArgs: public EventArgs
 {
 public:
+    /// \param source The source Element.
+    /// \param target The target Element.
     FocusEventArgs(const std::string& type,
                    Element* source,
                    Element* target,
@@ -329,9 +337,13 @@ public:
 
     //virtual std::string type() const = 0;
 
+    /// \returns true if the event has bubble phase listeners.
     virtual bool hasBubblePhaseListeners() const = 0;
+
+    /// \returns true if the event has capture phase listeners.
     virtual bool hasCapturePhaseListeners() const = 0;
 
+    /// \returns true if the event has bubble or capture phase listeners.
     bool hasListeners() const
     {
         return hasBubblePhaseListeners() || hasCapturePhaseListeners();
@@ -341,6 +353,7 @@ public:
 
 
 /// \brief DOM Events follow the DOM capture, target, bubble propagation scheme.
+/// \tparam EventArgsType The Event argument type wrapped this DOMEvent.
 template <typename EventArgsType>
 class DOMEvent: public BaseDOMEvent
 {
@@ -407,7 +420,11 @@ protected:
 class ResizeEventArgs
 {
 public:
+    /// \brief Construct a ResizeEventArgs with the given shape.
+    /// \param shape The new shape.
     ResizeEventArgs(const Shape& shape);
+
+    /// \brief Destroy the ResizeEventArgs.
     virtual ~ResizeEventArgs();
 
     const Shape& shape() const;
@@ -421,16 +438,25 @@ protected:
 class AttributeEventArgs
 {
 public:
+    /// \brief Create an AttributeEventArgs with the given parameters.
+    /// \param key The key associated with this event.
+    /// \param value The value associated with this event.
     AttributeEventArgs(const std::string& key, const Any& value = Any());
 
+    /// \brief Destroy the AttributeEventArgs.
     virtual ~AttributeEventArgs();
 
+    /// \returns the key associated with this event.
     const std::string& key() const;
 
+    /// \returns the value associated with this event.
     const Any& value() const;
 
 protected:
+    /// \brief The key associated with this event.
     std::string _key;
+
+    /// \brief The value associated with this event.
     Any _value;
 
 };
@@ -453,15 +479,21 @@ protected:
 class ElementEventArgs
 {
 public:
+    /// \brief Construct the ElementEventArgs.
+    /// \param element The element associated with this Element event.
     ElementEventArgs(Element* element);
 
+    /// \brief Destroy the ElementEventArgs.
     virtual ~ElementEventArgs();
 
+    /// \returns a pointer to the element or nullptr if not available.
     Element* element();
     
+    /// \returns a pointer to the element or nullptr if not available.
     const Element* element() const;
 
 protected:
+    /// \brief A pointer to the element or nullptr if not available.
     Element* _element = nullptr;
 
 };
@@ -470,26 +502,40 @@ protected:
 class ElementOrderEventArgs: public ElementEventArgs
 {
 public:
+    /// \brief Create an ElementOrderEventArgs.
+    /// \param element The element associated with this Element order event.
+    /// \param oldIndex old index before the Element order event.
+    /// \param newIndex The new index after the Element order event.
     ElementOrderEventArgs(Element* element,
                           std::size_t oldIndex,
                           std::size_t newIndex);
 
+    /// \brief Destroys the ElementOrderEventArgs.
     virtual ~ElementOrderEventArgs();
 
+    /// \returns the old index before the Element order event.
     std::size_t oldIndex() const;
 
+    /// \returns the new index after the Element order event.
     std::size_t newIndex() const;
 
+    /// \returns true if the Element was moved forward.
     bool wasMovedForward() const;
 
+    /// \returns true if the Element was moved backward.
     bool wasMovedBackward() const;
 
+    /// \returns true if the Element is at the front.
     bool isAtFront() const;
 
+    /// \returns true if the Element is at the back.
     bool isAtBack() const;
 
 protected:
+    /// \brief The old index before the Element order event.
     std::size_t _oldIndex = 0;
+
+    /// \brief The new index after the Element order event.
     std::size_t _newIndex = 0;
 
 };
