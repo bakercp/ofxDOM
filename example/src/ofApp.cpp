@@ -17,5 +17,5 @@ void ofApp::setup()
 void ofApp::draw()
 {
     ofBackgroundGradient(ofColor::white, ofColor::black);
-    ofDrawBitmapStringHighlight("See console for output.", ofPoint(30, 30));
+    ofDrawBitmapStringHighlight("See console for output.", 30, 30);
 }
