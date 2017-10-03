@@ -171,16 +171,8 @@ private:
     ofEventListener _keyReleasedListener;
 
     /// \brief Pointer down event listener.
-    ofEventListener _pointerDownListener;
+    ofEventListener _pointerEventListener;
 
-    /// \brief Pointer up event listener.
-    ofEventListener _pointerUpListener;
-
-    /// \brief Pointer move event listener.
-    ofEventListener _pointerMoveListener;
-
-    /// \brief Pointer cancel event listener.
-    ofEventListener _pointerCancelListener;
 
 };
 

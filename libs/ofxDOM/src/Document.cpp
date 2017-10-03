@@ -26,10 +26,7 @@ Document::Document(): Element("document", 0, 0, 1024, 768)
     _keyPressedListener = ofEvents().keyPressed.newListener(this, &Document::onKeyEvent, std::numeric_limits<int>::lowest());
     _keyReleasedListener = ofEvents().keyReleased.newListener(this, &Document::onKeyEvent, std::numeric_limits<int>::lowest());
 
-    _pointerDownListener = PointerEvents::instance().onPointerDown.newListener(this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
-    _pointerUpListener = PointerEvents::instance().onPointerUp.newListener(this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
-    _pointerMoveListener = PointerEvents::instance().onPointerMove.newListener(this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
-    _pointerCancelListener = PointerEvents::instance().onPointerCancel.newListener(this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
+    _pointerEventListener = PointerEventsManager::instance().events()->pointerUp.newListener(this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
 }
 
 
@@ -125,7 +122,7 @@ bool Document::onPointerEvent(PointerEventArgs& e)
     // The Element that the pointer is currently hitting.
     // Find the current active target.
     // TODO: Use lastActiveTarget to seed target search?
-    Element* activeTarget = recursiveHitTest(screenToParent(e.point()));
+    Element* activeTarget = recursiveHitTest(screenToParent(e.position()));
 
     // TODO: Quick and dirty.
     if (e.eventType() == PointerEventArgs::POINTER_DOWN && activeTarget != nullptr && activeTarget->isFocusable() && capturedPointers().empty())

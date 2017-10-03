@@ -39,29 +39,33 @@ public:
     std::size_t id() const;
 
     /// \returns the start position of the captured pointer.
-    const Position& start() const;
+    Position start() const;
 
-    /// \returns the start()-position() of the captured pointer.
-    const Position& offset() const;
+    /// \returns the start() - position() of the captured pointer.
+    Position offset() const;
 
     /// \returns the current position of the captured pointer.
-    const Position& position() const;
+    Position position() const;
 
     /// \returns the velocity of the captured pointer (lastPosition() - position()).
-    const Position& velocity() const;
+    Position velocity() const;
 
-    /// \returns the last update time.
-    uint64_t lastUpdate() const;
+    /// \returns the last update time in milliseconds.
+    uint64_t lastUpdateMillis() const;
 
-    /// \returns the initial timestamp when the pointer was captured.
-    uint64_t timestamp() const;
+    OF_DEPRECATED_MSG("Use lastUpdateMillis().", uint64_t lastUpdate() const);
+
+    /// \returns the initial timestamp when the pointer was captured in millisecons.
+    uint64_t timestampMillis() const;
+
+    OF_DEPRECATED_MSG("Use timestampMillis().", uint64_t timestamp() const);
 
     friend std::ostream& operator << (std::ostream& os,
                                       const CapturedPointer& pointer);
 
 private:
     /// \brief The captured pointer's id.
-    std::size_t _id;
+    std::size_t _id = 0;
 
     /// \brief The captured pointer's start position.
     Position _start;
@@ -75,19 +79,19 @@ private:
     /// \brief The captured pointer's current velocity.
     Position _velocity;
 
-    /// \brief The timestamp of the last update.
-    uint64_t _lastUpdate;
+    /// \brief The timestamp of the last update in milliseconds.
+    uint64_t _lastUpdateMillis;
 
-    /// \brief The timestamp when the pointer was captured.
-    uint64_t _timestamp;
+    /// \brief The timestamp when the pointer was captured in milliseconds.
+    uint64_t _timestampMillis;
 
 };
 
 
-inline std::ostream& operator<<(std::ostream& os,
-                                const CapturedPointer& pointer)
+inline std::ostream& operator << (std::ostream& os,
+                                  const CapturedPointer& pointer)
 {
-    os << pointer.id() << " " << pointer.lastUpdate();
+    os << pointer.id() << " " << pointer.lastUpdateMillis();
     return os;
 }
 

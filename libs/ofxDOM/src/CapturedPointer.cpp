@@ -19,8 +19,8 @@ CapturedPointer::CapturedPointer(std::size_t id):
     _offset(Position()),
     _position(Position()),
     _velocity(Position()),
-    _lastUpdate(std::numeric_limits<uint64_t>::lowest()),
-    _timestamp(std::numeric_limits<uint64_t>::lowest())
+    _lastUpdateMillis(std::numeric_limits<uint64_t>::lowest()),
+    _timestampMillis(std::numeric_limits<uint64_t>::lowest())
 {
 }
 
@@ -34,24 +34,24 @@ void CapturedPointer::update(Element* element, const PointerUIEventArgs& e)
 {
     uint64_t now = ofGetElapsedTimeMillis();
 
-    if (_timestamp != std::numeric_limits<uint64_t>::lowest())
+    if (_timestampMillis != std::numeric_limits<uint64_t>::lowest())
     {
-        uint64_t dt = now - _lastUpdate;
-        Point ds = _position - e.pointer().point();
+        uint64_t dt = now - _lastUpdateMillis;
+        Point ds = _position - e.pointer().point().position();
 
-        _velocity = ds / dt;
-        _position = e.pointer().point();
-        _lastUpdate = now;
+        _velocity = ds.position() / dt;
+        _position = e.pointer().point().position();
+        _lastUpdateMillis = now;
     }
     else
     {
         _id = e.pointer().id();
-        _start = e.pointer().point();
+        _start = e.pointer().point().position();
         _offset = _start - element->getScreenPosition();
-        _position = e.pointer().point();
+        _position = e.pointer().point().position();
         _velocity = Position();
-        _lastUpdate = now;
-        _timestamp = now;
+        _lastUpdateMillis = now;
+        _timestampMillis = now;
     }
 }
 
@@ -62,39 +62,51 @@ std::size_t CapturedPointer::id() const
 }
 
 
-const Position& CapturedPointer::start() const
+Position CapturedPointer::start() const
 {
     return _start;
 }
 
 
-const Position& CapturedPointer::offset() const
+Position CapturedPointer::offset() const
 {
     return _offset;
 }
 
 
-const Position& CapturedPointer::position() const
+Position CapturedPointer::position() const
 {
     return _position;
 }
 
 
-const Position& CapturedPointer::velocity() const
+Position CapturedPointer::velocity() const
 {
     return _velocity;
 }
 
 
+uint64_t CapturedPointer::lastUpdateMillis() const
+{
+    return _lastUpdateMillis;
+}
+
+
 uint64_t CapturedPointer::lastUpdate() const
 {
-    return _lastUpdate;
+    return lastUpdateMillis();
+}
+
+
+uint64_t CapturedPointer::timestampMillis() const
+{
+    return _timestampMillis;
 }
 
 
 uint64_t CapturedPointer::timestamp() const
 {
-    return _timestamp;
+    return timestampMillis();
 }
 
 
