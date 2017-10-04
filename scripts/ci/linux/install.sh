@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-OF_ROOT=$( cd "$(dirname "$0")/../../../.." ; pwd -P )
+OF_ROOT=~/openFrameworks
 
 # Default addon github info.
 GH_USERNAME='bakercp'
@@ -11,6 +11,7 @@ GH_DEPTH=1
 # An array of required addons that will be gathered below.
 REQUIRED_ADDONS=()
 
+echo "The target is ${TARGET}"
 echo ${OF_ROOT}/addons/${OF_ADDON_NAME}/
 ls -lah ${OF_ROOT}/addons/${OF_ADDON_NAME}/
 
