@@ -48,10 +48,10 @@ matrix:
 #          - gdb
 
 # OSX, OF master
-  - os: osx
-    osx_image: xcode8
-    compiler: clang
-    env: TARGET="osx" OF_BRANCH="master"
+# - os: osx
+#   osx_image: xcode8
+#   compiler: clang
+#   env: TARGET="osx" OF_BRANCH="master"
 
 # OSX, OF stable:  Not supported yet
 #  - os: osx
@@ -188,7 +188,7 @@ matrix:
 
 install:
   - cd ~
-  - git clone --depth=1 --branch=$OF_BRANCH https://github.com/openframeworks/openFrameworks
+  - git clone --depth=1 --branch=CI_TESTING https://github.com/bakercp/openFrameworks
   - cd openFrameworks
   - scripts/ci/addons/install.sh
 

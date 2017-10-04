@@ -11,6 +11,9 @@ GH_DEPTH=1
 # An array of required addons that will be gathered below.
 REQUIRED_ADDONS=()
 
+echo ${OF_ROOT}/addons/${OF_ADDON_NAME}/
+ls -lah ${OF_ROOT}/addons/${OF_ADDON_NAME}/
+
 # Extract ADDON_DEPENDENCIES from addon_config.mk file.
 if [ -f ${OF_ROOT}/addons/${OF_ADDON_NAME}/addon_config.mk ]; then
   while read line; do
