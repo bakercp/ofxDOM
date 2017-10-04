@@ -1,21 +1,32 @@
 #!/usr/bin/env bash
 set -e
 
-OF_ROOT=~/openFrameworks
-OF_ADDON_NAME=${TRAVIS_REPO_SLUG#*/}
-OF_ADDON_FOLDER=${TRAVIS_BUILD_DIR}
+
+echo "------------------------- not in #TARGET "
+
+TRAVIS_REPO_OWNER=${TRAVIS_REPO_SLUG%/*}
+TRAVIS_REPO_NAME=${TRAVIS_REPO_SLUG#*/}
+
+echo "Owner ${TRAVIS_REPO_OWNER}"
+echo "Repo ${TRAVIS_REPO_NAME}"
 
 
-# Default addon github info.
-GH_USERNAME='bakercp'
-GH_BRANCH='master'
-GH_DEPTH=1
-
-# An array of required addons that will be gathered below.
-REQUIRED_ADDONS=()
-
-echo "------------------------- IS IN TARGET "
-
+#
+# OF_ROOT=~/openFrameworks
+# OF_ADDON_NAME=${TRAVIS_REPO_SLUG#*/}
+# OF_ADDON_FOLDER=${TRAVIS_BUILD_DIR}
+#
+#
+# # Default addon github info.
+# GH_USERNAME='bakercp'
+# GH_BRANCH='master'
+# GH_DEPTH=1
+#
+# # An array of required addons that will be gathered below.
+# REQUIRED_ADDONS=()
+#
+# echo "The addon folder is ${OF_ADDON_FOLDER}"
+#
 #
 # echo "The target is ${TARGET}"
 # echo ${OF_ROOT}/addons/${OF_ADDON_NAME}/
