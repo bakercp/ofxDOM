@@ -2,6 +2,8 @@
 set -e
 
 OF_ROOT=~/openFrameworks
+OF_ADDON_NAME=${TRAVIS_REPO_SLUG#*/}
+
 
 # Default addon github info.
 GH_USERNAME='bakercp'
@@ -13,6 +15,7 @@ REQUIRED_ADDONS=()
 
 echo "The target is ${TARGET}"
 echo ${OF_ROOT}/addons/${OF_ADDON_NAME}/
+ls -lah ${OF_ROOT}/addons/
 ls -lah ${OF_ROOT}/addons/${OF_ADDON_NAME}/
 
 # Extract ADDON_DEPENDENCIES from addon_config.mk file.
