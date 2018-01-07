@@ -52,7 +52,7 @@ matrix:
 #   osx_image: xcode8
 #   compiler: clang
 #   env: TARGET="osx" OF_BRANCH="master"
-
+#
 # OSX, OF stable:  Not supported yet
 #  - os: osx
 #    osx_image: xcode8
@@ -186,14 +186,11 @@ matrix:
   exclude:
     - compiler: gcc
 
+before_install:
+  - source <(curl -SLs https://raw.githubusercontent.com/bakercp/ofx-ci-scripts/${OF_BRANCH}/install_ci.sh)
 install:
-  - cd ~
-  - git clone --depth=1 --branch=CI_TESTING https://github.com/bakercp/openFrameworks
-  - cd openFrameworks
-  - scripts/ci/addons/install.sh
-
+  - do_install
 script:
-  - scripts/ci/addons/build.sh
-
+  - do_script
 git:
   depth: 10
