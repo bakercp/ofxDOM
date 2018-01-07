@@ -8,6 +8,7 @@
 #pragma once
 
 
+#include <unordered_map>
 #include <string>
 #include <vector>
 #include "ofx/DOM/Events.h"

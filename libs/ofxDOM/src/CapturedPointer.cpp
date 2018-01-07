@@ -39,7 +39,7 @@ void CapturedPointer::update(Element* element, const PointerUIEventArgs& e)
         uint64_t dt = now - _lastUpdateMillis;
         Point ds = _position - e.pointer().point().position();
 
-        _velocity = ds.position() / dt;
+        _velocity = ds.position() / float(dt);
         _position = e.pointer().point().position();
         _lastUpdateMillis = now;
     }
