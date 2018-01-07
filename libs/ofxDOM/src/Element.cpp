@@ -895,7 +895,12 @@ std::vector<CapturedPointer>::iterator Element::findCapturedPointerById(std::siz
 
 std::vector<CapturedPointer>::const_iterator Element::findCapturedPointerById(std::size_t id) const
 {
-    return findCapturedPointerById(id);
+     return std::find_if(_capturedPointers.cbegin(),
+                         _capturedPointers.cend(),
+                         [id](const CapturedPointer& pointer)
+                         {
+                             return id == pointer.id();
+                         });
 }
 
 
