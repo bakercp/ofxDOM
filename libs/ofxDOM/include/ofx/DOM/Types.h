@@ -8,14 +8,13 @@
 #pragma once
 
 
-#include "ofBaseTypes.h"
-
-
 #include <type_traits>
 #include <utility>
 #include <typeinfo>
 #include <string>
 #include <cassert>
+#include "ofRectangle.h"
+#include "ofTypes.h"
 
 
 namespace ofx {
