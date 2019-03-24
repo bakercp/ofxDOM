@@ -20,8 +20,8 @@ class CapturedPointer
 {
 public:
     /// \brief Create a CapturedPointer with the given id.
-    /// \param id The id of the captured pointer.
-    CapturedPointer(std::size_t id);
+    /// \param pointerId The id of the captured pointer.
+    CapturedPointer(std::size_t pointerId);
 
     /// \brief Destroy the captured pointer.
     ~CapturedPointer();
@@ -36,7 +36,9 @@ public:
     void update(Element* element, const PointerUIEventArgs& e);
 
     /// \returns the captured pointer's id.
-    std::size_t id() const;
+    std::size_t pointerId() const;
+
+    OF_DEPRECATED_MSG("Use pointerId().", std::size_t id() const);
 
     /// \returns the start position of the captured pointer.
     Position start() const;
@@ -65,7 +67,7 @@ public:
 
 private:
     /// \brief The captured pointer's id.
-    std::size_t _id = 0;
+    std::size_t _pointerId = 0;
 
     /// \brief The captured pointer's start position.
     Position _start;
@@ -91,7 +93,7 @@ private:
 inline std::ostream& operator << (std::ostream& os,
                                   const CapturedPointer& pointer)
 {
-    os << pointer.id() << " " << pointer.lastUpdateMillis();
+    os << pointer.pointerId() << " " << pointer.lastUpdateMillis();
     return os;
 }
 

@@ -114,10 +114,10 @@ bool Document::onPointerEvent(PointerEventArgs& e)
     bool wasEventHandled = false;
 
     // Add this pointer to the list of active pointers.
-    _activePointers[e.id()] = e;
+    _activePointers[e.pointerId()] = e;
 
     // The last element that the current pointer was hitting.
-    Element* lastActiveTarget = findElementInMap(e.id(), _activeTargets);
+    Element* lastActiveTarget = findElementInMap(e.pointerId(), _activeTargets);
 
     // The Element that the pointer is currently hitting.
     // Find the current active target.
@@ -194,7 +194,7 @@ bool Document::onPointerEvent(PointerEventArgs& e)
     // We start off assuming that the event target is the active target.
     // If we determine that the pointer has already been captured, we will
     // correct this.
-    Element* eventTarget = findElementInMap(e.id(), _capturedPointerIdToElementMap);
+    Element* eventTarget = findElementInMap(e.pointerId(), _capturedPointerIdToElementMap);
 
     // If there is no event target but there is an active target, attempt to
     // capture the pointer.
@@ -204,7 +204,7 @@ bool Document::onPointerEvent(PointerEventArgs& e)
         activeTarget->getImplicitPointerCapture())
     {
         eventTarget = activeTarget;
-        setPointerCaptureForElement(eventTarget, e.id());
+        setPointerCaptureForElement(eventTarget, e.pointerId());
     }
 
     // If true, we call synthesizePointerOutAndLeave after the pointerup / pointercancel event.
@@ -236,7 +236,7 @@ bool Document::onPointerEvent(PointerEventArgs& e)
 
     // Here we handle a special case for non-hover sythesized pointer events.
     if (activeTarget != nullptr &&
-        !e.canHover() &&
+        e.deviceType() != PointerEventArgs::TYPE_MOUSE &&
         (e.eventType() == PointerEventArgs::POINTER_UP ||
          e.eventType() == PointerEventArgs::POINTER_CANCEL))
     {
@@ -263,7 +263,7 @@ bool Document::onPointerEvent(PointerEventArgs& e)
         event.setPhase(EventArgs::Phase::AT_TARGET);
 
         // Update captured pointer data.
-        auto capturedPointer = eventTarget->findCapturedPointerById(e.id());
+        auto capturedPointer = eventTarget->findCapturedPointerById(e.pointerId());
 
         if (capturedPointer != eventTarget->capturedPointers().end())
         {
@@ -287,7 +287,7 @@ bool Document::onPointerEvent(PointerEventArgs& e)
         if (e.eventType() == PointerEventArgs::POINTER_UP ||
             e.eventType() == PointerEventArgs::POINTER_CANCEL)
         {
-            releasePointerCaptureForElement(eventTarget, e.id());
+            releasePointerCaptureForElement(eventTarget, e.pointerId());
         }
 
         wasEventHandled = true;
@@ -299,16 +299,17 @@ bool Document::onPointerEvent(PointerEventArgs& e)
     }
 
     // Manage active targets and pointers lists.
-    if (!e.canHover() && (e.eventType() == PointerEventArgs::POINTER_UP ||
-                          e.eventType() == PointerEventArgs::POINTER_CANCEL))
+    if (e.deviceType() != PointerEventArgs::TYPE_MOUSE
+    && (e.eventType() == PointerEventArgs::POINTER_UP ||
+        e.eventType() == PointerEventArgs::POINTER_CANCEL))
     {
-        _activeTargets.erase(e.id());
-        _activePointers.erase(e.id());
+        _activeTargets.erase(e.pointerId());
+        _activePointers.erase(e.pointerId());
     }
     else
     {
         // Active target may be a nullptr if outside of the Document.
-        _activeTargets[e.id()] = activeTarget;
+        _activeTargets[e.pointerId()] = activeTarget;
     }
 
     return wasEventHandled;

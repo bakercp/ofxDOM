@@ -862,31 +862,31 @@ void Element::invalidateChildShape() const
 }
 
 
-bool Element::isPointerCaptured(std::size_t id) const
+bool Element::isPointerCaptured(std::size_t pointerId) const
 {
-    return findCapturedPointerById(id) != _capturedPointers.end();
+    return findCapturedPointerById(pointerId) != _capturedPointers.end();
 }
 
 
-std::vector<CapturedPointer>::iterator Element::findCapturedPointerById(std::size_t id)
+std::vector<CapturedPointer>::iterator Element::findCapturedPointerById(std::size_t pointerId)
 {
     return std::find_if(_capturedPointers.begin(),
                         _capturedPointers.end(),
-                        [id](const CapturedPointer& pointer)
+                        [pointerId](const CapturedPointer& pointer)
                         {
-                            return id == pointer.id();
+                            return pointerId == pointer.pointerId();
                         });
 }
 
 
 
-std::vector<CapturedPointer>::const_iterator Element::findCapturedPointerById(std::size_t id) const
+std::vector<CapturedPointer>::const_iterator Element::findCapturedPointerById(std::size_t pointerId) const
 {
      return std::find_if(_capturedPointers.cbegin(),
                          _capturedPointers.cend(),
-                         [id](const CapturedPointer& pointer)
+                         [pointerId](const CapturedPointer& pointer)
                          {
-                             return id == pointer.id();
+                             return pointerId == pointer.pointerId();
                          });
 }
 

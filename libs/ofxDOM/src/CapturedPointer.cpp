@@ -13,8 +13,8 @@ namespace ofx {
 namespace DOM {
 
 
-CapturedPointer::CapturedPointer(std::size_t id):
-    _id(id),
+CapturedPointer::CapturedPointer(std::size_t pointerId):
+    _pointerId(pointerId),
     _start(Position()),
     _offset(Position()),
     _position(Position()),
@@ -45,7 +45,7 @@ void CapturedPointer::update(Element* element, const PointerUIEventArgs& e)
     }
     else
     {
-        _id = e.pointer().id();
+        _pointerId = e.pointer().pointerId();
         _start = e.pointer().point().position();
         _offset = _start - element->getScreenPosition();
         _position = e.pointer().point().position();
@@ -56,9 +56,15 @@ void CapturedPointer::update(Element* element, const PointerUIEventArgs& e)
 }
 
 
+std::size_t CapturedPointer::pointerId() const
+{
+    return _pointerId;
+}
+
+
 std::size_t CapturedPointer::id() const
 {
-    return _id;
+    return _pointerId;
 }
 
 

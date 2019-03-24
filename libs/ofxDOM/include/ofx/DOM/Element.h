@@ -498,19 +498,19 @@ protected:
     std::vector<std::unique_ptr<Element>>::iterator findChild(Element* element);
 
     /// \brief Determine if a given pointer id is captured.
-    /// \param id The pointer id to test.
+    /// \param pointerId The pointer id to test.
     /// \returns true if the given pointer id is captured.
-    bool isPointerCaptured(std::size_t id) const;
+    bool isPointerCaptured(std::size_t pointerId) const;
 
     /// \brief Find the given CapturePointer info by id.
-    /// \param id The pointer id to find.
+    /// \param pointerId The pointer id to find.
     /// \returns An const iterator to the CapturedPointer info if found.
-    std::vector<CapturedPointer>::iterator findCapturedPointerById(std::size_t id);
+    std::vector<CapturedPointer>::iterator findCapturedPointerById(std::size_t pointerId);
 
     /// \brief Find the given CapturePointer info by id.
-    /// \param id The pointer id to find.
+    /// \param pointerId The pointer id to find.
     /// \returns An const iterator to the CapturedPointer info if found.
-    std::vector<CapturedPointer>::const_iterator findCapturedPointerById(std::size_t id) const;
+    std::vector<CapturedPointer>::const_iterator findCapturedPointerById(std::size_t pointerId) const;
 
     /// \brief Get a reference to the captured pointer vector.
     /// \returns a reference to all pointers captured by this Element.
