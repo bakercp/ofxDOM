@@ -23,7 +23,9 @@ public:
     ///
     /// The Document will have the default id of "document" and will fill
     /// the entire screen.
-    Document();
+    ///
+    /// \param window The window that is the source of the UI events.
+    Document(ofAppBaseWindow* window = nullptr);
 
     /// \brief Destroy the Document.
     virtual ~Document();
@@ -173,7 +175,8 @@ private:
     /// \brief Pointer down event listener.
     ofEventListener _pointerEventListener;
 
-
+    /// \brief The event source window.
+    ofAppBaseWindow* _window = nullptr;
 };
 
 

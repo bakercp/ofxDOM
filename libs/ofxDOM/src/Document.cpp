@@ -14,19 +14,31 @@ namespace ofx {
 namespace DOM {
 
 
-Document::Document(): Element("document", 0, 0, 1024, 768)
+Document::Document(ofAppBaseWindow* window): Element("document", 0, 0, 1024, 768)
 {
-    _setupListener = ofEvents().setup.newListener(this, &Document::setup);
-    _updateListener = ofEvents().update.newListener(this, &Document::update);
-    _drawListener = ofEvents().draw.newListener(this, &Document::draw, std::numeric_limits<int>::max());
-    _exitListener = ofEvents().exit.newListener(this, &Document::exit);
+    _window = window;
 
-    _windowResizedListener = ofEvents().windowResized.newListener(this, &Document::windowResized, std::numeric_limits<int>::lowest());
-    _fileDroppedListener = ofEvents().fileDragEvent.newListener(this, &Document::fileDragEvent, std::numeric_limits<int>::lowest());
-    _keyPressedListener = ofEvents().keyPressed.newListener(this, &Document::onKeyEvent, std::numeric_limits<int>::lowest());
-    _keyReleasedListener = ofEvents().keyReleased.newListener(this, &Document::onKeyEvent, std::numeric_limits<int>::lowest());
+    if (_window)
+    {
+        _pointerEventListener = PointerEventsManager::instance().eventsForWindow(_window)->pointerEvent.newListener(this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
+    }
+    else
+    {
+        _pointerEventListener = PointerEventsManager::instance().events()->pointerEvent.newListener(this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
+    }
 
-    _pointerEventListener = PointerEventsManager::instance().events()->pointerUp.newListener(this, &Document::onPointerEvent, std::numeric_limits<int>::lowest());
+    ofCoreEvents& events = _window ? _window->events() : ofEvents();
+
+    _setupListener = events.setup.newListener(this, &Document::setup);
+    _updateListener = events.update.newListener(this, &Document::update);
+    _drawListener = events.draw.newListener(this, &Document::draw, std::numeric_limits<int>::max());
+    _exitListener = events.exit.newListener(this, &Document::exit);
+
+    _windowResizedListener = events.windowResized.newListener(this, &Document::windowResized, std::numeric_limits<int>::lowest());
+    _fileDroppedListener = events.fileDragEvent.newListener(this, &Document::fileDragEvent, std::numeric_limits<int>::lowest());
+    _keyPressedListener = events.keyPressed.newListener(this, &Document::onKeyEvent, std::numeric_limits<int>::lowest());
+    _keyReleasedListener = events.keyReleased.newListener(this, &Document::onKeyEvent, std::numeric_limits<int>::lowest());
+
 }
 
 
