@@ -260,10 +260,8 @@ Position PointerUIEventArgs::localPosition() const
     {
         return _currentTaget->screenToLocal(pointer().point().position());
     }
-    else
-    {
-        return pointer().point().position();
-    }
+
+    return pointer().point().position();
 }
 
 

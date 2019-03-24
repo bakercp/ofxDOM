@@ -395,10 +395,8 @@ Element* Document::findElementInMap(std::size_t id, PointerElementMap& pem)
     {
         return iter->second;
     }
-    else
-    {
-        return nullptr;
-    }
+
+    return nullptr;
 }
 
 

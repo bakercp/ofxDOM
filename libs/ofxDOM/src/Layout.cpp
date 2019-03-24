@@ -42,11 +42,9 @@ std::vector<Element*> Layout::children()
     {
         return _parent->children();
     }
-    else
-    {
-        std::vector<Element*> _children;
-        return _children;
-    }
+
+    std::vector<Element*> _children;
+    return _children;
 }
 
 

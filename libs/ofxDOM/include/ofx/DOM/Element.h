@@ -660,10 +660,8 @@ ElementType* Element::addChild(std::unique_ptr<ElementType> element)
 
         return pNode;
     }
-    else
-    {
-        return nullptr;
-    }
+
+    return nullptr;
 }
 
 
@@ -738,10 +736,8 @@ LayoutType* Element::setLayout(std::unique_ptr<LayoutType> layout)
 
         return pLayout;
     }
-    else
-    {
-        return nullptr;
-    }
+
+    return nullptr;
 }
 
 
@@ -758,10 +754,8 @@ AnyType Element::getAttribute(const std::string& key, bool inherit) const
     {
         return parent()->getAttribute<AnyType>(key);
     }
-    else
-    {
-        throw DOMException(DOMException::INVALID_ATTRIBUTE_KEY);
-    }
+
+    throw DOMException(DOMException::INVALID_ATTRIBUTE_KEY);
 }
 
 

@@ -81,11 +81,9 @@ std::unique_ptr<Element> Element::removeChild(Element* element)
 
         return detachedChild;
     }
-    else
-    {
-        // Return nullptr because we couldn't find anything.
-        return nullptr;
-    }
+
+    // Return nullptr because we couldn't find anything.
+    return nullptr;
 }
 
 
@@ -413,11 +411,10 @@ Document* Element::document()
         // If a parent exists, return it recursively.
         return _parent->document();
     }
-    else
-    {
-        // Return self if a Document, otherwise, will return nullptr.
-        return dynamic_cast<Document*>(this);
-    }
+
+    // Return self if a Document, otherwise, will return nullptr.
+    return dynamic_cast<Document*>(this);
+
 }
 
 
@@ -428,11 +425,9 @@ const Document* Element::document() const
         // If a parent exists, return it recursively.
         return _parent->document();
     }
-    else
-    {
-        // Return self if a Document, otherwise, will return nullptr.
-        return dynamic_cast<const Document*>(this);
-    }
+
+    // Return self if a Document, otherwise, will return nullptr.
+    return dynamic_cast<const Document*>(this);
 }
 
 
@@ -466,10 +461,8 @@ Position Element::parentToScreen(const Position& parentPosition) const
     {
         return parentPosition + _parent->getScreenPosition();
     }
-    else
-    {
-        return parentPosition;
-    }
+
+    return parentPosition;
 }
 
 
@@ -479,10 +472,8 @@ Position Element::screenToParent(const Position& screenPosition) const
     {
         return screenPosition - _parent->getScreenPosition();
     }
-    else
-    {
-        return screenPosition;
-    }
+
+    return screenPosition;
 }
 
 
@@ -524,10 +515,8 @@ Position Element::getScreenPosition() const
     {
         return getPosition() + _parent->getScreenPosition();
     }
-    else
-    {
-        return getPosition();
-    }
+
+    return getPosition();
 }
 
 
@@ -762,10 +751,8 @@ Element* Element::recursiveHitTest(const Position& parentPosition)
             return nullptr;
         }
     }
-    else
-    {
-        return nullptr;
-    }
+
+    return nullptr;
 }
 
 
