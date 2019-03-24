@@ -156,7 +156,7 @@ public:
     /// \brief A utility method to print get the Event as a std::string.
     /// \returns The Event as a std::string.
     /// \note Not for serialization.
-    std::string toString() const;
+    virtual std::string toString() const;
 
 protected:
     /// \brief The name of the event (case-insensitive).
@@ -281,6 +281,20 @@ public:
 
     const ofKeyEventArgs& key() const;
 
+    /// \returns true if the alt key was active when this event was generated.
+    bool altKey() const;
+
+    /// \returns true if the meta key was active when this event was generated.
+    bool metaKey() const;
+
+    /// \returns true if the shift key was active when this event was generated.
+    bool shiftKey() const;
+    
+    /// \returns true if the control key was active when this event was generated.
+    bool ctrlKey() const;
+    
+    std::string toString() const override;
+    
     static const std::string KEY_DOWN;
     static const std::string KEY_UP;
 

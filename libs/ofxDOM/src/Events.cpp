@@ -294,7 +294,8 @@ KeyboardUIEventArgs::KeyboardUIEventArgs(const ofKeyEventArgs& args,
                 target,
                 true,
                 true,
-                ofGetElapsedTimeMillis())
+                ofGetElapsedTimeMillis()),
+    _key(args)
 {
 }
 
@@ -310,6 +311,52 @@ const ofKeyEventArgs& KeyboardUIEventArgs::key() const
 }
 
 
+bool KeyboardUIEventArgs::altKey() const
+{
+    return _key.hasModifier(OF_KEY_ALT);
+}
+
+    
+bool KeyboardUIEventArgs::metaKey() const
+{
+    return _key.hasModifier(OF_KEY_SUPER);
+}
+
+    
+bool KeyboardUIEventArgs::shiftKey() const
+{
+    return _key.hasModifier(OF_KEY_SHIFT);
+}
+
+    
+bool KeyboardUIEventArgs::ctrlKey() const
+{
+    return _key.hasModifier(OF_KEY_CONTROL);
+}
+
+    
+std::string KeyboardUIEventArgs::toString() const
+{
+    std::stringstream ss;
+    ss << UIEventArgs::toString();
+    
+    ss << "========" << std::endl;
+    ss << " codepoint: " << _key.codepoint << " (" << ofUTF8ToString(_key.codepoint) << ")" << std::endl;
+    ss << "  isRepeat: " << _key.isRepeat << std::endl;
+    ss << "       key: " << _key.key << " (" << ofUTF8ToString(_key.key) << ")" << std::endl;
+    ss << "   keycode: " << _key.keycode << " (" << ofUTF8ToString(_key.keycode) << ")" << std::endl;
+    ss << "  scancode: " << _key.scancode  << " (" << ofUTF8ToString(_key.scancode) << ")" << std::endl;
+    ss << "      type: " << _key.type << std::endl;
+    ss << " modifiers: " << _key.modifiers << std::endl;
+    ss << "      meta: " << metaKey() << std::endl;
+    ss << "      ctrl: " << ctrlKey() << std::endl;
+    ss << "     shift: " << shiftKey() << std::endl;
+    ss << "       alt: " << altKey() << std::endl;
+
+    return ss.str();
+}
+
+    
 const std::string FocusEventArgs::FOCUS_IN = "focusin";
 const std::string FocusEventArgs::FOCUS = "focus";
 const std::string FocusEventArgs::FOCUS_OUT = "focusout";
