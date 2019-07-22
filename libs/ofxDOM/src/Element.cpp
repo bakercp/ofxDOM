@@ -798,10 +798,8 @@ Element* Element::recursiveHitTest(const Position& parentPosition)
         {
             return this;
         }
-        else
-        {
-            return nullptr;
-        }
+
+        return nullptr;
     }
 
     return nullptr;
