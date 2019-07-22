@@ -357,8 +357,10 @@ std::vector<Element*> Element::children()
         {
             results.push_back(pChild);
         }
-
-        throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Element::children(): Child element is nullptr.");
+        else
+        {
+            throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Element::children(): Child element is nullptr.");
+        }
     }
 
     return results;
