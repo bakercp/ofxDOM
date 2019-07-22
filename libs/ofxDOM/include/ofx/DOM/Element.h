@@ -226,10 +226,20 @@ public:
     /// \returns a pointer to the first child or nullptr if no such child exists.
     Element* findFirstChildById(const std::string& id);
 
+    /// \brief Find this Element's first child by its id.
+    /// \param id The id of the child Element to find.
+    /// \returns a pointer to the first child or nullptr if no such child exists.
+    const Element* findFirstChildById(const std::string& id) const;
+
     /// \brief Find all of this Element's matching the given id.
     /// \param id The id of the child Elements to find.
     /// \returns a vector of pointers to child elements or an empty vector if none exist.
     std::vector<Element*> findChildrenById(const std::string& id);
+
+    /// \brief Find all of this Element's matching the given id.
+    /// \param id The id of the child Elements to find.
+    /// \returns a vector of pointers to child elements or an empty vector if none exist.
+    std::vector<const Element*> findChildrenById(const std::string& id) const;
 
     /// \brief Get a pointer to the parent.
     /// \returns a pointer to the parent or a nullptr.

@@ -395,6 +395,18 @@ bool Element::hasParent() const
 }
 
 
+const Element* Element::findFirstChildById(const std::string& id) const
+{
+    auto iter = std::find_if(_children.begin(),
+                             _children.end(),
+                             [&](const std::unique_ptr<Element>& child) {
+                                 return child->getId() == id;
+                             });
+
+    return (iter != _children.end()) ? iter->get() : nullptr;
+}
+
+
 Element* Element::findFirstChildById(const std::string& id)
 {
     auto iter = std::find_if(_children.begin(),
@@ -416,6 +428,33 @@ std::vector<Element*> Element::findChildrenById(const std::string& id)
     for (auto& child : _children)
     {
         Element* pChild = child.get();
+
+        if (pChild)
+        {
+            if (child->getId() == id)
+            {
+                matches.push_back(child.get());
+            }
+        }
+        else
+        {
+            throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Element::findChildrenById(): Child element is nullptr.");
+        }
+    }
+
+    return matches;
+}
+
+
+std::vector<const Element*> Element::findChildrenById(const std::string& id) const
+{
+    std::vector<const Element*> matches;
+
+    matches.reserve(_children.size());
+
+    for (auto& child : _children)
+    {
+        const Element* pChild = child.get();
 
         if (pChild)
         {
