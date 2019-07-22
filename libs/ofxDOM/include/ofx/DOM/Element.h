@@ -160,6 +160,9 @@ public:
     /// \returns a list of pointers to sibling elements.
     std::vector<Element*> siblings();
 
+    /// \returns a list of pointers to sibling elements.
+    std::vector<const Element*> siblings() const;
+
     /// \brief Get a list of siblings of a given Element or Element subclass.
     ///
     /// If the there are no siblings of the given type,
@@ -167,6 +170,14 @@ public:
     /// \returns a list of pointers to sibling elements of a given type.
     template <typename ElementType>
     std::vector<ElementType*> siblings();
+
+    /// \brief Get a list of siblings of a given Element or Element subclass.
+    ///
+    /// If the there are no siblings of the given type,
+    ///
+    /// \returns a list of pointers to sibling elements of a given type.
+    template <typename ElementType>
+    std::vector<const ElementType*> siblings() const;
 
     /// \brief Determine if the given Element is the parent of this Element.
     /// \param element A pointer the the Element to test.
@@ -188,8 +199,23 @@ public:
     /// The parent Element retains ownership.
     ///
     /// \returns a list of pointers to child elements.
+    std::vector<const Element*> children() const;
+
+    /// \brief Get a list of pointers to the child elements.
+    ///
+    /// The parent Element retains ownership.
+    ///
+    /// \returns a list of pointers to child elements.
     template <typename ElementType>
     std::vector<ElementType*> children();
+
+    /// \brief Get a list of pointers to the child elements.
+    ///
+    /// The parent Element retains ownership.
+    ///
+    /// \returns a list of pointers to child elements.
+    template <typename ElementType>
+    std::vector<const ElementType*> children() const;
 
     /// \brief Determine if this Element has a parent Element.
     /// \returns true if this Element has a parent Element.
@@ -690,6 +716,30 @@ std::vector<ElementType*> Element::siblings()
 
 
 template <typename ElementType>
+std::vector<const ElementType*> Element::siblings() const
+{
+    static_assert(std::is_base_of<Element, ElementType>(), "ElementType must be an Element or derived from Element.");
+
+    std::vector<const ElementType*> results;
+
+    if (_parent)
+    {
+        for (auto& child : _parent->_children)
+        {
+            const ElementType* pChild = dynamic_cast<const ElementType*>(child.get());
+
+            if (pChild != this)
+            {
+                results.push_back(pChild);
+            }
+        }
+    }
+
+    return results;
+}
+
+
+template <typename ElementType>
 std::vector<ElementType*> Element::children()
 {
     static_assert(std::is_base_of<Element, ElementType>(), "ElementType must be an Element or derived from Element.");
@@ -699,6 +749,27 @@ std::vector<ElementType*> Element::children()
     for (auto& child : _children)
     {
         ElementType* pChild = dynamic_cast<ElementType*>(child.get());
+
+        if (pChild)
+        {
+            results.push_back(pChild);
+        }
+    }
+
+    return results;
+}
+
+
+template <typename ElementType>
+std::vector<const ElementType*> Element::children() const
+{
+    static_assert(std::is_base_of<Element, ElementType>(), "ElementType must be an Element or derived from Element.");
+
+    std::vector<const ElementType*> results;
+
+    for (const auto& child : _children)
+    {
+        const ElementType* pChild = dynamic_cast<const ElementType*>(child.get());
 
         if (pChild)
         {

@@ -300,6 +300,36 @@ std::vector<Element*> Element::siblings()
 }
 
 
+std::vector<const Element*> Element::siblings() const
+{
+    std::vector<const Element*> results;
+
+    if (_parent)
+    {
+        results.reserve(_parent->_children.size());
+
+        for (auto& child : _parent->_children)
+        {
+            const Element* sibling = child.get();
+
+            if (sibling)
+            {
+                if (this != sibling)
+                {
+                    results.push_back(sibling);
+                }
+            }
+            else
+            {
+                throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Element::siblings(): Child element is nullptr.");
+            }
+        }
+    }
+
+    return results;
+}
+
+
 bool Element::isParent(Element* element) const
 {
     return element
@@ -322,6 +352,28 @@ std::vector<Element*> Element::children()
     for (auto& child : _children)
     {
         Element* pChild = child.get();
+
+        if (pChild)
+        {
+            results.push_back(pChild);
+        }
+
+        throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Element::children(): Child element is nullptr.");
+    }
+
+    return results;
+}
+
+
+std::vector<const Element*> Element::children() const
+{
+    std::vector<const Element*> results;
+
+    results.reserve(_children.size());
+
+    for (auto& child : _children)
+    {
+        const Element* pChild = child.get();
 
         if (pChild)
         {
