@@ -190,7 +190,7 @@ public:
     /// \brief Determine if the given Element is the parent of this Element.
     /// \param element A pointer the the Element to test.
     /// \returns true iff the given element is the parent of this Element.
-    bool isParent(Element* element) const;
+    bool isParent(const Element* element) const;
 
     /// \returns the number of children.
     std::size_t numChildren() const;
