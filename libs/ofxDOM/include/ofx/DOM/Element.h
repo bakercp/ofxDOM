@@ -158,9 +158,13 @@ public:
     std::size_t numSiblings() const;
 
     /// \returns a list of pointers to sibling elements.
+    /// \throws DOMException(DOMException::INVALID_STATE_ERROR) if invalid
+    ///  siblings are found.
     std::vector<Element*> siblings();
 
     /// \returns a list of pointers to sibling elements.
+    /// \throws DOMException(DOMException::INVALID_STATE_ERROR) if invalid
+    ///  siblings are found.
     std::vector<const Element*> siblings() const;
 
     /// \brief Get a list of siblings of a given Element or Element subclass.
@@ -168,6 +172,8 @@ public:
     /// If the there are no siblings of the given type,
     ///
     /// \returns a list of pointers to sibling elements of a given type.
+    /// \throws DOMException(DOMException::INVALID_STATE_ERROR) if invalid
+    ///  siblings are found.
     template <typename ElementType>
     std::vector<ElementType*> siblings();
 
@@ -176,6 +182,8 @@ public:
     /// If the there are no siblings of the given type,
     ///
     /// \returns a list of pointers to sibling elements of a given type.
+    /// \throws DOMException(DOMException::INVALID_STATE_ERROR) if invalid
+    ///  siblings are found.
     template <typename ElementType>
     std::vector<const ElementType*> siblings() const;
 
@@ -192,6 +200,8 @@ public:
     /// The parent Element retains ownership.
     ///
     /// \returns a list of pointers to child elements.
+    /// \throws DOMException(DOMException::INVALID_STATE_ERROR) if invalid
+    ///  children are found.
     std::vector<Element*> children();
 
     /// \brief Get a list of pointers to the child elements.
@@ -199,6 +209,8 @@ public:
     /// The parent Element retains ownership.
     ///
     /// \returns a list of pointers to child elements.
+    /// \throws DOMException(DOMException::INVALID_STATE_ERROR) if invalid
+    ///  children are found.
     std::vector<const Element*> children() const;
 
     /// \brief Get a list of pointers to the child elements.
@@ -206,6 +218,8 @@ public:
     /// The parent Element retains ownership.
     ///
     /// \returns a list of pointers to child elements.
+    /// \throws DOMException(DOMException::INVALID_STATE_ERROR) if invalid
+    ///  children are found.
     template <typename ElementType>
     std::vector<ElementType*> children();
 
@@ -214,6 +228,8 @@ public:
     /// The parent Element retains ownership.
     ///
     /// \returns a list of pointers to child elements.
+    /// \throws DOMException(DOMException::INVALID_STATE_ERROR) if invalid
+    ///  children are found.
     template <typename ElementType>
     std::vector<const ElementType*> children() const;
 
