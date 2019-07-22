@@ -169,8 +169,8 @@ private:
     {
         if (ptr)
             return ptr->clone();
-        else
-            return nullptr;
+
+        return nullptr;
     }
 
     Base* ptr;
