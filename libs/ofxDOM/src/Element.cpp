@@ -548,7 +548,7 @@ Position Element::getPosition() const
     return _shape.getPosition();
 }
 
-
+    
 float Element::getX() const
 {
     return _shape.getX();
@@ -558,6 +558,25 @@ float Element::getX() const
 float Element::getY() const
 {
     return _shape.getY();
+}
+
+
+void Element::setCenterPosition(float centerX, float centerY)
+{
+    setPosition(centerX - _shape.width * 0.5f,
+                centerY - _shape.height * 0.5f);
+}
+
+
+void Element::setCenterPosition(const Position& center)
+{
+    setCenterPosition(center.x, center.y);
+}
+
+
+Position Element::getCenterPosition() const
+{
+    return _shape.getCenter();
 }
 
 
@@ -581,6 +600,17 @@ float Element::getScreenX() const
 float Element::getScreenY() const
 {
     return getScreenPosition().y;
+}
+
+
+Position Element::getScreenCenterPosition() const
+{
+    if (_parent)
+    {
+        return getCenterPosition() + _parent->getScreenPosition();
+    }
+
+    return getCenterPosition();
 }
 
 

@@ -355,6 +355,26 @@ public:
     /// \returns the Y position of the Element in its parent coordinates.
     float getY() const;
 
+    /// \brief Set the center position of the Element in its parent coordinates.
+    ///
+    /// This will set the position from the center based on the size of the
+    /// element shape.
+    ///
+    /// \param centerX The new center x position in parent coordiantes.
+    /// \param centerY The new center y position in parent coordinates.
+    void setCenterPosition(float centerX, float centerY);
+
+    /// \brief Set the center position of the Element in its parent coordinates.
+    ///
+    /// This will set the position from the center based on the size of the
+    /// element shape.
+    ///
+    /// \param position The new center position in parent coordiantes.
+    void setCenterPosition(const Position& center);
+
+    /// \returns the center of the shape in parent coordinates.
+    Position getCenterPosition() const;
+
     /// \brief Get the Position of the Element in screen coordinates.
     /// \returns the Position of the Element in screen coordinates.
     /// \todo Cache screen position w/ shape.
@@ -367,6 +387,10 @@ public:
     /// \brief Get the Y position of the Element in screen coordinates.
     /// \returns the Y position of the Element in screen coordinates.
     float getScreenY() const;
+
+    /// \brief Get the center position of the Element in screen coordinates.
+    /// \returns the center position of the Element in screen coordinates.
+    Position getScreenCenterPosition() const;
 
     /// \brief Set the size of the Element.
     /// \param width The new width of the Element.
