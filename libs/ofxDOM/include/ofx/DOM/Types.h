@@ -13,6 +13,7 @@
 #include <typeinfo>
 #include <string>
 #include <cassert>
+#include "json.hpp"
 #include "ofRectangle.h"
 #include "ofTypes.h"
 
@@ -47,6 +48,14 @@ enum class Orientation
     /// \brief Sets the Orientation based on the aspect ratio.
     DEFAULT
 };
+
+
+NLOHMANN_JSON_SERIALIZE_ENUM( Orientation, {
+    { Orientation::HORIZONTAL, "HORIZONTAL" },
+    { Orientation::VERTICAL, "VERTICAL"},
+    { Orientation::DEFAULT, "DEFAULT"}
+})
+
 
 template <class T>
 using StorageType = typename std::decay<T>::type;
