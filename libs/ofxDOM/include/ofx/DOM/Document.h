@@ -8,6 +8,7 @@
 #pragma once
 
 
+#include "ofAppBaseWindow.h"
 #include "ofx/DOM/Element.h"
 
 
