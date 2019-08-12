@@ -291,7 +291,7 @@ std::vector<Element*> Element::siblings()
             }
             else
             {
-                throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Element::siblings(): Child element is nullptr.");
+                throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Element::siblings(): Sibling element is nullptr.");
             }
         }
     }
@@ -321,7 +321,7 @@ std::vector<const Element*> Element::siblings() const
             }
             else
             {
-                throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Element::siblings(): Child element is nullptr.");
+                throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "Element::siblings(): Sibling element is nullptr.");
             }
         }
     }
@@ -330,7 +330,7 @@ std::vector<const Element*> Element::siblings() const
 }
 
 
-bool Element::isParent(Element* element) const
+bool Element::isParent(const Element* element) const
 {
     return element
         && element == this->_parent;
@@ -589,7 +589,7 @@ Position Element::getPosition() const
     return _shape.getPosition();
 }
 
-    
+
 float Element::getX() const
 {
     return _shape.getX();
