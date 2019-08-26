@@ -26,7 +26,7 @@ public:
     /// the entire screen.
     ///
     /// \param window The window that is the source of the UI events.
-    Document(ofAppBaseWindow* window = nullptr);
+    Document(ofAppBaseWindow* window = ofGetWindowPtr());
 
     /// \brief Destroy the Document.
     virtual ~Document();
