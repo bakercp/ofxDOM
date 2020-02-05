@@ -15,10 +15,10 @@ namespace DOM {
 
 CapturedPointer::CapturedPointer(std::size_t pointerId):
     _pointerId(pointerId),
-    _start(Position()),
-    _offset(Position()),
-    _position(Position()),
-    _velocity(Position()),
+    _start(0, 0),
+    _offset(0, 0),
+    _position(0, 0),
+    _velocity(0, 0),
     _lastUpdateMillis(std::numeric_limits<uint64_t>::lowest()),
     _timestampMillis(std::numeric_limits<uint64_t>::lowest())
 {
@@ -49,7 +49,7 @@ void CapturedPointer::update(Element* element, const PointerUIEventArgs& e)
         _start = e.pointer().point().position();
         _offset = _start - element->getScreenPosition();
         _position = e.pointer().point().position();
-        _velocity = Position();
+        _velocity = Position(0);
         _lastUpdateMillis = now;
         _timestampMillis = now;
     }
