@@ -19,7 +19,7 @@ namespace DOM {
 class Element;
 
 
-/// \brief A base class for laying out Elements.
+/// \brief A base class for laying out child Elements.
 ///
 /// Generally this class and its subclasses should not be instantiated directly
 /// but instead should be created using Element::createLayout<LayoutType>(...).
@@ -27,33 +27,47 @@ class Element;
 class Layout
 {
 public:
-    /// \brief Create a Layout with a given Element parent.
-    /// \param parent The parent Element.
-    Layout(Element* parent);
+    /// \brief Create a Layout for the children of a given Element.
+    /// \param owner The parent Element whose child elements will be laid out.
+    Layout(Element* owner);
 
     /// \brief Destroy the layout.
     virtual ~Layout();
 
     /// \returns a pointer to the parent Element or nullptr if none.
-    Element* parent();
+    Element* owner();
 
     /// \returns true iff this layout is currently being done.
     bool isDoingLayout() const;
 
-    /// \brief Get all of the children for this element.
-    std::vector<Element*> children();
+//    /// \brief Get all of the children for this element.
+//    /// \returns all children for this element.
+//    std::vector<Element*> children();
 
-    /// \brief Do
+    /// \brief Do the layout.
     virtual void doLayout() = 0;
 
 protected:
-    /// \brief The owning Widget class.
-    Element* _parent = nullptr;
+    /// \brief The owning  Element.
+    Element* _owner = nullptr;
 
-    /// \brief True if in doLayout(). Used to prevent recusive calls.
+    /// \brief True if in doLayout(). Used to prevent recursive calls.
     bool _isDoingLayout = false;
 
     friend class Element;
+
+};
+
+
+/// \brief The FlowLayout uses LayoutProperties properties to do the Layout.
+class FlowLayout: public Layout
+{
+public:
+    FlowLayout(Element* parent);
+
+    virtual ~FlowLayout();
+
+    virtual void doLayout() override;
 
 };
 
@@ -69,9 +83,11 @@ public:
 
     virtual void doLayout() override;
 
+    /// \returns the box layout orientation.
     Orientation orientation() const;
 
 protected:
+    /// \brief The box layout orientation.
     Orientation _orientation = Orientation::HORIZONTAL;
 
 };

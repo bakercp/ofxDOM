@@ -399,6 +399,21 @@ void Document::releasePointerCaptureForElement(Element* element, std::size_t id)
 }
 
 
+void Document::releaseElement(Element* element)
+{
+    if (element != nullptr)
+    {
+//        std::cout << "releasing ... " << std::endl;
+//
+//        for (auto& child: element->children())
+//        {
+//            releaseElement(child);
+//        }
+
+    }
+}
+
+
 Element* Document::findElementInMap(std::size_t id, PointerElementMap& pem)
 {
     // Search the captured pointers for a matching pointer.

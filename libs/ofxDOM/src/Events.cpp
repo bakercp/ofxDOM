@@ -419,7 +419,7 @@ const Shape& ResizeEventArgs::shape() const
 
 
 AttributeEventArgs::AttributeEventArgs(const std::string& key,
-                                       const Any& value):
+                                       const nlohmann::json& value):
     _key(key),
     _value(value)
 {
@@ -437,7 +437,7 @@ const std::string& AttributeEventArgs::key() const
 }
 
 
-const Any& AttributeEventArgs::value() const
+const nlohmann::json& AttributeEventArgs::value() const
 {
     return _value;
 }

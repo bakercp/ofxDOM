@@ -49,6 +49,7 @@ public:
     /// \param type The event type string (case-insensitive).
     /// \param source The source Element.
     /// \param target The target Element.
+    /// \param relatedTarget A related target element.
     /// \param bubbles True iff the argument bubbles after AT_TARGET phase.
     /// \param cancelable True iff the event can be cancelled by a listener.
     /// \param timestamp The timestamp of the event.
@@ -455,7 +456,7 @@ public:
     /// \brief Create an AttributeEventArgs with the given parameters.
     /// \param key The key associated with this event.
     /// \param value The value associated with this event.
-    AttributeEventArgs(const std::string& key, const Any& value = Any());
+    AttributeEventArgs(const std::string& key, const nlohmann::json& value = nlohmann::json());
 
     /// \brief Destroy the AttributeEventArgs.
     virtual ~AttributeEventArgs();
@@ -464,14 +465,14 @@ public:
     const std::string& key() const;
 
     /// \returns the value associated with this event.
-    const Any& value() const;
+    const nlohmann::json& value() const;
 
 protected:
     /// \brief The key associated with this event.
     std::string _key;
 
     /// \brief The value associated with this event.
-    Any _value;
+    nlohmann::json _value;
 
 };
 
@@ -480,6 +481,7 @@ class EnablerEventArgs
 {
 public:
     EnablerEventArgs(bool value);
+    
     virtual ~EnablerEventArgs();
 
     bool value() const;

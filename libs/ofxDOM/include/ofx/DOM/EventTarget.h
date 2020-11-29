@@ -23,7 +23,16 @@ namespace DOM {
 /// EventTargets know how to handle events. This class is usually inherited
 /// using the curiously-recurring template pattern.
 ///
-/// \tparam EventTargetType The type of the Tvent target.
+/// For instance, the Element class extends a templated version of this. This allows any given element to
+/// register to be handle certain event types.
+///
+/// If a given class has not registered then all attempts to add a listener for that event will fail because the
+/// event will never be delivered.
+///
+/// An EventTarget must _both_ be registered to receive a certain event type _and_ have listeners for that
+/// type in order to process those events. Common DOM events
+///
+/// \tparam EventTargetType The type of the event target.
 template <class EventTargetType>
 class EventTarget
 {
@@ -34,84 +43,105 @@ public:
     /// \brief Destroy the EventTarget.
     virtual ~EventTarget();
 
-    template <class EventType, typename ArgumentsType, class ListenerClass>
-    void addEventListener(EventType& event,
-                          void (ListenerClass::*listenerMethod)(const void*, ArgumentsType&),
-                          bool useCapture = false,
-                          int priority = OF_EVENT_ORDER_AFTER_APP)
-    {
-        ofAddListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
-    }
-
+//    template <class EventType, typename ArgumentsType, class ListenerClass>
+//    void addEventListener(EventType& event,
+//                          void (ListenerClass::*listenerMethod)(const void*, ArgumentsType&),
+//                          bool useCapture = false,
+//                          int priority = OF_EVENT_ORDER_AFTER_APP)
+//    {
+//        ofAddListener(event.event(useCapture),
+//                      dynamic_cast<ListenerClass*>(this),
+//                      listenerMethod, priority);
+//    }
+//
     template <class EventType, typename ArgumentsType, class ListenerClass>
     void addEventListener(EventType& event,
                           void (ListenerClass::*listenerMethod)(ArgumentsType&),
                           bool useCapture = false,
                           int priority = OF_EVENT_ORDER_AFTER_APP)
     {
-        ofAddListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
+        ofAddListener(event.event(useCapture),
+                      dynamic_cast<ListenerClass*>(this),
+                      listenerMethod, priority);
     }
-
-    template <class EventType, typename ArgumentsType, class ListenerClass>
-    void addEventListener(EventType& event,
-                          bool (ListenerClass::*listenerMethod)(const void*, ArgumentsType&),
-                          bool useCapture = false,
-                          int priority = OF_EVENT_ORDER_AFTER_APP)
-    {
-        ofAddListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
-    }
-
-    template <class EventType, typename ArgumentsType, class ListenerClass>
-    void addEventListener(EventType& event,
-                          bool (ListenerClass::*listenerMethod)(ArgumentsType&),
-                          bool useCapture = false,
-                          int priority = OF_EVENT_ORDER_AFTER_APP)
-    {
-        ofAddListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
-    }
-
-    template <class EventType, typename ArgumentsType, class ListenerClass>
-    void removeEventListener(EventType& event,
-                             void (ListenerClass::*listenerMethod)(const void*, ArgumentsType&),
-                             bool useCapture = false,
-                             int priority = OF_EVENT_ORDER_AFTER_APP)
-    {
-        ofRemoveListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
-    }
-
+//
+//    template <class EventType, typename ArgumentsType, class ListenerClass>
+//    void addEventListener(EventType& event,
+//                          bool (ListenerClass::*listenerMethod)(const void*, ArgumentsType&),
+//                          bool useCapture = false,
+//                          int priority = OF_EVENT_ORDER_AFTER_APP)
+//    {
+//        ofAddListener(event.event(useCapture),
+//                      dynamic_cast<ListenerClass*>(this),
+//                      listenerMethod, priority);
+//    }
+//
+//    template <class EventType, typename ArgumentsType, class ListenerClass>
+//    void addEventListener(EventType& event,
+//                          bool (ListenerClass::*listenerMethod)(ArgumentsType&),
+//                          bool useCapture = false,
+//                          int priority = OF_EVENT_ORDER_AFTER_APP)
+//    {
+//        ofAddListener(event.event(useCapture),
+//                      dynamic_cast<ListenerClass*>(this),
+//                      listenerMethod, priority);
+//    }
+//
+//    template <class EventType, typename ArgumentsType, class ListenerClass>
+//    void removeEventListener(EventType& event,
+//                             void (ListenerClass::*listenerMethod)(const void*, ArgumentsType&),
+//                             bool useCapture = false,
+//                             int priority = OF_EVENT_ORDER_AFTER_APP)
+//    {
+//        ofRemoveListener(event.event(useCapture),
+//                         dynamic_cast<ListenerClass*>(this),
+//                         listenerMethod, priority);
+//    }
+//
     template <class EventType, typename ArgumentsType, class ListenerClass>
     void removeEventListener(EventType& event,
                              void (ListenerClass::*listenerMethod)(ArgumentsType&),
                              bool useCapture = false,
                              int priority = OF_EVENT_ORDER_AFTER_APP)
     {
-        ofRemoveListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
+        ofRemoveListener(event.event(useCapture),
+                         dynamic_cast<ListenerClass*>(this),
+                         listenerMethod,
+                         priority);
     }
-
-
-    template <class EventType, typename ArgumentsType, class ListenerClass>
-    void removeEventListener(EventType& event,
-                             bool (ListenerClass::*listenerMethod)(const void*, ArgumentsType&),
-                             bool useCapture = false,
-                             int priority = OF_EVENT_ORDER_AFTER_APP)
-    {
-        ofRemoveListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
-    }
-
-
-    template <class EventType, typename ArgumentsType, class ListenerClass>
-    void removeEventListener(EventType& event,
-                             bool (ListenerClass::*listenerMethod)(ArgumentsType&),
-                             bool useCapture = false,
-                             int priority = OF_EVENT_ORDER_AFTER_APP)
-    {
-        ofRemoveListener(event.event(useCapture), dynamic_cast<ListenerClass*>(this), listenerMethod, priority);
-    }
+//
+//
+//    template <class EventType, typename ArgumentsType, class ListenerClass>
+//    void removeEventListener(EventType& event,
+//                             bool (ListenerClass::*listenerMethod)(const void*, ArgumentsType&),
+//                             bool useCapture = false,
+//                             int priority = OF_EVENT_ORDER_AFTER_APP)
+//    {
+//        ofRemoveListener(event.event(useCapture),
+//                         dynamic_cast<ListenerClass*>(this),
+//                         listenerMethod,
+//                         priority);
+//    }
+//
+//
+//    template <class EventType, typename ArgumentsType, class ListenerClass>
+//    void removeEventListener(EventType& event,
+//                             bool (ListenerClass::*listenerMethod)(ArgumentsType&),
+//                             bool useCapture = false,
+//                             int priority = OF_EVENT_ORDER_AFTER_APP)
+//    {
+//        ofRemoveListener(event.event(useCapture),
+//                         dynamic_cast<ListenerClass*>(this),
+//                         listenerMethod,
+//                         priority);
+//    }
 
     /// \brief Dispatch the given event.
     ///
     /// This will return true if the default action for this event should be
     /// prevented.
+    ///
+    /// See https://www.w3.org/TR/DOM-Level-3-Events/#event-flow for dispatch event flow.
     ///
     /// \param event The Event to dispatch.
     /// \tparam EventType The Event type to dispatch.
@@ -141,6 +171,9 @@ public:
     bool isEventTypeRegistered(const std::string& type) const;
 
     /// \brief Register a new event type by name.
+    ///
+    /// When calling `dispatchEvent()`, events of the given type will be dispatched to the given event.
+    ///
     /// \param type The event type.
     /// \param event A pointer to the DOMEvent<> that will be called.
     void registerEventType(const std::string& type, BaseDOMEvent* event);
@@ -165,6 +198,7 @@ public:
     {
     }
 
+    // Default events that subclasses do not need to register for.
     DOMEvent<PointerUIEventArgs> pointerOver;
     DOMEvent<PointerUIEventArgs> pointerEnter;
     DOMEvent<PointerUIEventArgs> pointerDown;
@@ -209,6 +243,8 @@ public:
     ofEvent<EnablerEventArgs> hidden;
 
 protected:
+    
+    /// \brief The event registry is a mapping from a specific event to a specific event listener for that event.
     std::unordered_map<std::string, BaseDOMEvent*> _eventRegistry;
 
 };
@@ -223,7 +259,7 @@ EventTarget<EventTargetType>::EventTarget()
     // it be on more of an ad hoc basis ... could be a speed optimization not
     // to have each one.
 
-    // theoretically not having any events registered woudl make isEventTypeRegistered much faster.
+    // theoretically not having any events registered would make isEventTypeRegistered much faster.
     _eventRegistry = {
         { PointerEventArgs::POINTER_OVER, &pointerOver },
         { PointerEventArgs::POINTER_ENTER, &pointerEnter },
@@ -254,14 +290,20 @@ template <class EventTargetType>
 template <class EventType>
 bool EventTarget<EventTargetType>::dispatchEvent(EventType& event)
 {
-    // Get the target (this Element).
+    // When a class wants to dispatch a certain event, this function is called.
+    
+    // CAPTURE PHASE ===========================================================
+    // 1. Identify the target of this event.
+    //
+    // The target element is the element that the event is being dispatched
+    // with.
     EventTargetType* target = dynamic_cast<EventTargetType*>(this);
 
-    // Create the path from the target to the document.
+    // 2. Determine an event path from the dispatch target to the document root.
     std::vector<EventTargetType*> targets;
 
-    // The target will be at the beginning of the list.
-    // The root document will be at the end of the list.
+    // The target will be at the front of the list.
+    // The root document will be at the back of the list.
     do
     {
         targets.push_back(target);
@@ -270,6 +312,8 @@ bool EventTarget<EventTargetType>::dispatchEvent(EventType& event)
     while (target);
 
 
+    // 3.
+    
     // Capture and Target phase (document -> target).
 
     // Begin with the document (at the end of the list).
@@ -305,6 +349,11 @@ bool EventTarget<EventTargetType>::dispatchEvent(EventType& event)
         // Continue iterating.
         ++riter;
     }
+    
+    
+    
+    // BUBBLE PHASE ============================================================
+
 
     // Bubble phase if needed (target -> document).
     if (targets.size() > 1 && event.bubbles())
@@ -348,10 +397,8 @@ bool EventTarget<EventTargetType>::hasListenersForEventType(const std::string& t
     {
         return iter->second->hasListeners();
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -381,10 +428,8 @@ bool EventTarget<EventTargetType>::handleEvent(EventArgsType& e)
             throw DOMException(DOMException::INVALID_STATE_ERROR + ": " + "EventTarget::handleEvent: " + e.type() + " invalid listener registered.");
         }
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

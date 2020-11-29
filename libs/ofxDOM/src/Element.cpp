@@ -7,12 +7,18 @@
 
 #include "ofx/DOM/Element.h"
 #include "ofx/DOM/Document.h"
+#include "ofx/DOM/LayoutProperties.h"
 #include "ofGraphics.h"
 #include <algorithm>
 
 
 namespace ofx {
 namespace DOM {
+
+
+Element::Element(): Element(0, 0, 0, 0)
+{
+}
 
 
 Element::Element(float x, float y, float width, float height):
@@ -29,6 +35,7 @@ Element::Element(const std::string& id,
     _id(id),
     _shape(x, y, width, height)
 {
+    createLayout<FlowLayout>(this);
 }
 
 
@@ -46,7 +53,14 @@ std::unique_ptr<Element> Element::removeChild(Element* element)
         // Move the child out of the children array.
         std::unique_ptr<Element> detachedChild = std::move(*iter);
 
-        // Disown the detached child
+        Document* document = detachedChild->document();
+
+        if (document)
+        {
+            document->releaseElement(detachedChild.get());
+        }
+
+        // Disown the detached child.
         _children.erase(iter);
 
         // Set the parent to nullptr.
@@ -657,6 +671,11 @@ Position Element::getScreenCenterPosition() const
 
 void Element::setSize(float width, float height)
 {
+    width = std::max(getAttribute<float>("min-width", width), width);
+    width = std::min(getAttribute<float>("max-width", width), width);
+    height = std::max(getAttribute<float>("min-height", height), height);
+    height = std::min(getAttribute<float>("max-height", height), height);
+
     _shape.setWidth(width);
     _shape.setHeight(height);
     _shape.standardize();
@@ -765,7 +784,7 @@ bool Element::hasAttribute(const std::string& key) const
 }
 
 
-void Element::setAttribute(const std::string& key, const Any& value)
+void Element::setAttribute(const std::string& key, const nlohmann::json& value)
 {
     _attributes[key] = value;
 
@@ -780,7 +799,6 @@ void Element::clearAttribute(const std::string& key)
     AttributeEventArgs e(key);
     ofNotifyEvent(attributeCleared, e, this);
 }
-
 
 
 void Element::_setup(ofEventArgs& e)
@@ -804,6 +822,16 @@ void Element::_update(ofEventArgs& e)
         }
 
         onUpdate();
+    }
+    
+    if (_layoutInvalid)
+    {
+        if (_layout)
+        {
+            _layout->doLayout();
+        }
+        
+        _layoutInvalid = false;
     }
 }
 
@@ -976,10 +1004,7 @@ void Element::invalidateChildShape() const
         _parent->invalidateChildShape();
     }
 
-    if (_layout)
-    {
-        _layout->doLayout();
-    }
+    _layoutInvalid = true;
 }
 
 

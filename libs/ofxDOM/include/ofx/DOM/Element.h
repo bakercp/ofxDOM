@@ -46,6 +46,8 @@ class AbstractLayout;
 class Element: public EventTarget<Element>
 {
 public:
+    Element();
+    
     /// \brief Construct a new Element with the given parameters.
     ///
     /// The Element will take the default id, an empty string.
@@ -289,10 +291,10 @@ public:
 
     /// \brief Take ownership of the passed std::unique_ptr<Layout>.
     ///
-    /// This this is "sink" meaning that any Layout passed to this will be
+    /// This is a "sink" meaning that any Layout passed to this will be
     /// owned by this Element.
     ///
-    /// \param layout the rvalue reference to the Layout.
+    /// \param layout the layout to take ownership of.
     /// \returns A pointer to the set Layout. The parent Element retains
     /// ownership of the pointer via a std::unique_ptr.
     /// \tparam LayoutType The Layout Type.
@@ -434,7 +436,7 @@ public:
     /// \brief Get the height of the Element.
     /// \returns The height of the Element.
     float getHeight() const;
-
+    
     /// \brief Get the shape of the Element in its parent coordinates.
     /// \returns the shape of the Element in its parent coordinates.
     Shape getShape() const;
@@ -468,18 +470,29 @@ public:
     /// \returns true iff the Element has an attribute with the given name.
     bool hasAttribute(const std::string& name) const;
 
+//    /// \brief Get a named attribute via its key.
+//    ///
+//    /// Users should check to see if the attribute exists using hasAttribute or
+//    /// catch the DOMException.
+//    ///
+//    /// \throws DOMException if no such key.
+//    /// \throws if the types do not match.
+//    /// \param key The name of the attribute.
+//    /// \param inherit True if the Element should query its ancestors for the attribute.
+//    /// \returns The value corresponding to the key, or throws an exception.
+//    template <typename AnyType>
+//    AnyType getAttribute(const std::string& key, bool inherit = false) const;
+
     /// \brief Get a named attribute via its key.
     ///
-    /// Users should check to see if the attribute exists using hasAttribute or
-    /// catch the DOMException.
-    ///
-    /// \throws DOMException if no such key.
-    /// \throws Poco::BadCastException if the types do not match.
     /// \param key The name of the attribute.
     /// \param inherit True if the Element should query its ancestors for the attribute.
     /// \returns The value corresponding to the key, or throws an exception.
+//    template <typename AnyType>
+//    AnyType getAttribute(const std::string& key, AnyType defaultValue, bool inherit = false) const;
+  
     template <typename AnyType>
-    AnyType getAttribute(const std::string& key, bool inherit = false) const;
+    AnyType getAttribute(const std::string& key, AnyType defaultValue) const;
 
     /// \brief Set a value for a named attribute.
     ///
@@ -488,7 +501,7 @@ public:
     ///
     /// \param name The name of the attribute.
     /// \param value The new value of the attribute called name.
-    void setAttribute(const std::string& name, const Any& value);
+    void setAttribute(const std::string& name, const nlohmann::json& value);
 
     /// \brief Clear a named attribute.
     /// \param The name of the attribute to clear.
@@ -545,6 +558,14 @@ public:
     // void setTabIndex(int index);
     // int getTabIndex() const;
 
+    int depth(int n)
+    {
+        if (_parent)
+            return _parent->depth(n+1);
+        return n;
+    }
+    
+    
 protected:
     /// \brief Setup method called by parent Element.
     /// \param e The event data.
@@ -658,7 +679,7 @@ private:
 
     /// \brief A collection of named attributes.
     /// \todo This may not be permanent.
-    std::unordered_map<std::string, Any> _attributes;
+    nlohmann::json _attributes;
 
     /// \brief Automatically capture the pointer on pointer down.
     bool _implicitPointerCapture = false;
@@ -668,7 +689,10 @@ private:
     /// first pointer captured, and thus the primary pointer.
     std::vector<CapturedPointer> _capturedPointers;
 
-    /// \brief The Layout associated with this
+    /// \brief True if the layout needs to be updated.
+    mutable bool _layoutInvalid = false;
+    
+    /// \brief The Layout associated with this Element.
     std::unique_ptr<Layout> _layout = nullptr;
 
     /// \brief An optional pointer to a parent Node.
@@ -754,7 +778,7 @@ std::vector<ElementType*> Element::siblings()
         {
             ElementType* pChild = dynamic_cast<ElementType*>(child.get());
 
-            if (pChild != this)
+            if (pChild && pChild != this)
             {
                 results.push_back(pChild);
             }
@@ -778,7 +802,7 @@ std::vector<const ElementType*> Element::siblings() const
         {
             const ElementType* pChild = dynamic_cast<const ElementType*>(child.get());
 
-            if (pChild != this)
+            if (pChild && pChild != this)
             {
                 results.push_back(pChild);
             }
@@ -847,7 +871,7 @@ LayoutType* Element::setLayout(std::unique_ptr<LayoutType> layout)
         LayoutType* pLayout = layout.get();
 
         // Assign the parent to the node via the raw pointer.
-        pLayout->_parent = this;
+        pLayout->_owner = this;
 
         // Take ownership of the layout.
         _layout = std::move(layout);
@@ -862,22 +886,38 @@ LayoutType* Element::setLayout(std::unique_ptr<LayoutType> layout)
 }
 
 
+//template <typename AnyType>
+//AnyType Element::getAttribute(const std::string& key) const //, bool inherit) const
+//{
+//    auto iter = _attributes.find(key);
+//
+//    if (iter != _attributes.end())
+//    {
+//        return iter->get<AnyType>();
+//    }
+//    else if (inherit && hasParent())
+//    {
+//        return parent()->getAttribute<AnyType>(key);//, inherit);
+//    }
+//
+//    throw DOMException(DOMException::INVALID_ATTRIBUTE_KEY);
+//}
+
+
 template <typename AnyType>
-AnyType Element::getAttribute(const std::string& key, bool inherit) const
+AnyType Element::getAttribute(const std::string& key, AnyType defaultValue) const //, bool inherit) const
 {
-    auto iter = _attributes.find(key);
-
-    if (iter != _attributes.end() && iter->second.is<AnyType>())
+    try
     {
-        return iter->second.as<AnyType>();
+        return _attributes.at(key).get<AnyType>();
     }
-    else if (inherit && hasParent())
+    catch (const std::exception&)
     {
-        return parent()->getAttribute<AnyType>(key);
     }
 
-    throw DOMException(DOMException::INVALID_ATTRIBUTE_KEY);
+    return defaultValue;
 }
+
 
 
 } } // namespace ofx::DOM

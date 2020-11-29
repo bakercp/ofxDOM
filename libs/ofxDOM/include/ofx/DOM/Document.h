@@ -86,6 +86,12 @@ public:
     /// \throws DOMException on invalid DOM state or pointer id.
     void releasePointerCaptureForElement(Element* element, std::size_t id);
 
+    /// \brief Releases an element from all interactions.
+    ///
+    /// This is called when an element anywhere is removed from a parent. This
+    /// will invalidate any active status, update focus, to the parent, etc.
+    void releaseElement(Element* element);
+
 protected:
     /// \brief Map pointer ids to Elements.
     typedef std::unordered_map<std::size_t, Element*> PointerElementMap;
